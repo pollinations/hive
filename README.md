@@ -4,10 +4,10 @@ Welcome to Pollinations Hive - a revolutionary repository where AI meets collabo
 
 ## 🌟 Overview
 
-Pollinations Hive is a collection of self-contained applications, each residing in its own folder. What makes this repository special is:
+Pollinations Hive is a collection of self-contained applications, each residing in its own folder at the root of the repository. What makes this repository special is:
 - **100% AI-Generated Code**: Created through collaboration between humans and AI assistants
 - **Automatic Deployment**: Each app is automatically deployed to its own subdomain
-- **Simple App Creation**: Just add your code to the `apps/` directory
+- **Simple App Creation**: Just add your app folder to the root directory
 
 ## 🤖 How It Works
 
@@ -18,7 +18,7 @@ Pollinations Hive is a collection of self-contained applications, each residing 
 
 ## 📂 Repository Structure
 
-Each folder in the `apps/` directory contains a self-contained application that is automatically deployed. This modular structure ensures:
+Each folder in the root directory contains a self-contained application that is automatically deployed. This modular structure ensures:
 - Clear separation of concerns
 - Easy navigation
 - Independent functionality
@@ -28,14 +28,14 @@ Each folder in the `apps/` directory contains a self-contained application that 
 ### Types of Apps Supported
 
 1. **Static HTML Apps**
-   - Create a folder in `apps/` with an `index.html` file
+   - Create a folder in the root directory with an `index.html` file
    - Add any static assets (CSS, JavaScript, images)
-   - Example: See `apps/hello-world`
+   - Example: See `hello-world` folder
 
 2. **Node.js/React Apps**
-   - Create a folder in `apps/` with a `package.json`
+   - Create a folder in the root directory with a `package.json`
    - Include a `build` script for production builds
-   - Example: See `apps/react-example`
+   - Example: See `react-example` folder
 
 ## 🚀 Getting Started
 

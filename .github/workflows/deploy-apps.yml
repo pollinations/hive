@@ -28,7 +28,9 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v39
         with:
-          path: apps
+          files: |
+            */index.html
+            */package.json
 
       - name: Find and deploy apps
         env:
@@ -61,10 +63,19 @@ jobs:
             netlify deploy --dir="$deploy_dir" --site="$site_name" --prod
           }
           
-          # Deploy each changed app
+          # Get unique app directories from changed files
+          declare -A app_dirs
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            app_dir=$(dirname "$file")
-            if [ -f "$app_dir/index.html" ] || [ -f "$app_dir/package.json" ]; then
-              deploy_app "$app_dir"
+            dir=$(dirname "$file")
+            # Only process root level directories
+            if [[ "$dir" != *"/"* ]]; then
+              app_dirs["$dir"]=1
+            fi
+          done
+          
+          # Deploy each app directory
+          for dir in "${!app_dirs[@]}"; do
+            if [ -f "$dir/index.html" ] || [ -f "$dir/package.json" ]; then
+              deploy_app "$dir"
             fi
           done
