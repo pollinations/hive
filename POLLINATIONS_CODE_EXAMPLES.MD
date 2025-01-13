@@ -107,3 +107,57 @@ eventSource.onmessage = function(event) {
   const textData = JSON.parse(event.data);
   console.log('New text generated:', textData);
 };
+```
+
+## Video Generation API
+
+### Python Example
+
+```python
+import requests
+
+def generate_video(prompt, duration=10, resolution='1080p', model='video-gen', seed=None):
+    url = "https://video.pollinations.ai/generate"
+    payload = {
+        "prompt": prompt,
+        "model": model,
+        "duration": duration,
+        "resolution": resolution,
+        "seed": seed
+    }
+    response = requests.post(url, json=payload)
+    with open('generated_video.mp4', 'wb') as file:
+        file.write(response.content)
+    print('Video downloaded!')
+
+generate_video("A futuristic cityscape", duration=10, resolution='1080p', model='video-gen', seed=42)
+```
+
+### JavaScript Example
+
+```javascript
+const fetch = require('node-fetch');
+
+async function generateVideo() {
+  const response = await fetch('https://video.pollinations.ai/generate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      prompt: "A futuristic cityscape",
+      model: "video-gen",
+      duration: 10,
+      resolution: "1080p",
+      seed: 42
+    }),
+  });
+
+  const data = await response.buffer();
+  const fs = require('fs');
+  fs.writeFileSync('generated_video.mp4', data);
+  console.log('Video downloaded!');
+}
+
+generateVideo();
+```
