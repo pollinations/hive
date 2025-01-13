@@ -113,6 +113,37 @@ https://image.pollinations.ai/prompt/A%20beautiful%20sunset%20over%20the%20ocean
 https://text.pollinations.ai/What%20is%20artificial%20intelligence?seed=42&json=true&model=mistral&system=You%20are%20a%20helpful%20AI%20assistant
 ```
 
+### Video Generation API
+
+#### Generate Video
+`POST https://video.pollinations.ai/generate`
+
+**Request Body:**
+```json
+{
+  "prompt": "A futuristic cityscape",
+  "model": "video-gen",
+  "duration": 10,
+  "resolution": "1080p",
+  "seed": 42
+}
+```
+
+**Return:** Video file (typically MP4)
+
+#### Example Usage
+
+```
+POST https://video.pollinations.ai/generate
+{
+  "prompt": "A futuristic cityscape",
+  "model": "video-gen",
+  "duration": 10,
+  "resolution": "1080p",
+  "seed": 42
+}
+```
+
 ## Code Examples
 
 ### Python (Image Generation)
