@@ -1,8 +1,6 @@
 name: Resolve Issue with OpenHands
 
 on:
-  push:
-    branches: [ main ]
   issues:
     types: [labeled]
   pull_request:
