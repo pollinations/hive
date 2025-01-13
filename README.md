@@ -41,27 +41,22 @@ Each folder in the root directory contains a self-contained application that is 
 
 ### Creating or Modifying an App
 
-1. **Create an Issue**
-   - Open a new GitHub issue
-   - Clearly describe the feature or modification you want
-   - Be specific about requirements and expectations
+1. **Create a New App**
+   - Create a new directory in the root of the repository
+   - For static sites: Add an `index.html` file
+   - For Node.js apps: Add a `package.json` with a `build` script
 
-2. **Trigger the AI Assistant**
-   - Mention @MentatBot in your issue
-   - The bot will analyze your request and start implementing
+2. **Automatic Deployment**
+   - Push your changes to the `main` branch
+   - GitHub Actions will automatically:
+     - Build Node.js apps if needed
+     - Deploy all apps to GitHub Pages
+     - Update the index page
+   - Access your app at `https://{username}.github.io/hive/{app-name}/`
 
-3. **Refine Through Comments**
-   - Review the AI's implementation
-   - Provide feedback through comments
-   - The AI will adjust based on your input
-
-### Using @MentatBot
-
-To engage with our AI assistant:
-- Use `@mentatbot` in your issues or comments
-- Be clear and specific in your requests
-- The bot will respond with a plan and begin implementation
-- You can continue the conversation through comments
+3. **App Types**
+   - **Static HTML Apps**: Just add an `index.html` file
+   - **Node.js/React Apps**: Include `package.json` with a `build` script
 
 ## 📚 Documentation
 

@@ -1,99 +1,91 @@
-name: Deploy Apps
+name: Deploy Apps to GitHub Pages
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+    paths:
+      - '*/package.json'
+      - '*/index.html'
+      - '*/**'
 
 jobs:
-  deploy-apps:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'
 
-      - name: Check Netlify credentials
-        id: check-netlify
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Process apps
         run: |
-          if [ -n "${{ secrets.NETLIFY_AUTH_TOKEN }}" ] && [ -n "${{ secrets.NETLIFY_TEAM_SLUG }}" ]; then
-            echo "has_credentials=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_credentials=false" >> $GITHUB_OUTPUT
-          fi
+          # Create a directory for the built apps
+          mkdir -p _site
 
-      - name: Install Netlify CLI
-        if: steps.check-netlify.outputs.has_credentials == 'true'
-        run: npm install -g netlify-cli
-
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v39
-        with:
-          files: |
-            */index.html
-            */package.json
-
-      - name: Find and deploy apps
-        if: steps.check-netlify.outputs.has_credentials == 'true'
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_TEAM_SLUG: ${{ secrets.NETLIFY_TEAM_SLUG }}
-        run: |
-          # Function to deploy an app
-          deploy_app() {
-            local app_dir="$1"
-            local app_name=$(basename "$app_dir")
-            local site_name="hive-${app_name}"
+          # Process each app directory
+          for APP in */; do
+            APP=${APP%/}  # Remove trailing slash
             
-            echo "Deploying $app_name from $app_dir"
-            
-            # Check if it's a Node.js app
-            if [ -f "$app_dir/package.json" ]; then
-              (cd "$app_dir" && npm install && npm run build)
-              deploy_dir="$app_dir/build"
-            else
-              deploy_dir="$app_dir"
+            # Skip special directories
+            if [[ "$APP" == "_site" || "$APP" == ".*" || "$APP" == "node_modules" || "$APP" == ".git" || "$APP" == ".github" ]]; then
+              continue
             fi
             
-            # Create site if it doesn't exist
-            if ! netlify sites:list | grep -q "$site_name"; then
-              echo "Creating new site: $site_name"
-              netlify sites:create --name "$site_name"
-            fi
+            echo "Processing $APP"
             
-            # Deploy to Netlify
-            netlify deploy --dir="$deploy_dir" --site="$site_name" --prod
-          }
-          
-          # Get unique app directories from changed files
-          declare -A app_dirs
-          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            dir=$(dirname "$file")
-            # Only process root level directories
-            if [[ "$dir" != *"/"* ]]; then
-              app_dirs["$dir"]=1
+            if [ -f "$APP/package.json" ]; then
+              echo "Building Node.js app: $APP"
+              cd $APP
+              npm install
+              npm run build
+              
+              # Copy build output to _site
+              if [ -d "build" ]; then
+                mkdir -p ../_site/$APP
+                cp -r build/* ../_site/$APP/
+              elif [ -d "dist" ]; then
+                mkdir -p ../_site/$APP
+                cp -r dist/* ../_site/$APP/
+              fi
+              cd ..
+            elif [ -f "$APP/index.html" ]; then
+              echo "Static site detected: $APP"
+              mkdir -p _site/$APP
+              cp -r $APP/* _site/$APP/
             fi
           done
           
-          # Deploy each app directory
-          for dir in "${!app_dirs[@]}"; do
-            if [ -f "$dir/index.html" ] || [ -f "$dir/package.json" ]; then
-              deploy_app "$dir"
+          # Create main index page that links to all apps
+          echo "<html><head><title>Hive Apps</title><style>body{font-family:sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem}</style></head><body>" > _site/index.html
+          echo "<h1>Hive Apps</h1><ul>" >> _site/index.html
+          for APP in _site/*/; do
+            APP=${APP%/}  # Remove trailing slash
+            APP=${APP#_site/}  # Remove _site/ prefix
+            if [ "$APP" != "index.html" ]; then
+              echo "<li><a href='$APP'>$APP</a></li>" >> _site/index.html
             fi
           done
+          echo "</ul></body></html>" >> _site/index.html
 
-      - name: Deployment skipped notification
-        if: steps.check-netlify.outputs.has_credentials == 'false'
-        run: |
-          echo "::notice::Netlify deployment was skipped because NETLIFY_AUTH_TOKEN and/or NETLIFY_TEAM_SLUG secrets are not configured."
-          echo "This is expected for pull requests from forks or when Netlify deployment is not set up."
-          echo "The workflow will continue successfully."
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
