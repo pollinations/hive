@@ -1,7 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
 :root {
   font-family: 'Crimson Text', serif;
   line-height: 1.5;
   font-weight: 400;
+  font-size: 16px;
 
   color-scheme: dark;
   color: rgba(255, 255, 255, 0.87);
@@ -11,13 +14,8 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
-}
-
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
 }
 
 * {
@@ -26,4 +24,27 @@ body {
   padding: 0;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 480px) {
+  :root {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 2000px) {
+  :root {
+    font-size: 18px;
+  }
+}

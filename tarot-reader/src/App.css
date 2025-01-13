@@ -1,7 +1,6 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100%;
+  min-height: 100vh;
   text-align: center;
 }
 
@@ -12,34 +11,37 @@
   align-items: center;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   color: #e2e2e2;
+  padding: clamp(1rem, 5vw, 3rem);
 }
 
 h1 {
-  font-size: 2.5em;
-  margin-bottom: 2rem;
+  font-size: clamp(1.8rem, 5vw, 2.5rem);
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
   color: #ffd700;
   text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
 }
 
 .card-container {
-  max-width: 800px;
-  width: 90%;
-  min-height: 400px;
+  width: 100%;
+  max-width: min(90vw, 1200px);
+  min-height: min(70vh, 600px);
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
+  padding: clamp(1rem, 3vw, 2rem);
+  margin: 0 auto;
 }
 
 .draw-button {
   background: linear-gradient(45deg, #ffd700, #ffa500);
   border: none;
-  padding: 1rem 2rem;
-  font-size: 1.2em;
+  padding: clamp(0.8rem, 2vw, 1.2rem) clamp(1.5rem, 3vw, 2rem);
+  font-size: clamp(1rem, 2vw, 1.2rem);
   color: #1a1a2e;
   border-radius: 8px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
+  width: fit-content;
 }
 
 .draw-button:hover {
@@ -56,33 +58,60 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
+  gap: clamp(1.5rem, 4vw, 2.5rem);
+  width: 100%;
 }
 
 .tarot-card {
-  max-width: 300px;
-  border-radius: 15px;
+  width: 100%;
+  max-width: min(80vw, 400px);
+  height: auto;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  border-radius: clamp(10px, 2vw, 15px);
   box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
-  transition: transform 0.3s;
+  transition: transform 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .tarot-card {
+    max-width: min(50vw, 300px);
+  }
 }
 
 .tarot-card:hover {
-  transform: scale(1.05);
+  transform: scale(1.02);
 }
 
 .reading-text {
-  max-width: 600px;
+  width: 100%;
+  max-width: min(90vw, 800px);
   background: rgba(255, 255, 255, 0.1);
-  padding: 2rem;
-  border-radius: 10px;
-  margin-top: 1rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border-radius: clamp(8px, 2vw, 12px);
+  margin-top: clamp(1rem, 2vw, 1.5rem);
   font-style: italic;
   line-height: 1.6;
+  backdrop-filter: blur(10px);
 }
 
 h2 {
   color: #ffd700;
-  font-size: 1.8em;
+  font-size: clamp(1.5rem, 4vw, 1.8rem);
   margin: 0;
   text-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+}
+
+@media (max-width: 480px) {
+  .app {
+    padding: 1rem;
+  }
+  
+  .card-container {
+    padding: 0.5rem;
+  }
+  
+  .reading-text {
+    padding: 1.2rem;
+  }
 }
