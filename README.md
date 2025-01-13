@@ -4,7 +4,10 @@ Welcome to Pollinations Hive - a revolutionary repository where AI meets collabo
 
 ## 🌟 Overview
 
-Pollinations Hive is a collection of self-contained applications, each residing in its own folder. What makes this repository special is its development approach: **100% of the code is AI-generated**, created through collaboration between humans and AI assistants.
+Pollinations Hive is a collection of self-contained applications, each residing in its own folder. What makes this repository special is:
+- **100% AI-Generated Code**: Created through collaboration between humans and AI assistants
+- **Automatic Deployment**: Each app is automatically deployed to its own subdomain
+- **Simple App Creation**: Just add your code to the `apps/` directory
 
 ## 🤖 How It Works
 
@@ -15,11 +18,24 @@ Pollinations Hive is a collection of self-contained applications, each residing 
 
 ## 📂 Repository Structure
 
-Each folder in this repository contains a self-contained application. This modular structure ensures:
+Each folder in the `apps/` directory contains a self-contained application that is automatically deployed. This modular structure ensures:
 - Clear separation of concerns
 - Easy navigation
 - Independent functionality
 - Simplified maintenance
+- Automatic deployment to unique subdomains
+
+### Types of Apps Supported
+
+1. **Static HTML Apps**
+   - Create a folder in `apps/` with an `index.html` file
+   - Add any static assets (CSS, JavaScript, images)
+   - Example: See `apps/hello-world`
+
+2. **Node.js/React Apps**
+   - Create a folder in `apps/` with a `package.json`
+   - Include a `build` script for production builds
+   - Example: See `apps/react-example`
 
 ## 🚀 Getting Started
 
@@ -58,8 +74,18 @@ For detailed API documentation and examples:
 - **AI-Driven Development**: Leverage AI to implement features and fix bugs
 - **Interactive Development**: Real-time collaboration between humans and AI
 - **Self-Contained Apps**: Each application is independent and modular
+- **Automatic Deployment**: Apps are deployed to `{app-name}.hive.pollinations.ai`
 - **Version Control**: Full Git history of AI-generated changes
 - **Community-Driven**: Open for contributions and improvements
+
+### Deployment Features
+
+- **Automatic Detection**: System detects when apps are added or modified
+- **Smart Builds**: 
+  - Static sites deploy directly
+  - Node.js apps are built automatically
+- **Efficient Updates**: Only changed apps are redeployed
+- **Custom Domains**: Each app gets its own subdomain
 
 ## 🤝 Contributing
 
