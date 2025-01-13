@@ -21,7 +21,17 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Check Netlify credentials
+        id: check-netlify
+        run: |
+          if [ -n "${{ secrets.NETLIFY_AUTH_TOKEN }}" ] && [ -n "${{ secrets.NETLIFY_TEAM_SLUG }}" ]; then
+            echo "has_credentials=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_credentials=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Install Netlify CLI
+        if: steps.check-netlify.outputs.has_credentials == 'true'
         run: npm install -g netlify-cli
 
       - name: Get changed files
@@ -33,6 +43,7 @@ jobs:
             */package.json
 
       - name: Find and deploy apps
+        if: steps.check-netlify.outputs.has_credentials == 'true'
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_TEAM_SLUG: ${{ secrets.NETLIFY_TEAM_SLUG }}
@@ -79,3 +90,10 @@ jobs:
               deploy_app "$dir"
             fi
           done
+
+      - name: Deployment skipped notification
+        if: steps.check-netlify.outputs.has_credentials == 'false'
+        run: |
+          echo "::notice::Netlify deployment was skipped because NETLIFY_AUTH_TOKEN and/or NETLIFY_TEAM_SLUG secrets are not configured."
+          echo "This is expected for pull requests from forks or when Netlify deployment is not set up."
+          echo "The workflow will continue successfully."
