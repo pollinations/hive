@@ -24,7 +24,7 @@ jobs:
       macro: ${{ vars.OPENHANDS_MACRO || '@openhands-agent' }}
       max_iterations: ${{ fromJson(vars.OPENHANDS_MAX_ITER || 100) }}
       base_container_image: ${{ vars.OPENHANDS_BASE_CONTAINER_IMAGE || '' }}
-      LLM_MODEL: ${{ vars.LLM_MODEL || 'openai/gpt-4' }}
+      LLM_MODEL: ${{ secrets.LLM_MODEL || 'openai/gpt-4' }}
     secrets:
       PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
       PAT_USERNAME: ${{ secrets.PAT_USERNAME }}
