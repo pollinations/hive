@@ -1,0 +1,81 @@
+name: Deploy Apps
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy-apps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Netlify CLI
+        run: npm install -g netlify-cli
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v39
+        with:
+          files: |
+            */index.html
+            */package.json
+
+      - name: Find and deploy apps
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_TEAM_SLUG: ${{ secrets.NETLIFY_TEAM_SLUG }}
+        run: |
+          # Function to deploy an app
+          deploy_app() {
+            local app_dir="$1"
+            local app_name=$(basename "$app_dir")
+            local site_name="hive-${app_name}"
+            
+            echo "Deploying $app_name from $app_dir"
+            
+            # Check if it's a Node.js app
+            if [ -f "$app_dir/package.json" ]; then
+              (cd "$app_dir" && npm install && npm run build)
+              deploy_dir="$app_dir/build"
+            else
+              deploy_dir="$app_dir"
+            fi
+            
+            # Create site if it doesn't exist
+            if ! netlify sites:list | grep -q "$site_name"; then
+              echo "Creating new site: $site_name"
+              netlify sites:create --name "$site_name"
+            fi
+            
+            # Deploy to Netlify
+            netlify deploy --dir="$deploy_dir" --site="$site_name" --prod
+          }
+          
+          # Get unique app directories from changed files
+          declare -A app_dirs
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            dir=$(dirname "$file")
+            # Only process root level directories
+            if [[ "$dir" != *"/"* ]]; then
+              app_dirs["$dir"]=1
+            fi
+          done
+          
+          # Deploy each app directory
+          for dir in "${!app_dirs[@]}"; do
+            if [ -f "$dir/index.html" ] || [ -f "$dir/package.json" ]; then
+              deploy_app "$dir"
+            fi
+          done
