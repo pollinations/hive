@@ -2,7 +2,7 @@
 for APP in */; do
     if [ -f "${APP}package.json" ]; then
         cd "$APP"
-        npm install
+        npm ci
         cd ..
     fi
 done
