@@ -216,20 +216,13 @@
 
     <div style="margin: 20px 0;" id="prompt-customization">
         <div class="prompt-section">
-            <h3>Customize Prompts</h3>
-                <div class="input-group">
-                    <label for="initial-prompt" class="input-label">Initial Prompt:</label>
-                    <textarea id="initial-prompt" class="prompt-editor"></textarea>
-                    <div class="input-help">Sets the context and creates the initial ASCII art</div>
-                    <button onclick="resetPrompt('initial')">Reset to Default</button>
-                </div>
-
-                <div class="input-group">
-                    <label for="evolution-prompt" class="input-label">Evolution Prompt:</label>
-                    <textarea id="evolution-prompt" class="prompt-editor"></textarea>
-                    <div class="input-help">Defines how the art should evolve in each iteration</div>
-                    <button onclick="resetPrompt('evolution')">Reset to Default</button>
-                </div>
+            <h3>Customize Prompt</h3>
+            <div class="input-group">
+                <label for="base-prompt" class="input-label">Animation Prompt:</label>
+                <textarea id="base-prompt" class="prompt-editor"></textarea>
+                <div class="input-help">Describe what kind of animation you want to create. The system will automatically handle the initial state and evolution.</div>
+                <button onclick="resetPrompt('base')">Reset to Default</button>
+            </div>
         </div>
     </div>
     
@@ -251,58 +244,57 @@
         const presets = {
             ascii_animation: {
                 name: "ASCII Animation",
-                initialPrompt: "Create a simple ASCII art scene that can be animated. Use standard ASCII characters to draw a scene with potential for movement or transformation. The scene could be anything - a flowing river, a dancing figure, a swaying tree, etc. Keep it under 20 lines and 40 characters wide.",
-                evolutionPrompt: "Create the next frame of the ASCII animation by making small, smooth changes to the previous frame. Maintain the core elements while adding subtle motion or transformation. Ensure the transition feels natural and fluid. Keep the same size and style as the previous frame.",
+                prompt: "Create a frame of an ASCII animation. Use standard ASCII characters to draw a scene with potential for movement or transformation. The scene could be anything - a flowing river, a dancing figure, a swaying tree, etc. Keep it under 20 lines and 40 characters wide.",
                 temperature: 0.6,
                 delay: 2500,
                 description: "Creates smooth ASCII art animations with natural transitions between frames."
             },
             story: {
                 name: "ASCII Story Evolution",
-                systemPrompt: "You are an ASCII art storyteller. Create evolving scenes that tell a story. Only respond with ASCII art, no explanations.",
-                initialPrompt: "Create a simple ASCII art scene depicting a character or setting. Keep it under 20 lines and 40 characters wide. Use only ASCII characters to create the art.",
-                evolutionPrompt: "Evolve this scene to show the next moment in the story. Characters can move, interact, or transform. Keep some elements consistent for continuity. IMPORTANT: Use only ASCII characters in your response, maintaining the artistic style of ASCII art throughout the evolution.",
+                prompt: "Create a frame of an evolving ASCII art story. Use ASCII characters to depict a character or setting in a way that can naturally progress into the next moment of the story. Keep it under 20 lines and 40 characters wide.",
                 temperature: 0.8,
                 delay: 4000,
                 description: "Creates an evolving story using pure ASCII art characters, with each scene building on the previous one."
             },
             typography: {
                 name: "Typographic Poetry Evolution",
-                systemPrompt: "You are a typographic poetry artist. Create evolving poems that use creative formatting and typography. Only respond with the poem, no explanations.",
-                initialPrompt: "Create a short poem (4-8 lines) that uses creative typography and spacing to enhance its meaning. The poem should be simple enough that it can evolve gradually.",
-                evolutionPrompt: "Evolve the previous poem by making small changes to either individual words or the formatting. Change only 1-2 elements at a time to maintain continuity. The changes should enhance the poem's meaning or visual impact.",
+                prompt: "Create a frame of an evolving typographic poem. Use creative typography and spacing to enhance its meaning in a way that can smoothly transform. Keep it between 4-8 lines and use spacing creatively.",
                 temperature: 0.7,
                 delay: 4000,
                 description: "Evolves a poem through subtle changes in words and formatting, creating a flowing typographic experience."
             },
             emoji: {
                 name: "Emoji Art Evolution",
-                systemPrompt: "You are an emoji art generator. Create evolving patterns using emoji characters. Only respond with emoji art patterns, no explanations.",
-                initialPrompt: "Create a simple emoji art pattern. Keep it under 20 lines and 40 characters wide. Use emoji to create an abstract or representational scene.",
-                evolutionPrompt: "Transform this emoji pattern into a new arrangement. Maintain some thematic connection while introducing new emoji elements.",
+                prompt: "Create a frame of evolving emoji art. Use emoji to create a pattern or scene that can transform smoothly. Keep it under 20 lines and 40 characters wide.",
                 temperature: 0.9,
                 delay: 3500,
                 description: "Creates patterns using emoji characters that transform and interact with each other."
             },
             math: {
                 name: "Mathematical Pattern Evolution",
-                systemPrompt: "You are a mathematical pattern generator. Create evolving patterns using ASCII characters that follow mathematical principles. Only respond with ASCII art, no explanations.",
-                initialPrompt: "Create a mathematical pattern using ASCII characters. Use symbols like ▲△□○⬡⬢ to represent geometric shapes. Keep it under 20 lines and 40 characters wide.",
-                evolutionPrompt: "Transform this pattern following mathematical rules: symmetry, fractals, or geometric progression. Each evolution should build on the mathematical principle of the previous pattern.",
+                prompt: "Create a frame of an evolving mathematical pattern. Use symbols like ▲△□○⬡⬢ to represent geometric shapes in a way that can transform following mathematical principles. Keep it under 20 lines and 40 characters wide.",
                 temperature: 0.5,
                 delay: 3000,
                 description: "Generates mathematical and geometric patterns that evolve following principles of symmetry and progression."
             },
             weather: {
                 name: "Weather System Evolution",
-                systemPrompt: "You are a weather pattern visualizer. Create evolving ASCII art that represents changing weather systems. Only respond with ASCII art, no explanations.",
-                initialPrompt: "Create a weather system visualization using ASCII characters. Use symbols like ☀ ☁ ☂ ☃ ⚡ to represent weather elements. Keep it under 20 lines and 40 characters wide.",
-                evolutionPrompt: "Evolve this weather pattern naturally. Show how the system changes over time, with clouds forming/dissipating, rain/snow falling, or storms developing/clearing.",
+                prompt: "Create a frame of an evolving weather system visualization. Use symbols like ☀ ☁ ☂ ☃ ⚡ to show weather elements that can naturally change over time. Keep it under 20 lines and 40 characters wide.",
                 temperature: 0.7,
                 delay: 3500,
                 description: "Visualizes weather systems that change over time, showing patterns of clouds, rain, and other weather elements."
             }
         };
+
+        // Function to derive initial prompt from base prompt
+        function deriveInitialPrompt(basePrompt) {
+            return `${basePrompt}\nNo explanation. Respond only with the initial state.`;
+        }
+
+        // Function to derive evolution prompt from base prompt
+        function deriveEvolutionPrompt(basePrompt) {
+            return `${basePrompt}\nTransform the given input into an output according to the previous instructions. No explanation. Respond purely with the state.`;
+        }
 
         // DOM Elements
         const startBtn = document.getElementById('startBtn');
@@ -412,21 +404,15 @@
             }
             
             // Set values from the current preset
-            initialPromptInput.value = currentPreset.initialPrompt;
-            evolutionPromptInput.value = currentPreset.evolutionPrompt;
+            document.getElementById('base-prompt').value = currentPreset.prompt;
             temperatureInput.value = currentPreset.temperature;
             delayInput.value = currentPreset.delay;
         }
 
         // Reset prompt to preset default
         function resetPrompt(type) {
-            switch(type) {
-                case 'initial':
-                    initialPromptInput.value = currentPreset.initialPrompt;
-                    break;
-                case 'evolution':
-                    evolutionPromptInput.value = currentPreset.evolutionPrompt;
-                    break;
+            if (type === 'base') {
+                document.getElementById('base-prompt').value = currentPreset.prompt;
             }
         }
 
@@ -481,8 +467,7 @@
         temperatureInput.addEventListener('change', debouncedUpdateUrlHash);
         seedInput.addEventListener('change', debouncedUpdateUrlHash);
         delayInput.addEventListener('change', debouncedUpdateUrlHash);
-        initialPromptInput.addEventListener('input', debouncedUpdateUrlHash);
-        evolutionPromptInput.addEventListener('input', debouncedUpdateUrlHash);
+        document.getElementById('base-prompt').addEventListener('input', debouncedUpdateUrlHash);
 
         // Update description when preset changes
         presetSelect.addEventListener('change', updatePresetDescription);
@@ -528,11 +513,11 @@
 
             try {
                 isProcessing = true;
-                const prompt = currentDisplay.textContent || initialPromptInput.value;
+                const basePrompt = document.getElementById('base-prompt').value;
+                const prompt = currentDisplay.textContent || deriveInitialPrompt(basePrompt);
                 currentIteration++;
                 
-                const newPrompt = `${evolutionPromptInput.value}
-Keep it under 20 lines and 40 characters wide.
+                const newPrompt = `${deriveEvolutionPrompt(basePrompt)}
 Current iteration: ${currentIteration}
 
 Previous art:
@@ -563,7 +548,8 @@ ${prompt}`;
                 stopBtn.disabled = false;
                 
                 if (!currentDisplay.textContent) {
-                    const response = await generateText(initialPromptInput.value);
+                    const basePrompt = document.getElementById('base-prompt').value;
+                    const response = await generateText(deriveInitialPrompt(basePrompt));
                     if (isRunning) {  // Check if still running after await
                         currentDisplay.textContent = response;
                         loopInterval = setInterval(runIteration, parseInt(delayInput.value));
