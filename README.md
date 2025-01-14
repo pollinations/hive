@@ -30,8 +30,7 @@ The AI will handle all the coding - you just need to describe what you want!
 
 This repository is powered by:
 
-- [Mentat.ai](https://mentat.ai/) - Hosting the running coding agent that enables AI-driven development
-- [OpenHands](https://github.com/All-Hands-AI/OpenHands) - The underlying AI agent platform that makes automated development possible
+- [Mentat.ai](https://mentat.ai/) - The AI coding agent that enables automated development through GitHub
 - [Pollinations AI Platform](https://pollinations.ai) - The AI platform ecosystem this repository is part of
 
 ## 🔗 Related Resources
