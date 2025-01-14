@@ -6,9 +6,9 @@ Welcome to Pollinations Hive - a revolutionary repository where AI meets collabo
 
 | App | Source | Last Updated |
 |-----|--------|--------------|
-| [llm-feedback](https://pollinations.github.io/hive/llm-feedback) | [./llm-feedback](./llm-feedback) | 2025-01-14 |
-| [tarot-reader](https://pollinations.github.io/hive/tarot-reader) | [./tarot-reader](./tarot-reader) | 2025-01-14 |
-| [image-prompt](https://pollinations.github.io/hive/image-prompt) | [./image-prompt](./image-prompt) | 2025-01-13 |
+| [llm-feedback](https://llm-feedback.hive.pollinations.ai) | [./llm-feedback](./llm-feedback) | 2025-01-14 |
+| [tarot-reader](https://tarot-reader.hive.pollinations.ai) | [./tarot-reader](./tarot-reader) | 2025-01-14 |
+| [image-prompt](https://image-prompt.hive.pollinations.ai) | [./image-prompt](./image-prompt) | 2025-01-13 |
 ## 📚 Documentation
 ## 🌈 Features
 ## 🤝 Contributing
