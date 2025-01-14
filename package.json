@@ -1,0 +1,27 @@
+{
+  "name": "hive",
+  "version": "1.0.0",
+  "description": "Collection of Pollinations apps",
+  "scripts": {
+    "test": "node scripts/test-apps.js",
+    "test:html": "node scripts/test-html.js",
+    "postinstall": "npx playwright install chromium"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pollinations/hive.git"
+  },
+  "keywords": [
+    "pollinations",
+    "apps"
+  ],
+  "author": "Pollinations",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pollinations/hive/issues"
+  },
+  "homepage": "https://github.com/pollinations/hive#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.41.1"
+  }
+}
