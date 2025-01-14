@@ -41,6 +41,7 @@ jobs:
 
       - name: Process apps
         run: |
+          # Test PR preview deployment
           # Create a directory for the built apps
           mkdir -p _site
 
