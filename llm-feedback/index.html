@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LLM Feedback Loop - ASCII Art Evolution</title>
     <style>
+        #preview-window {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-family: monospace;
+            white-space: pre;
+            min-height: 100px;
+        }
         body {
             font-family: system-ui, -apple-system, sans-serif;
             max-width: 800px;
@@ -221,6 +230,8 @@
     
 
     <div style="margin: 30px 0;">
+        <h2>Preview Animation</h2>
+        <div id="preview-window"></div>
         <h2>Current Art</h2>
         <div id="current"></div>
     </div>
@@ -306,12 +317,79 @@
         let loopInterval = null;
         let currentPreset = presets.ascii_animation;
         let isProcessing = false;  // Flag to prevent concurrent operations
+        let frames = [];  // Store animation frames
+        let previewInterval = null;  // For preview animation
+
+        // Function to update URL hash with current state
+        function updateUrlHash() {
+            const state = {
+                preset: presetSelect.value,
+                temperature: temperatureInput.value,
+                delay: delayInput.value,
+                initialPrompt: initialPromptInput.value,
+                evolutionPrompt: evolutionPromptInput.value
+            };
+            window.location.hash = encodeURIComponent(JSON.stringify(state));
+        }
+
+        // Function to load state from URL hash
+        function loadFromUrlHash() {
+            if (window.location.hash) {
+                try {
+                    const state = JSON.parse(decodeURIComponent(window.location.hash.slice(1)));
+                    presetSelect.value = state.preset || 'ascii_animation';
+                    temperatureInput.value = state.temperature || '0.8';
+                    delayInput.value = state.delay || '3000';
+                    initialPromptInput.value = state.initialPrompt || currentPreset.initialPrompt;
+                    evolutionPromptInput.value = state.evolutionPrompt || currentPreset.evolutionPrompt;
+                    currentPreset = presets[state.preset] || presets.ascii_animation;
+                } catch (e) {
+                    console.error('Error loading state from URL:', e);
+                }
+            }
+        }
+
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        const debouncedUpdateUrlHash = debounce(updateUrlHash, 500);
+
+        // Function to update preview animation
+        function updatePreview() {
+            const previewWindow = document.getElementById('preview-window');
+            let frameIndex = 0;
+
+            if (previewInterval) {
+                clearInterval(previewInterval);
+            }
+
+            if (frames.length > 0) {
+                previewInterval = setInterval(() => {
+                    previewWindow.textContent = frames[frameIndex];
+                    frameIndex = (frameIndex + 1) % frames.length;
+                }, 300);
+            }
+        }
 
         // Cleanup function to ensure proper state reset
         function cleanup() {
             if (loopInterval) {
                 clearInterval(loopInterval);
                 loopInterval = null;
+            }
+            if (previewInterval) {
+                clearInterval(previewInterval);
+                previewInterval = null;
             }
             isRunning = false;
             isProcessing = false;
@@ -358,6 +436,8 @@
             cleanup();
             currentDisplay.textContent = '';  // Clear current display
             historyDisplay.innerHTML = '';    // Clear history
+            frames = [];  // Clear frames array
+            document.getElementById('preview-window').textContent = '';  // Clear preview
 
             currentPreset = presets[e.target.value];
             initializePrompts();
@@ -384,8 +464,16 @@
         }
 
         // Initialize configuration on startup
+        loadFromUrlHash();
         initializePrompts();
         updatePresetDescription();
+
+        // Add event listeners for URL hash updates
+        presetSelect.addEventListener('change', debouncedUpdateUrlHash);
+        temperatureInput.addEventListener('change', debouncedUpdateUrlHash);
+        delayInput.addEventListener('change', debouncedUpdateUrlHash);
+        initialPromptInput.addEventListener('input', debouncedUpdateUrlHash);
+        evolutionPromptInput.addEventListener('input', debouncedUpdateUrlHash);
 
         // Update description when preset changes
         presetSelect.addEventListener('change', updatePresetDescription);
@@ -419,6 +507,10 @@
             historyItem.className = 'history-item';
             historyItem.textContent = text;
             historyDisplay.appendChild(historyItem);
+            
+            // Add to frames array and update preview
+            frames.push(text);
+            updatePreview();
         }
 
         async function runIteration() {
