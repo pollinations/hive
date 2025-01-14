@@ -171,7 +171,6 @@
         <label for="preset-select" class="input-label">Choose a Preset:</label>
         <select id="preset-select" class="preset-selector">
             <option value="ascii_animation">ASCII Animation</option>
-            <option value="cellular">Cellular Automata</option>
             <option value="story">ASCII Story Evolution</option>
             <option value="typography">Typographic Poetry Evolution</option>
             <option value="emoji">Emoji Art Evolution</option>
@@ -236,19 +235,11 @@
         const presets = {
             ascii_animation: {
                 name: "ASCII Animation",
-                initialPrompt: "You are an ASCII art animator. Create a simple animated scene using ASCII characters. Keep it under 20 lines and 40 characters wide. Use basic ASCII characters to create a scene that can be animated smoothly.",
-                evolutionPrompt: "Evolve the previous ASCII art to create smooth animation. Maintain the overall scene while making small changes that create a sense of motion or transformation. Keep the style and elements consistent.",
-                temperature: 0.7,
-                delay: 3000,
-                description: "Creates smooth ASCII animations with gradual transitions between frames."
-            },
-            cellular: {
-                name: "Cellular Automata",
-                initialPrompt: "You are a cellular automata simulator using ASCII art. Create a grid pattern using only two states: '#' for live cells and '.' for dead cells. The grid should be exactly 15 lines high and 30 characters wide. Fill about 30% of cells randomly.",
-                evolutionPrompt: "Apply these exact cellular automata rules to the previous pattern:\n1. Count live neighbors (including diagonals)\n2. A live cell (#) survives if it has 2 or 3 live neighbors\n3. A dead cell (.) becomes alive if it has exactly 3 live neighbors\n4. All other cells die or stay dead\nOnly output the new grid pattern using # and . characters.",
-                temperature: 0.3,
-                delay: 2000,
-                description: "Simulates true cellular automata following Conway's Game of Life rules."
+                initialPrompt: "Create a simple ASCII art scene that can be animated. Use standard ASCII characters to draw a scene with potential for movement or transformation. The scene could be anything - a flowing river, a dancing figure, a swaying tree, etc. Keep it under 20 lines and 40 characters wide.",
+                evolutionPrompt: "Create the next frame of the ASCII animation by making small, smooth changes to the previous frame. Maintain the core elements while adding subtle motion or transformation. Ensure the transition feels natural and fluid. Keep the same size and style as the previous frame.",
+                temperature: 0.6,
+                delay: 2500,
+                description: "Creates smooth ASCII art animations with natural transitions between frames."
             },
             story: {
                 name: "ASCII Story Evolution",
@@ -310,7 +301,7 @@
         let isRunning = false;
         let currentIteration = 0;
         let loopInterval = null;
-        let currentPreset = presets.cellular;
+        let currentPreset = presets.ascii_animation;
         let isProcessing = false;  // Flag to prevent concurrent operations
 
         // Cleanup function to ensure proper state reset
