@@ -40,15 +40,35 @@
             white-space: pre;
         }
         button {
-            padding: 5px 10px;
+            padding: 8px 16px;
             margin-right: 10px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
         }
-        .prompt-display {
-            background: #e8f4ff;
+        button:hover {
+            background: #1976d2;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .prompt-section {
+            background: #fff;
             padding: 15px;
             border-radius: 5px;
             margin: 10px 0;
-            border-left: 4px solid #2196f3;
+        }
+        .prompt-editor {
+            width: 100%;
+            min-height: 100px;
+            margin: 10px 0;
+            font-family: monospace;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
         .explanation {
             background: #fff;
@@ -56,10 +76,86 @@
             border-radius: 5px;
             margin: 20px 0;
         }
-        code {
-            background: #f5f5f5;
-            padding: 2px 4px;
-            border-radius: 3px;
+        .preset-selector {
+            padding: 8px;
+            margin: 10px 0;
+            width: 200px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .collapsible {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .collapsible-header {
+            padding: 10px;
+            cursor: pointer;
+            background: #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .collapsible-content {
+            padding: 15px;
+            display: none;
+            transition: all 0.3s ease;
+        }
+        .collapsible.open .collapsible-content {
+            display: block;
+        }
+        .input-group {
+            margin: 15px 0;
+        }
+        #history {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        #history::-webkit-scrollbar {
+            width: 8px;
+        }
+        #history::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        #history::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        #history::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+        .preset-selector {
+            padding: 8px;
+            margin: 10px 0;
+            width: 250px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .preset-selector:focus {
+            outline: none;
+            border-color: #2196f3;
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        }
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .input-help {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 4px;
+        }
+        .input-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -68,54 +164,125 @@
 
     <div class="explanation">
         <h2>How it Works</h2>
-        <p>This example demonstrates a feedback loop with an AI language model to create evolving ASCII art. Here's what's happening:</p>
-        <ol>
-            <li>The AI is given a system prompt that defines its role as an ASCII art generator.</li>
-            <li>When you click Start, it generates an initial piece of ASCII art.</li>
-            <li>For each iteration, the previous art is fed back to the AI with a request to evolve it.</li>
-            <li>The temperature setting controls how creative/random the AI's responses are.</li>
-            <li>The delay controls how frequently new art is generated.</li>
-        </ol>
+        <p>This interactive demo creates evolving art using AI. Choose a preset or customize the prompts to create different types of evolving patterns!</p>
     </div>
 
-    <div class="prompt-display">
-        <h3>System Prompt:</h3>
-        <p><code>You are an ASCII art generator. Create abstract evolving patterns. Only respond with ASCII art, no explanations.</code></p>
-        
-        <h3>Initial User Prompt:</h3>
-        <p><code>Create a simple ASCII art scene. Keep it under 20 lines and 40 characters wide. Make it abstract and evolving.</code></p>
-        
-        <h3>Evolution Prompt Template:</h3>
-        <p><code>Evolve this ASCII art into something different while maintaining some connection to the previous version.</code></p>
+    <div id="preset-control" class="prompt-section">
+        <label for="preset-select" class="input-label">Choose a Preset:</label>
+        <select id="preset-select" class="preset-selector">
+            <option value="cellular">Cellular Automata Evolution</option>
+            <option value="story">Story Evolution</option>
+            <option value="emoji">Emoji Art Evolution</option>
+            <option value="math">Mathematical Pattern Evolution</option>
+            <option value="weather">Weather System Evolution</option>
+        </select>
+        <p id="preset-description" style="margin-top: 10px; color: #666;"></p>
     </div>
-    
-    <div id="controls" class="explanation">
+
+    <div id="controls" class="prompt-section">
         <h2>Controls</h2>
-        <div style="margin-bottom: 15px;">
-            <button id="startBtn">Start</button>
-            <button id="stopBtn" disabled>Stop</button>
+        <div style="margin-bottom: 20px;">
+            <button id="startBtn">Start Evolution</button>
+            <button id="stopBtn" disabled>Stop Evolution</button>
         </div>
-        <div style="display: flex; gap: 20px;">
+        <div class="controls-grid">
             <label>
                 Delay (ms):
-                <input type="number" id="delay" value="3000" min="1000" step="500">
+                <input type="number" id="delay" value="3000" min="1000" step="500" style="width: 100px;">
                 <div class="input-help">Time between generations (minimum 1000ms)</div>
             </label>
             <label>
                 Temperature:
-                <input type="number" id="temperature" value="0.8" min="0.1" max="2" step="0.1">
+                <input type="number" id="temperature" value="0.8" min="0.1" max="2" step="0.1" style="width: 100px;">
                 <div class="input-help">Controls randomness (0.1 = conservative, 2.0 = creative)</div>
             </label>
         </div>
     </div>
 
-    <h2>Current Art</h2>
-    <div id="current"></div>
+    <div class="collapsible" style="margin: 20px 0;" id="prompt-customization">
+        <div class="collapsible-header" style="user-select: none;">
+            <h3>Customize Prompts</h3>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+            <div class="prompt-section">
+                <div class="input-group">
+                    <label for="system-prompt" class="input-label">System Prompt:</label>
+                    <textarea id="system-prompt" class="prompt-editor"></textarea>
+                    <button onclick="resetPrompt('system')">Reset to Default</button>
+                </div>
+
+                <div class="input-group">
+                    <label for="initial-prompt" class="input-label">Initial Prompt:</label>
+                    <textarea id="initial-prompt" class="prompt-editor"></textarea>
+                    <button onclick="resetPrompt('initial')">Reset to Default</button>
+                </div>
+
+                <div class="input-group">
+                    <label for="evolution-prompt" class="input-label">Evolution Prompt:</label>
+                    <textarea id="evolution-prompt" class="prompt-editor"></textarea>
+                    <button onclick="resetPrompt('evolution')">Reset to Default</button>
+                </div>
+            </div>
+        </div>
+    </div>
     
-    <h2>Evolution History</h2>
-    <div id="history"></div>
+
+    <div style="margin: 30px 0;">
+        <h2>Current Art</h2>
+        <div id="current"></div>
+    </div>
+    
+    <div style="margin: 30px 0;">
+        <h2>Evolution History</h2>
+        <div id="history"></div>
+    </div>
 
     <script>
+        // Preset configurations
+        const presets = {
+            cellular: {
+                name: "Cellular Automata Evolution",
+                systemPrompt: "You are an ASCII art generator specializing in cellular automata patterns. Create evolving patterns that follow simple rules. Only respond with ASCII art, no explanations.",
+                initialPrompt: "Create a cellular automata pattern using ASCII characters. Keep it under 20 lines and 40 characters wide. Use simple symbols like . and # to represent cells.",
+                evolutionPrompt: "Evolve this cellular pattern following these rules:\n1. Living cells (# or filled characters) with 2-3 neighbors survive\n2. Empty cells (. or spaces) with 3 neighbors become alive\n3. All other cells die or stay empty\nMaintain some connection to the previous pattern.",
+                temperature: 0.6,
+                delay: 3000
+            },
+            story: {
+                name: "Story Evolution",
+                systemPrompt: "You are an ASCII art storyteller. Create evolving scenes that tell a story. Only respond with ASCII art, no explanations.",
+                initialPrompt: "Create a simple ASCII art scene depicting a character or setting. Keep it under 20 lines and 40 characters wide.",
+                evolutionPrompt: "Evolve this scene to show the next moment in the story. Characters can move, interact, or transform. Keep some elements consistent for continuity.",
+                temperature: 0.8,
+                delay: 4000
+            },
+            emoji: {
+                name: "Emoji Art Evolution",
+                systemPrompt: "You are an emoji art generator. Create evolving patterns using emoji characters. Only respond with emoji art patterns, no explanations.",
+                initialPrompt: "Create a simple emoji art pattern. Keep it under 20 lines and 40 characters wide. Use emoji to create an abstract or representational scene.",
+                evolutionPrompt: "Transform this emoji pattern into a new arrangement. Maintain some thematic connection while introducing new emoji elements.",
+                temperature: 0.9,
+                delay: 3500
+            },
+            math: {
+                name: "Mathematical Pattern Evolution",
+                systemPrompt: "You are a mathematical pattern generator. Create evolving patterns using ASCII characters that follow mathematical principles. Only respond with ASCII art, no explanations.",
+                initialPrompt: "Create a mathematical pattern using ASCII characters. Use symbols like ▲△□○⬡⬢ to represent geometric shapes. Keep it under 20 lines and 40 characters wide.",
+                evolutionPrompt: "Transform this pattern following mathematical rules: symmetry, fractals, or geometric progression. Each evolution should build on the mathematical principle of the previous pattern.",
+                temperature: 0.5,
+                delay: 3000
+            },
+            weather: {
+                name: "Weather System Evolution",
+                systemPrompt: "You are a weather pattern visualizer. Create evolving ASCII art that represents changing weather systems. Only respond with ASCII art, no explanations.",
+                initialPrompt: "Create a weather system visualization using ASCII characters. Use symbols like ☀ ☁ ☂ ☃ ⚡ to represent weather elements. Keep it under 20 lines and 40 characters wide.",
+                evolutionPrompt: "Evolve this weather pattern naturally. Show how the system changes over time, with clouds forming/dissipating, rain/snow falling, or storms developing/clearing.",
+                temperature: 0.7,
+                delay: 3500
+            }
+        };
+
         // DOM Elements
         const startBtn = document.getElementById('startBtn');
         const stopBtn = document.getElementById('stopBtn');
@@ -123,18 +290,141 @@
         const temperatureInput = document.getElementById('temperature');
         const currentDisplay = document.getElementById('current');
         const historyDisplay = document.getElementById('history');
+        const presetSelect = document.getElementById('preset-select');
+        const systemPromptInput = document.getElementById('system-prompt');
+        const initialPromptInput = document.getElementById('initial-prompt');
+        const evolutionPromptInput = document.getElementById('evolution-prompt');
 
         // State variables
         let isRunning = false;
         let currentIteration = 0;
         let loopInterval;
+        let currentPreset = presets.cellular;
 
-        // Initial prompt to start the generation process
-        const initialPrompt = `
-Create a simple ASCII art scene. 
-Keep it under 20 lines and 40 characters wide.
-Make it abstract and evolving.
-Current iteration: 0`;
+        // Initialize prompts
+        function initializePrompts() {
+            systemPromptInput.value = currentPreset.systemPrompt;
+            initialPromptInput.value = currentPreset.initialPrompt;
+            evolutionPromptInput.value = currentPreset.evolutionPrompt;
+            temperatureInput.value = currentPreset.temperature;
+            delayInput.value = currentPreset.delay;
+        }
+
+        // Load saved prompts from localStorage or use defaults
+        function loadSavedPrompts() {
+            const saved = localStorage.getItem('promptConfig');
+            if (saved) {
+                const config = JSON.parse(saved);
+                systemPromptInput.value = config.systemPrompt;
+                initialPromptInput.value = config.initialPrompt;
+                evolutionPromptInput.value = config.evolutionPrompt;
+            } else {
+                initializePrompts();
+            }
+        }
+
+        // Save prompts to localStorage
+        function savePrompts() {
+            const config = {
+                systemPrompt: systemPromptInput.value,
+                initialPrompt: initialPromptInput.value,
+                evolutionPrompt: evolutionPromptInput.value
+            };
+            localStorage.setItem('promptConfig', JSON.stringify(config));
+        }
+
+        // Reset prompt to preset default
+        function resetPrompt(type) {
+            switch(type) {
+                case 'system':
+                    systemPromptInput.value = currentPreset.systemPrompt;
+                    break;
+                case 'initial':
+                    initialPromptInput.value = currentPreset.initialPrompt;
+                    break;
+                case 'evolution':
+                    evolutionPromptInput.value = currentPreset.evolutionPrompt;
+                    break;
+            }
+            savePrompts();
+        }
+
+        // Handle preset changes
+        presetSelect.addEventListener('change', (e) => {
+            const select = e.target;
+            select.style.backgroundColor = '#e8f4ff';
+            setTimeout(() => {
+                select.style.backgroundColor = '';
+            }, 300);
+
+            currentPreset = presets[e.target.value];
+            initializePrompts();
+            savePrompts();
+            if (isRunning) {
+                stopLoop();
+                startLoop();
+            }
+
+            // Flash the description for visual feedback
+            const description = document.getElementById('preset-description');
+            description.style.backgroundColor = '#e8f4ff';
+            setTimeout(() => {
+                description.style.backgroundColor = '';
+            }, 300);
+        });
+
+        // Initialize collapsible sections
+        document.querySelectorAll('.collapsible-header').forEach(header => {
+            const content = header.parentElement;
+            const icon = header.querySelector('.toggle-icon');
+            icon.textContent = '▶'; // Start closed
+            
+            header.addEventListener('click', () => {
+                content.classList.toggle('open');
+                icon.textContent = content.classList.contains('open') ? '▼' : '▶';
+                
+                // Add transition effect
+                const contentDiv = content.querySelector('.collapsible-content');
+                if (content.classList.contains('open')) {
+                    contentDiv.style.opacity = '0';
+                    contentDiv.style.display = 'block';
+                    setTimeout(() => {
+                        contentDiv.style.opacity = '1';
+                    }, 10);
+                } else {
+                    contentDiv.style.opacity = '0';
+                    setTimeout(() => {
+                        contentDiv.style.display = 'none';
+                    }, 300);
+                }
+            });
+        });
+
+        // Save prompts when they're modified
+        [systemPromptInput, initialPromptInput, evolutionPromptInput].forEach(input => {
+            input.addEventListener('change', savePrompts);
+        });
+
+        // Update preset description
+        function updatePresetDescription() {
+            const description = document.getElementById('preset-description');
+            const preset = presets[presetSelect.value];
+            description.textContent = preset.description;
+        }
+
+        // Add descriptions to presets
+        presets.cellular.description = "Creates patterns that evolve like Conway's Game of Life, following simple rules of cellular automata.";
+        presets.story.description = "Generates evolving scenes that tell a story through ASCII characters and simple animations.";
+        presets.emoji.description = "Creates patterns using emoji characters that transform and interact with each other.";
+        presets.math.description = "Generates mathematical and geometric patterns that evolve following principles of symmetry and progression.";
+        presets.weather.description = "Visualizes weather systems that change over time, showing patterns of clouds, rain, and other weather elements.";
+
+        // Load saved configuration on startup
+        loadSavedPrompts();
+        updatePresetDescription();
+
+        // Update description when preset changes
+        presetSelect.addEventListener('change', updatePresetDescription);
 
         /**
          * Generates text using the Pollinations API
@@ -152,7 +442,7 @@ Current iteration: 0`;
                     messages: [
                         {
                             role: 'system',
-                            content: 'You are an ASCII art generator. Create abstract evolving patterns. Only respond with ASCII art, no explanations.'
+                            content: systemPromptInput.value
                         },
                         { role: 'user', content: prompt }
                     ],
@@ -175,11 +465,10 @@ Current iteration: 0`;
             if (!isRunning) return;
 
             try {
-                const prompt = currentDisplay.textContent || initialPrompt;
+                const prompt = currentDisplay.textContent || initialPromptInput.value;
                 currentIteration++;
                 
-                const newPrompt = `
-Evolve this ASCII art into something different while maintaining some connection to the previous version.
+                const newPrompt = `${evolutionPromptInput.value}
 Keep it under 20 lines and 40 characters wide.
 Current iteration: ${currentIteration}
 
