@@ -206,6 +206,11 @@
                 <input type="number" id="temperature" value="0.8" min="0.1" max="2" step="0.1" style="width: 100px;">
                 <div class="input-help">Controls randomness (0.1 = conservative, 2.0 = creative)</div>
             </label>
+            <label>
+                Seed:
+                <input type="number" id="seed" value="" placeholder="Random" style="width: 100px;">
+                <div class="input-help">Optional: Set for reproducible results</div>
+            </label>
         </div>
     </div>
 
@@ -304,6 +309,7 @@
         const stopBtn = document.getElementById('stopBtn');
         const delayInput = document.getElementById('delay');
         const temperatureInput = document.getElementById('temperature');
+        const seedInput = document.getElementById('seed');
         const currentDisplay = document.getElementById('current');
         const historyDisplay = document.getElementById('history');
         const presetSelect = document.getElementById('preset-select');
@@ -325,6 +331,7 @@
             const state = {
                 preset: presetSelect.value,
                 temperature: temperatureInput.value,
+                seed: seedInput.value,
                 delay: delayInput.value,
                 initialPrompt: initialPromptInput.value,
                 evolutionPrompt: evolutionPromptInput.value
@@ -339,6 +346,7 @@
                     const state = JSON.parse(decodeURIComponent(window.location.hash.slice(1)));
                     presetSelect.value = state.preset || 'ascii_animation';
                     temperatureInput.value = state.temperature || '0.8';
+                    seedInput.value = state.seed || '';
                     delayInput.value = state.delay || '3000';
                     initialPromptInput.value = state.initialPrompt || currentPreset.initialPrompt;
                     evolutionPromptInput.value = state.evolutionPrompt || currentPreset.evolutionPrompt;
@@ -471,6 +479,7 @@
         // Add event listeners for URL hash updates
         presetSelect.addEventListener('change', debouncedUpdateUrlHash);
         temperatureInput.addEventListener('change', debouncedUpdateUrlHash);
+        seedInput.addEventListener('change', debouncedUpdateUrlHash);
         delayInput.addEventListener('change', debouncedUpdateUrlHash);
         initialPromptInput.addEventListener('input', debouncedUpdateUrlHash);
         evolutionPromptInput.addEventListener('input', debouncedUpdateUrlHash);
@@ -494,7 +503,8 @@
                     messages: [
                         { role: 'user', content: prompt }
                     ],
-                    temperature: parseFloat(temperatureInput.value)
+                    temperature: parseFloat(temperatureInput.value),
+                    ...(seedInput.value && { seed: parseInt(seedInput.value) })
                 }),
             });
 
