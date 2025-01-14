@@ -2,6 +2,19 @@
 
 Welcome to Pollinations Hive - a revolutionary repository where AI meets collaborative development! This project showcases a unique approach to software development where applications are created and modified entirely through AI assistance.
 
+## 📱 Available Apps
+
+Explore our growing collection of AI-powered applications! Each app is automatically deployed and accessible through its own subdomain:
+
+| App | Source | Last Updated |
+|-----|--------|--------------|
+| [llm-feedback](https://llm-feedback.hive.pollinations.ai) | [./llm-feedback](./llm-feedback) | 2025-01-14 |
+| [hello-world](https://hello-world.hive.pollinations.ai) | [./hello-world](./hello-world) | 2025-01-13 |
+| [tarot-reader](https://tarot-reader.hive.pollinations.ai) | [./tarot-reader](./tarot-reader) | 2025-01-14 |
+| [image-prompt](https://image-prompt.hive.pollinations.ai) | [./image-prompt](./image-prompt) | 2025-01-13 |
+
+> 🔄 This list is automatically updated whenever new apps are added or existing ones are modified.
+
 ## 🌟 Overview
 
 Pollinations Hive is a collection of self-contained applications, each residing in its own folder at the root of the repository. What makes this repository special is:
