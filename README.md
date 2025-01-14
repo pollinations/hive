@@ -14,12 +14,16 @@ Welcome to Pollinations Hive - a revolutionary repository where AI meets collabo
 | [evil-chat](https://pollinations.github.io/hive/evil-chat/) | [./evil-chat](./evil-chat) | 2025-01-14 |
 ## 📚 Documentation
 ## 🌈 Features
-## 🤝 Contributing
+## 💡 Submit Your App Idea
 
-1. Create an issue describing your proposed change
-2. Tag @MentatBot to begin implementation
-3. Provide feedback on the AI's implementation
-4. Review and refine through comments
+Want to add your app to the Hive? It's easy:
+
+1. Create an issue describing your app idea
+2. Tag @MentatBot or check the box in its comment to start the AI-powered development
+3. Provide feedback as the AI builds your app
+4. Review and refine until your app is ready
+
+The AI will handle all the coding - you just need to describe what you want!
 
 ## 🙏 Credits
 
