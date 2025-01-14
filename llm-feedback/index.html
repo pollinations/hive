@@ -265,7 +265,8 @@
                 initialPrompt: "Create a simple emoji art pattern. Keep it under 20 lines and 40 characters wide. Use emoji to create an abstract or representational scene.",
                 evolutionPrompt: "Transform this emoji pattern into a new arrangement. Maintain some thematic connection while introducing new emoji elements.",
                 temperature: 0.9,
-                delay: 3500
+                delay: 3500,
+                description: "Creates patterns using emoji characters that transform and interact with each other."
             },
             math: {
                 name: "Mathematical Pattern Evolution",
@@ -273,7 +274,8 @@
                 initialPrompt: "Create a mathematical pattern using ASCII characters. Use symbols like ▲△□○⬡⬢ to represent geometric shapes. Keep it under 20 lines and 40 characters wide.",
                 evolutionPrompt: "Transform this pattern following mathematical rules: symmetry, fractals, or geometric progression. Each evolution should build on the mathematical principle of the previous pattern.",
                 temperature: 0.5,
-                delay: 3000
+                delay: 3000,
+                description: "Generates mathematical and geometric patterns that evolve following principles of symmetry and progression."
             },
             weather: {
                 name: "Weather System Evolution",
@@ -281,7 +283,8 @@
                 initialPrompt: "Create a weather system visualization using ASCII characters. Use symbols like ☀ ☁ ☂ ☃ ⚡ to represent weather elements. Keep it under 20 lines and 40 characters wide.",
                 evolutionPrompt: "Evolve this weather pattern naturally. Show how the system changes over time, with clouds forming/dissipating, rain/snow falling, or storms developing/clearing.",
                 temperature: 0.7,
-                delay: 3500
+                delay: 3500,
+                description: "Visualizes weather systems that change over time, showing patterns of clouds, rain, and other weather elements."
             }
         };
 
@@ -373,15 +376,12 @@
         function updatePresetDescription() {
             const description = document.getElementById('preset-description');
             const preset = presets[presetSelect.value];
-            description.textContent = preset.description;
+            if (preset && preset.description) {
+                description.textContent = preset.description;
+            } else {
+                description.textContent = ""; // Clear description if not available
+            }
         }
-
-        // Add descriptions to presets
-        presets.cellular.description = "Creates patterns that evolve like Conway's Game of Life, following simple rules of cellular automata.";
-        presets.story.description = "Generates evolving scenes that tell a story through ASCII characters and simple animations.";
-        presets.emoji.description = "Creates patterns using emoji characters that transform and interact with each other.";
-        presets.math.description = "Generates mathematical and geometric patterns that evolve following principles of symmetry and progression.";
-        presets.weather.description = "Visualizes weather systems that change over time, showing patterns of clouds, rain, and other weather elements.";
 
         // Initialize configuration on startup
         initializePrompts();
