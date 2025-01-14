@@ -4,22 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Devil's Advocate Chat</title>
+    <link rel="stylesheet" href="../styles.css">
     <style>
+        :root {
+            /* Override default theme with dark theme colors */
+            --color-bg: #1a0000;
+            --color-text: #ff3333;
+            --color-primary: #4a0000;
+            --color-primary-hover: #600;
+            --color-card-bg: #2a0000;
+            --color-border: #4a0000;
+        }
+
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #1a0000;
-            color: #ff3333;
-            font-family: 'Times New Roman', Times, serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            background: radial-gradient(circle at center, #2a0000 0%, #1a0000 100%);
         }
 
         .container {
             max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
+            margin: var(--spacing-4) auto;
+            padding: var(--spacing-6);
             flex-grow: 1;
             display: flex;
             flex-direction: column;
@@ -27,68 +34,85 @@
 
         .chat-header {
             text-align: center;
-            margin-bottom: 20px;
-            font-size: 2em;
+            margin-bottom: var(--spacing-6);
+            font-size: 2.5rem;
+            font-weight: 700;
             text-shadow: 0 0 10px #ff0000;
+            letter-spacing: 0.05em;
         }
 
         .chat-box {
             flex-grow: 1;
-            background-color: #2a0000;
-            border: 2px solid #4a0000;
-            border-radius: 5px;
-            padding: 20px;
-            margin-bottom: 20px;
+            background-color: var(--color-card-bg);
+            border: 2px solid var(--color-border);
+            border-radius: 0.5rem;
+            padding: var(--spacing-6);
+            margin-bottom: var(--spacing-6);
             overflow-y: auto;
             min-height: 400px;
+            box-shadow: var(--shadow-lg);
         }
 
         .message {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
+            margin: var(--spacing-3) 0;
+            padding: var(--spacing-4);
+            border-radius: 0.5rem;
             animation: fadeIn 0.5s ease-in;
+            line-height: 1.5;
         }
 
         .user-message {
             background-color: #3a0000;
             margin-left: 20%;
-            border-left: 3px solid #ff3333;
+            border-left: 3px solid var(--color-text);
+            box-shadow: var(--shadow);
         }
 
         .ai-message {
             background-color: #300;
             margin-right: 20%;
             border-right: 3px solid #800;
+            box-shadow: var(--shadow);
         }
 
         .input-area {
             display: flex;
-            gap: 10px;
+            gap: var(--spacing-4);
+            background-color: var(--color-card-bg);
+            padding: var(--spacing-4);
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow);
         }
 
         #message-input {
             flex-grow: 1;
-            padding: 10px;
-            background-color: #2a0000;
-            border: 2px solid #4a0000;
-            color: #ff3333;
-            border-radius: 5px;
+            padding: var(--spacing-3);
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 2px solid var(--color-border);
+            color: var(--color-text);
+            border-radius: 0.375rem;
             font-family: inherit;
         }
 
+        #message-input:focus {
+            border-color: var(--color-text);
+            box-shadow: 0 0 0 3px rgba(255, 51, 51, 0.1);
+        }
+
         #send-button {
-            padding: 10px 20px;
-            background-color: #4a0000;
+            padding: var(--spacing-3) var(--spacing-6);
+            background-color: var(--color-primary);
             border: none;
-            color: #ff3333;
-            border-radius: 5px;
+            color: var(--color-text);
+            border-radius: 0.375rem;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.2s ease;
+            font-weight: 500;
         }
 
         #send-button:hover {
-            background-color: #600;
+            background-color: var(--color-primary-hover);
+            transform: translateY(-1px);
         }
 
         @keyframes fadeIn {
@@ -100,7 +124,14 @@
             display: none;
             color: #800;
             font-style: italic;
-            margin: 10px 0;
+            margin: var(--spacing-3) 0;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
         }
     </style>
 </head>

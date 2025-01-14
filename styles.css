@@ -1,0 +1,163 @@
+/* Base styles for Pollinations examples */
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  
+  /* Colors */
+  --color-bg: #fafafa;
+  --color-text: #1a1a1a;
+  --color-primary: #0066ff;
+  --color-primary-hover: #0052cc;
+  --color-secondary: #6b7280;
+  --color-border: #e5e7eb;
+  --color-card-bg: #ffffff;
+  
+  /* Spacing */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Reset & Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  margin: 0;
+  padding: 0;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: var(--spacing-4);
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+}
+
+p {
+  margin-bottom: var(--spacing-4);
+}
+
+/* Container */
+.container {
+  max-width: 65ch;
+  margin: 0 auto;
+  padding: var(--spacing-6);
+}
+
+/* Card */
+.card {
+  background-color: var(--color-card-bg);
+  border-radius: 0.5rem;
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow);
+}
+
+/* Form Elements */
+input, textarea {
+  width: 100%;
+  padding: var(--spacing-3);
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+  background-color: var(--color-card-bg);
+  font-family: inherit;
+  font-size: 1rem;
+  transition: border-color 0.15s ease;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+}
+
+/* Buttons */
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-3) var(--spacing-6);
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+button:hover {
+  background-color: var(--color-primary-hover);
+}
+
+button.secondary {
+  background-color: var(--color-secondary);
+}
+
+button.secondary:hover {
+  background-color: #4b5563;
+}
+
+/* Loading States */
+.loading {
+  display: inline-block;
+  padding: var(--spacing-2) var(--spacing-4);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+/* Error States */
+.error {
+  padding: var(--spacing-4);
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-radius: 0.375rem;
+  margin-bottom: var(--spacing-4);
+}
+
+/* Code Display */
+pre, code {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+pre {
+  padding: var(--spacing-4);
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+}
