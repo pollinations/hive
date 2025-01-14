@@ -319,7 +319,7 @@ ${prompt}`;
                 const text = await response.text();
                 console.log('Raw response:', text);
                 elements.start.textContent = 'Start Evolution';
-                return text;
+                return '';
             } catch (error) {
                 console.error('Generation error:', error);
                 elements.start.textContent = 'Start Evolution';
