@@ -3,597 +3,330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM Feedback Loop - ASCII Art Evolution</title>
+    <title>LLM ASCII Art Evolution</title>
     <style>
-        #preview-window {
-            background: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            margin: 20px 0;
-            font-family: monospace;
-            white-space: pre;
-            min-height: 100px;
-        }
         body {
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: system-ui, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background: #f0f0f0;
-            line-height: 1.6;
+            background: #f5f5f5;
+            line-height: 1.5;
         }
-        #controls {
-            margin: 20px 0;
-            padding: 10px;
-            background: #fff;
-            border-radius: 5px;
-        }
-        #current {
-            font-family: monospace;
-            white-space: pre;
-            background: #fff;
+        .container {
+            background: white;
             padding: 20px;
-            border-radius: 5px;
-            margin: 20px 0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        #history {
-            display: flex;
-            flex-direction: column-reverse;
-            gap: 10px;
-        }
-        .history-item {
-            font-family: monospace;
-            background: #fff;
-            padding: 10px;
-            border-radius: 5px;
+        .mono {
+            font-family: 'Courier New', Courier, monospace;
             white-space: pre;
+            display: block;
+            width: 480px;
+            height: 600px;
+            overflow: auto;
+            background: #f8f8f8;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: 0.02em;
+        }
+        textarea, select {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
         }
         button {
             padding: 8px 16px;
-            margin-right: 10px;
             background: #2196f3;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-        }
-        button:hover {
-            background: #1976d2;
+            margin-right: 8px;
         }
         button:disabled {
             background: #ccc;
-            cursor: not-allowed;
-        }
-        .prompt-section {
-            background: #fff;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 10px 0;
-        }
-        .prompt-editor {
-            width: 100%;
-            min-height: 100px;
-            margin: 10px 0;
-            font-family: monospace;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .explanation {
-            background: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-        .preset-selector {
-            padding: 8px;
-            margin: 10px 0;
-            width: 200px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-        .collapsible {
-            background: #f8f8f8;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin: 10px 0;
-        }
-        .collapsible-header {
-            padding: 10px;
-            cursor: pointer;
-            background: #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .collapsible-content {
-            padding: 15px;
-            display: none;
-            transition: all 0.3s ease;
-        }
-        .collapsible.open .collapsible-content {
-            display: block;
-        }
-        .input-group {
-            margin: 15px 0;
         }
         #history {
-            max-height: 500px;
+            max-height: 400px;
             overflow-y: auto;
-            padding-right: 10px;
         }
-        #history::-webkit-scrollbar {
-            width: 8px;
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
         }
-        #history::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-        #history::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-        #history::-webkit-scrollbar-thumb:hover {
-            background: #666;
-        }
-        .preset-selector {
-            padding: 8px;
-            margin: 10px 0;
-            width: 250px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-            font-size: 1em;
-            cursor: pointer;
-        }
-        .preset-selector:focus {
-            outline: none;
-            border-color: #2196f3;
-            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
-        }
-        .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 15px;
-        }
-        .input-help {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 4px;
-        }
-        .input-label {
+        label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin: 8px 0;
         }
     </style>
 </head>
 <body>
     <h1>LLM ASCII Art Evolution</h1>
-
-    <div class="explanation">
-        <h2>How it Works</h2>
-        <p>This interactive demo creates evolving art using AI. Choose a preset or customize the prompts to create different types of evolving patterns!</p>
-    </div>
-
-    <div id="preset-control" class="prompt-section">
-        <label for="preset-select" class="input-label">Choose a Preset:</label>
-        <select id="preset-select" class="preset-selector">
-            <option value="ascii_animation">ASCII Animation</option>
-            <option value="story">ASCII Story Evolution</option>
-            <option value="typography">Typographic Poetry Evolution</option>
-            <option value="emoji">Emoji Art Evolution</option>
-            <option value="math">Mathematical Pattern Evolution</option>
-            <option value="weather">Weather System Evolution</option>
+    
+    <div class="container">
+        <select id="preset-select">
+            <option value="calligram">Calligrammatic Style (Apollinaire)</option>
+            <option value="fragments">Fragmented Minimalism (Mallarmé)</option>
+            <option value="futurism">Dynamic Explosions (Futurism)</option>
+            <option value="concrete">Geometric Precision (Concrete)</option>
+            <option value="flowing">Flowing Representations (Carroll)</option>
+            <option value="quantum">Quantum Interference Patterns</option>
+            <option value="glitch">Digital Glitch Artifacts</option>
+            <option value="neural">Neural Activity Maps</option>
+            <option value="tictactoe">Tic Tac Toe Game</option>
+            <option value="weather">Weather System Patterns</option>
         </select>
-        <p id="preset-description" style="margin-top: 10px; color: #666;"></p>
-    </div>
-
-    <div id="controls" class="prompt-section">
-        <h2>Controls</h2>
-        <div style="margin-bottom: 20px;">
+        
+        <label>
+            Animation Prompt:
+            <textarea id="base-prompt" rows="4"></textarea>
+        </label>
+        
+        <div>
             <button id="startBtn">Start Evolution</button>
             <button id="stopBtn" disabled>Stop Evolution</button>
         </div>
-        <div class="controls-grid">
-            <label>
-                Delay (ms):
-                <input type="number" id="delay" value="3000" min="1000" step="500" style="width: 100px;">
-                <div class="input-help">Time between generations (minimum 1000ms)</div>
-            </label>
-            <label>
-                Temperature:
-                <input type="number" id="temperature" value="0.8" min="0.1" max="2" step="0.1" style="width: 100px;">
-                <div class="input-help">Controls randomness (0.1 = conservative, 2.0 = creative)</div>
-            </label>
-            <label>
-                Seed:
-                <input type="number" id="seed" value="" placeholder="Random" style="width: 100px;">
-                <div class="input-help">Optional: Set for reproducible results</div>
-            </label>
-        </div>
+        
+        <label>
+            Temperature: 
+            <input type="number" id="temperature" value="0.8" min="0.1" max="2" step="0.1">
+        </label>
+        
+        <label>
+            Seed (optional): 
+            <input type="number" id="seed" placeholder="Random">
+        </label>
     </div>
 
-    <div style="margin: 20px 0;" id="prompt-customization">
-        <div class="prompt-section">
-            <h3>Customize Prompt</h3>
-            <div class="input-group">
-                <label for="base-prompt" class="input-label">Animation Prompt:</label>
-                <textarea id="base-prompt" class="prompt-editor"></textarea>
-                <div class="input-help">Describe what kind of animation you want to create. The system will automatically handle the initial state and evolution.</div>
-                <button onclick="resetPrompt('base')">Reset to Default</button>
-            </div>
-        </div>
+    <div class="container">
+        <h2>Preview</h2>
+        <div id="preview-window" class="mono"></div>
     </div>
     
-
-    <div style="margin: 30px 0;">
-        <h2>Preview Animation</h2>
-        <div id="preview-window"></div>
-        <h2>Current Art</h2>
-        <div id="current"></div>
-    </div>
-    
-    <div style="margin: 30px 0;">
-        <h2>Evolution History</h2>
+    <div class="container">
+        <h2>History</h2>
         <div id="history"></div>
     </div>
 
     <script>
-        // Preset configurations
+        // Simplified presets
         const presets = {
-            ascii_animation: {
-                name: "ASCII Animation",
-                prompt: "Create a frame of an ASCII animation. Use standard ASCII characters to draw a scene with potential for movement or transformation. The scene could be anything - a flowing river, a dancing figure, a swaying tree, etc. Keep it under 20 lines and 40 characters wide.",
-                temperature: 0.6,
-                delay: 2500,
-                description: "Creates smooth ASCII art animations with natural transitions between frames."
+            calligram: {
+                prompt: "Guillaume Apollinaire's Calligrammes: Interconnected ASCII designs where words and letters flow into abstract or figurative forms. Words and shapes merge into visual poetry, balanced and meaningful, like a fountain, starburst, or tree.",
+                temperature: 0.8
             },
-            story: {
-                name: "ASCII Story Evolution",
-                prompt: "Create a frame of an evolving ASCII art story. Use ASCII characters to depict a character or setting in a way that can naturally progress into the next moment of the story. Keep it under 20 lines and 40 characters wide.",
-                temperature: 0.8,
-                delay: 4000,
-                description: "Creates an evolving story using pure ASCII art characters, with each scene building on the previous one."
+            fragments: {
+                prompt: "Stéphane Mallarmé's Un Coup de Dés: Scattered ASCII characters utilizing negative space in random, abstract patterns. Like weightless fragments suspended in air, forming loose narratives - a constellation or shattered object floating between coherence and chaos.",
+                temperature: 0.9
             },
-            typography: {
-                name: "Typographic Poetry Evolution",
-                prompt: "Create a frame of an evolving typographic poem. Use creative typography and spacing to enhance its meaning in a way that can smoothly transform. Keep it between 4-8 lines and use spacing creatively.",
-                temperature: 0.7,
-                delay: 4000,
-                description: "Evolves a poem through subtle changes in words and formatting, creating a flowing typographic experience."
+            futurism: {
+                prompt: "Futurist Parole in Libertà: Chaotic, energetic compositions with sharp angles and overlapping symbols. ASCII art expressing speed and modernity, industrial machinery, urban energy, objects in motion - like a sonic boom or shattering glass.",
+                temperature: 0.9
             },
-            emoji: {
-                name: "Emoji Art Evolution",
-                prompt: "Create a frame of evolving emoji art. Use emoji to create a pattern or scene that can transform smoothly. Keep it under 20 lines and 40 characters wide.",
-                temperature: 0.9,
-                delay: 3500,
-                description: "Creates patterns using emoji characters that transform and interact with each other."
+            concrete: {
+                prompt: "Concrete Poetry Movement: Precise, symmetrical arrangements of ASCII characters in geometric patterns - grids, tessellations, spirals. Mathematical and controlled designs emphasizing repetition and form, structured yet organic.",
+                temperature: 0.7
             },
-            math: {
-                name: "Mathematical Pattern Evolution",
-                prompt: "Create a frame of an evolving mathematical pattern. Use symbols like ▲△□○⬡⬢ to represent geometric shapes in a way that can transform following mathematical principles. Keep it under 20 lines and 40 characters wide.",
-                temperature: 0.5,
-                delay: 3000,
-                description: "Generates mathematical and geometric patterns that evolve following principles of symmetry and progression."
+            flowing: {
+                prompt: "Lewis Carroll's The Mouse's Tale: Organic, flowing ASCII patterns that wind and curve across space. Serpentine arrangements of characters forming narrative shapes, like a winding river or climbing vine.",
+                temperature: 0.8
+            },
+            quantum: {
+                prompt: "Quantum wave function interference: ASCII patterns showing probability clouds and wave-particle duality. Rippling interference fringes, quantum tunneling effects, and probability density distributions emerge and collapse. Characters form Schrödinger equation solutions and quantum uncertainty visualizations.",
+                temperature: 0.95
+            },
+            glitch: {
+                prompt: "Corrupted digital artifacts: ASCII patterns of broken data and compression artifacts. Glitch art aesthetics with misaligned characters, data corruption patterns, and broken encodings. Like damaged VHS tapes, corrupted memory dumps, and digital decay - both systematic and chaotic.",
+                temperature: 1.0
+            },
+            neural: {
+                prompt: "Brain activity visualization: ASCII patterns depicting neural firing patterns and synaptic connections. Dynamic networks of neurons lighting up in waves of activation, showing thought patterns emerging from chaos. Like EEG readings mixed with neural network architectures and consciousness emergence patterns.",
+                temperature: 0.85
+            },
+            tictactoe: {
+                prompt: "ASCII Tic Tac Toe game simulation: Create a 3x3 grid using | and - characters for the board. Place X and O moves strategically, showing game progression. Include empty spaces for potential moves. Make it feel like a real game in progress, with moves that follow valid Tic Tac Toe rules. Sometimes show near-wins or blocking moves.",
+                temperature: 0.7
             },
             weather: {
-                name: "Weather System Evolution",
-                prompt: "Create a frame of an evolving weather system visualization. Use symbols like ☀ ☁ ☂ ☃ ⚡ to show weather elements that can naturally change over time. Keep it under 20 lines and 40 characters wide.",
-                temperature: 0.7,
-                delay: 3500,
-                description: "Visualizes weather systems that change over time, showing patterns of clouds, rain, and other weather elements."
+                prompt: "Dynamic weather system visualization: ASCII patterns showing atmospheric conditions and weather fronts. Create swirling cloud formations, precipitation patterns, and pressure systems. Show wind flows with arrows (← → ↑ ↓), storm cells with symbols (* # @), and temperature gradients. Like a weather radar map coming alive with movement and transformation.",
+                temperature: 0.85
             }
         };
 
-        // Function to derive initial prompt from base prompt
-        function deriveInitialPrompt(basePrompt) {
-            return `${basePrompt}\nNo explanation. Respond only with the initial state.`;
-        }
-
-        // Function to derive evolution prompt from base prompt
-        function deriveEvolutionPrompt(basePrompt) {
-            return `${basePrompt}\nTransform the given input into an output according to the previous instructions. No explanation. Respond purely with the state.`;
-        }
-
         // DOM Elements
-        const startBtn = document.getElementById('startBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const delayInput = document.getElementById('delay');
-        const temperatureInput = document.getElementById('temperature');
-        const seedInput = document.getElementById('seed');
-        const currentDisplay = document.getElementById('current');
-        const historyDisplay = document.getElementById('history');
-        const presetSelect = document.getElementById('preset-select');
-        const systemPromptInput = document.getElementById('system-prompt');
-        const initialPromptInput = document.getElementById('initial-prompt');
-        const evolutionPromptInput = document.getElementById('evolution-prompt');
+        const elements = {
+            start: document.getElementById('startBtn'),
+            stop: document.getElementById('stopBtn'),
+            temperature: document.getElementById('temperature'),
+            seed: document.getElementById('seed'),
+            history: document.getElementById('history'),
+            preset: document.getElementById('preset-select'),
+            prompt: document.getElementById('base-prompt'),
+            preview: document.getElementById('preview-window')
+        };
 
-        // State variables
+        // State
         let isRunning = false;
-        let currentIteration = 0;
-        let loopInterval = null;
-        let currentPreset = presets.ascii_animation;
-        let isProcessing = false;  // Flag to prevent concurrent operations
-        let frames = [];  // Store animation frames
-        let previewInterval = null;  // For preview animation
+        let frames = [];
+        let frameIndex = 0;
 
-        // Function to update URL hash with current state
-        function updateUrlHash() {
-            const state = {
-                preset: presetSelect.value,
-                temperature: temperatureInput.value,
-                seed: seedInput.value,
-                delay: delayInput.value,
-                initialPrompt: initialPromptInput.value,
-                evolutionPrompt: evolutionPromptInput.value
-            };
-            window.location.hash = encodeURIComponent(JSON.stringify(state));
+        // Core functions
+        function createEmptyCanvas() {
+            return 'no input yet. please create the first state';
+            // return '.'.repeat(40) + '\n' + 
+            //        ('.' + ' '.repeat(38) + '.' + '\n').repeat(18) +
+            //      '.'.repeat(40);
         }
 
-        // Function to load state from URL hash
-        function loadFromUrlHash() {
-            if (window.location.hash) {
-                try {
-                    const state = JSON.parse(decodeURIComponent(window.location.hash.slice(1)));
-                    presetSelect.value = state.preset || 'ascii_animation';
-                    temperatureInput.value = state.temperature || '0.8';
-                    seedInput.value = state.seed || '';
-                    delayInput.value = state.delay || '3000';
-                    initialPromptInput.value = state.initialPrompt || currentPreset.initialPrompt;
-                    evolutionPromptInput.value = state.evolutionPrompt || currentPreset.evolutionPrompt;
-                    currentPreset = presets[state.preset] || presets.ascii_animation;
-                } catch (e) {
-                    console.error('Error loading state from URL:', e);
-                }
-            }
+        function extractDisplayContent(text) {
+            const match = text.match(/```([\s\S]*?)```/);
+            return match ? match[1] : text;
         }
 
-        // Debounce function
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        const debouncedUpdateUrlHash = debounce(updateUrlHash, 500);
-
-        // Function to update preview animation
-        function updatePreview() {
-            const previewWindow = document.getElementById('preview-window');
-            let frameIndex = 0;
-
-            if (previewInterval) {
-                clearInterval(previewInterval);
-            }
-
-            if (frames.length > 0) {
-                previewInterval = setInterval(() => {
-                    previewWindow.textContent = frames[frameIndex];
+        function startPreviewAnimation() {
+            // Update preview every 300ms
+            setInterval(() => {
+                if (frames.length > 0) {
+                    // console.log('Displaying frame:', frameIndex, frames.length);
+                    elements.preview.textContent = extractDisplayContent(frames[frameIndex]);
                     frameIndex = (frameIndex + 1) % frames.length;
-                }, 300);
-            }
+                }
+            }, 700);
         }
 
-        // Cleanup function to ensure proper state reset
-        function cleanup() {
-            if (loopInterval) {
-                clearInterval(loopInterval);
-                loopInterval = null;
-            }
-            if (previewInterval) {
-                clearInterval(previewInterval);
-                previewInterval = null;
-            }
-            isRunning = false;
-            isProcessing = false;
-            startBtn.disabled = false;
-            stopBtn.disabled = true;
-        }
+        async function generateText(prompt, currentState) {
+            const formatInstructions = `- You create an output state from an input state according to the prompt. It will be visualized in a 40x20 grid.
+- Output exactly 20 lines, each exactly 40 characters wide
+- You may output explanations but wrap the next state in triple backticks \`\`\` so we can parse it for display
+- If there is an input state, transform it gradually according to the prompt.
+- If there is no input state, use the prompt to come up with a starting state. Be creative
+- Maintain consistent style and theme
 
-        // Initialize prompts with preset values
-        function initializePrompts() {
-            if (!currentPreset) {
-                currentPreset = presets[presetSelect.value];
-            }
-            
-            // Set values from the current preset
-            document.getElementById('base-prompt').value = currentPreset.prompt;
-            temperatureInput.value = currentPreset.temperature;
-            delayInput.value = currentPreset.delay;
-        }
-
-        // Reset prompt to preset default
-        function resetPrompt(type) {
-            if (type === 'base') {
-                document.getElementById('base-prompt').value = currentPreset.prompt;
-            }
-        }
-
-        // Handle preset changes
-        presetSelect.addEventListener('change', async (e) => {
-            if (isProcessing) return; // Prevent changing preset while processing
-            
-            const select = e.target;
-            select.style.backgroundColor = '#e8f4ff';
-            setTimeout(() => {
-                select.style.backgroundColor = '';
-            }, 300);
-
-            // Clean up any existing evolution
-            cleanup();
-            currentDisplay.textContent = '';  // Clear current display
-            historyDisplay.innerHTML = '';    // Clear history
-            frames = [];  // Clear frames array
-            document.getElementById('preview-window').textContent = '';  // Clear preview
-
-            currentPreset = presets[e.target.value];
-            initializePrompts();
-
-            // Flash the description for visual feedback
-            const description = document.getElementById('preset-description');
-            description.style.backgroundColor = '#e8f4ff';
-            setTimeout(() => {
-                description.style.backgroundColor = '';
-            }, 300);
-        });
-
-
-
-        // Update preset description
-        function updatePresetDescription() {
-            const description = document.getElementById('preset-description');
-            const preset = presets[presetSelect.value];
-            if (preset && preset.description) {
-                description.textContent = preset.description;
-            } else {
-                description.textContent = ""; // Clear description if not available
-            }
-        }
-
-        // Initialize configuration on startup
-        loadFromUrlHash();
-        initializePrompts();
-        updatePresetDescription();
-
-        // Add event listeners for URL hash updates
-        presetSelect.addEventListener('change', debouncedUpdateUrlHash);
-        temperatureInput.addEventListener('change', debouncedUpdateUrlHash);
-        seedInput.addEventListener('change', debouncedUpdateUrlHash);
-        delayInput.addEventListener('change', debouncedUpdateUrlHash);
-        document.getElementById('base-prompt').addEventListener('input', debouncedUpdateUrlHash);
-
-        // Update description when preset changes
-        presetSelect.addEventListener('change', updatePresetDescription);
-
-        /**
-         * Generates text using the Pollinations API
-         * @param {string} prompt - The prompt to send to the API
-         * @returns {Promise<string>} The generated text response
-         */
-        async function generateText(prompt) {
-            // Make a request to the Pollinations API
-            const response = await fetch('https://text.pollinations.ai/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    messages: [
-                        { role: 'user', content: prompt }
-                    ],
-                    temperature: parseFloat(temperatureInput.value),
-                    ...(seedInput.value && { seed: parseInt(seedInput.value) })
-                }),
-            });
-
-            const data = await response.text();
-            return data;
-        }
-
-        function addToHistory(text) {
-            const historyItem = document.createElement('div');
-            historyItem.className = 'history-item';
-            historyItem.textContent = text;
-            historyDisplay.appendChild(historyItem);
-            
-            // Add to frames array and update preview
-            frames.push(text);
-            updatePreview();
-        }
-
-        async function runIteration() {
-            if (!isRunning || isProcessing) return;
-
-            try {
-                isProcessing = true;
-                const basePrompt = document.getElementById('base-prompt').value;
-                const prompt = currentDisplay.textContent || deriveInitialPrompt(basePrompt);
-                currentIteration++;
-                
-                const newPrompt = `${deriveEvolutionPrompt(basePrompt)}
-Current iteration: ${currentIteration}
-
-Previous art:
+Prompt:
 ${prompt}`;
 
-                const response = await generateText(newPrompt);
-                
-                if (isRunning) {  // Check if still running after await
-                    addToHistory(currentDisplay.textContent);
-                    currentDisplay.textContent = response;
-                }
-                
-            } catch (error) {
-                console.error('Error:', error);
-                cleanup();
-            } finally {
-                isProcessing = false;
-            }
-        }
-
-        async function startLoop() {
-            if (isProcessing) return;  // Prevent starting while processing
-            
             try {
-                isProcessing = true;
-                isRunning = true;
-                startBtn.disabled = true;
-                stopBtn.disabled = false;
+                console.log('Generation started');
+                console.log('Current state:', currentState);
+                console.log('Prompt:', prompt);
+                console.log('System instructions:', formatInstructions);
                 
-                if (!currentDisplay.textContent) {
-                    const basePrompt = document.getElementById('base-prompt').value;
-                    const response = await generateText(deriveInitialPrompt(basePrompt));
-                    if (isRunning) {  // Check if still running after await
-                        currentDisplay.textContent = response;
-                        loopInterval = setInterval(runIteration, parseInt(delayInput.value));
-                    }
-                } else {
-                    loopInterval = setInterval(runIteration, parseInt(delayInput.value));
-                }
+                elements.start.textContent = 'Generating...';
+                
+                const encodedPrompt = encodeURIComponent(currentState);
+                const encodedSystem = encodeURIComponent(formatInstructions);
+                
+                let seed = elements.seed.value ? parseInt(elements.seed.value) : Math.floor(Math.random() * 10);
+                elements.seed.value = seed; // Update input with chosen seed
+                
+                const url = `https://text.pollinations.ai/${encodedPrompt}?system=${encodedSystem}&seed=${seed}`;
+                console.log('Request URL:', url);
+                
+                console.log('Fetching...');
+                const response = await fetch(url);
+                console.log('Response received:', response.status);
+                
+                const text = await response.text();
+                console.log('Raw response:', text);
+                
+                elements.start.textContent = 'Start Evolution';
+                return text;
             } catch (error) {
-                console.error('Error starting loop:', error);
-                cleanup();
-            } finally {
-                isProcessing = false;
+                console.error('Generation error:', error);
+                elements.start.textContent = 'Start Evolution';
+                return '';
             }
         }
 
-        function stopLoop() {
-            cleanup();
-        }
+        async function evolve() {
+            console.log('Starting evolution');
+            let currentState = createEmptyCanvas();
+            console.log('Initial state created:', currentState);
+            
+            while (isRunning) {
+                try {
+                    console.log('--- New iteration ---');
+                    const prompt = elements.prompt.value;
+                    console.log('Getting next state for prompt:', prompt);
+                    
+                    const text = await generateText(prompt, currentState);
+                    console.log('Generation completed');
+                    
+                    if (!text || !isRunning) {
+                        console.log('Breaking loop:', !text ? 'no text' : 'stopped');
+                        break;
+                    }
 
-        startBtn.addEventListener('click', startLoop);
-        stopBtn.addEventListener('click', stopLoop);
-        delayInput.addEventListener('change', () => {
-            if (isRunning && !isProcessing) {
-                const currentDelay = parseInt(delayInput.value);
-                if (currentDelay >= 1000) {  // Ensure minimum delay
-                    cleanup();
-                    startLoop();
-                } else {
-                    delayInput.value = '1000';
+                    frames.push(text);
+                    currentState = text; // Keep full text for LLM context
+                    console.log('State updated, frame count:', frames.length);
+                    
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item mono';
+                    historyItem.textContent = text;
+                    elements.history.insertBefore(historyItem, elements.history.firstChild);
+                    
+                    console.log('UI updated');
+                    
+                    // Wait 3 seconds before next iteration
+                    console.log('Waiting 3 seconds...');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    console.log('Wait complete');
+                } catch (error) {
+                    console.error('Evolution error:', error);
+                    if (!isRunning) {
+                        console.log('Breaking loop due to error');
+                        break;
+                    }
                 }
             }
+            console.log('Evolution stopped');
+        }
+
+        async function startEvolution() {
+            frames = []; // Clear frames array
+            frameIndex = 0; // Reset frame index
+            isRunning = true;
+            elements.start.disabled = true;
+            elements.stop.disabled = false;
+            await evolve();
+        }
+
+        function stopEvolution() {
+            isRunning = false;
+            elements.start.disabled = false;
+            elements.stop.disabled = true;
+        }
+
+        // Event Listeners
+        elements.start.addEventListener('click', startEvolution);
+        elements.stop.addEventListener('click', stopEvolution);
+        elements.preset.addEventListener('change', () => {
+            const preset = presets[elements.preset.value];
+            elements.prompt.value = preset.prompt;
+            elements.temperature.value = preset.temperature;
+        });
+        
+        elements.prompt.addEventListener('input', () => {
+            // Don't clear frames on prompt change anymore
         });
 
-        // Cleanup on page unload
-        window.addEventListener('unload', cleanup);
-    </script>
+        // Initialize
+        elements.preset.value = 'calligram';
+        elements.prompt.value = presets.calligram.prompt;
+        startPreviewAnimation();
 
-    <style>
-        /* Additional styles for new elements */
-        .input-help {
-            font-size: 0.9em;
-            color: #666;
-            margin-top: 4px;
-        }
-    </style>
+        // No need for cleanup of preview interval since it runs for the lifetime of the page
+    </script>
 </body>
 </html>
