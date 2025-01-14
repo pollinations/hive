@@ -22,8 +22,8 @@ jobs:
           # Create temporary file for the new apps list
           echo "## 📱 Available Apps" > apps_section.md
           echo "" >> apps_section.md
-          echo "| App | Source | Last Updated |" >> apps_section.md
-          echo "|-----|--------|--------------|" >> apps_section.md
+          echo "| App | Source | Creator | Last Updated |" >> apps_section.md
+          echo "|-----|--------|---------|--------------|" >> apps_section.md
           
           # Find all index.html files, excluding node_modules
           for app_path in $(find . -name "index.html" -not -path "*/node_modules/*" -not -path "*/.git/*"); do
@@ -39,11 +39,14 @@ jobs:
             # Get the last update date
             last_update=$(git log -1 --format="%ad" --date=short -- "$app_dir")
             
+            # Get the original creator (first committer)
+            creator=$(git log --reverse --format="%an" -- "$app_dir" | head -n 1)
+            
             # Create the deployment URL (using the directory name)
             deploy_url="https://$app_name.hive.pollinations.ai"
             
             # Add the app to the list
-            echo "| [$app_name]($deploy_url) | [$app_dir]($app_dir) | $last_update |" >> apps_section.md
+            echo "| [$app_name]($deploy_url) | [$app_dir]($app_dir) | $creator | $last_update |" >> apps_section.md
           done
           
           # Update README.md
