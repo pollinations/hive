@@ -2,70 +2,14 @@
 
 Welcome to Pollinations Hive - a revolutionary repository where AI meets collaborative development! This project showcases a unique approach to software development where applications are created and modified entirely through AI assistance.
 
-## 🌟 Overview
-
-Pollinations Hive is a collection of self-contained applications, each residing in its own folder at the root of the repository. What makes this repository special is:
-- **100% AI-Generated Code**: Created through collaboration between humans and AI assistants
-- **Automatic Deployment**: Each app is automatically deployed to its own subdomain
-- **Simple App Creation**: Just add your app folder to the root directory
-
-## 🤖 How It Works
-
-1. **Issue-Driven Development**: All new features and modifications start with a GitHub issue
-2. **AI Assistance**: Our AI coding assistant (@MentatBot) implements the requested features
-3. **Interactive Refinement**: Developers can comment on issues to guide and refine the implementation
-4. **Continuous Evolution**: The codebase grows and improves through this AI-human collaboration
-
-## 📂 Repository Structure
-
-Each folder in the root directory contains a self-contained application that is automatically deployed. This modular structure ensures:
-- Clear separation of concerns
-- Easy navigation
-- Independent functionality
-- Simplified maintenance
-- Automatic deployment to unique subdomains
-
-### Types of Apps Supported
-
-1. **Static HTML Apps**
-   - Create a folder in the root directory with an `index.html` file
-   - Add any static assets (CSS, JavaScript, images)
-   - Example: See `hello-world` folder
-
-2. **Node.js/React Apps**
-   - Create a folder in the root directory with a `package.json`
-   - Include a `build` script for production builds
-   - Example: See `react-example` folder
-
-## 🚀 Getting Started
-
-### Creating or Modifying an App
-
-1. **Create a New App**
-   - Create a new directory in the root of the repository
-   - For static sites: Add an `index.html` file
-   - For Node.js apps: Add a `package.json` with a `build` script
-
-2. **Automatic Deployment**
-   - Push your changes to the `main` branch
-   - GitHub Actions will automatically:
-     - Build Node.js apps if needed
-     - Deploy all apps to GitHub Pages
-     - Update the index page
-   - Access your app at `https://{username}.github.io/hive/{app-name}/`
-
-3. **App Types**
-   - **Static HTML Apps**: Just add an `index.html` file
-   - **Node.js/React Apps**: Include `package.json` with a `build` script
-
 ## 📱 Available Apps
 
-| App | Source | Last Updated |
-|-----|--------|--------------|
-| [llm-feedback](https://llm-feedback.hive.pollinations.ai) | [./llm-feedback](./llm-feedback) | 2025-01-14 |
-| [hello-world](https://hello-world.hive.pollinations.ai) | [./hello-world](./hello-world) | 2025-01-13 |
-| [tarot-reader](https://tarot-reader.hive.pollinations.ai) | [./tarot-reader](./tarot-reader) | 2025-01-14 |
-| [image-prompt](https://image-prompt.hive.pollinations.ai) | [./image-prompt](./image-prompt) | 2025-01-13 |
+| App | Source | Creator | Last Updated |
+|-----|--------|---------|--------------|
+| [llm-feedback](https://llm-feedback.hive.pollinations.ai) | [./llm-feedback](./llm-feedback) | mentatbot[bot] | 2025-01-14 |
+| [hello-world](https://hello-world.hive.pollinations.ai) | [./hello-world](./hello-world) | MentatBot | 2025-01-13 |
+| [tarot-reader](https://tarot-reader.hive.pollinations.ai) | [./tarot-reader](./tarot-reader) | mentatbot[bot] | 2025-01-14 |
+| [image-prompt](https://image-prompt.hive.pollinations.ai) | [./image-prompt](./image-prompt) | mentatbot[bot] | 2025-01-13 |
 ## 📚 Documentation
 
 For detailed API documentation and examples:
