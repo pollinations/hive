@@ -3,6 +3,7 @@
 Welcome to Pollinations Hive - a revolutionary repository where AI meets collaborative development! This project showcases a unique approach to software development where applications are created and modified entirely through AI assistance.
 
 ## 📱 Available Apps
+## 📱 Available Apps
 
 | App | Source | Last Updated |
 |-----|--------|--------------|
@@ -10,8 +11,15 @@ Welcome to Pollinations Hive - a revolutionary repository where AI meets collabo
 | [hello-world](https://hello-world.hive.pollinations.ai) | [./hello-world](./hello-world) | 2025-01-13 |
 | [tarot-reader](https://tarot-reader.hive.pollinations.ai) | [./tarot-reader](./tarot-reader) | 2025-01-14 |
 | [image-prompt](https://image-prompt.hive.pollinations.ai) | [./image-prompt](./image-prompt) | 2025-01-13 |
-
 ## 📚 Documentation
+## 📱 Available Apps
+
+| App | Source | Last Updated |
+|-----|--------|--------------|
+| [llm-feedback](https://llm-feedback.hive.pollinations.ai) | [./llm-feedback](./llm-feedback) | 2025-01-14 |
+| [hello-world](https://hello-world.hive.pollinations.ai) | [./hello-world](./hello-world) | 2025-01-13 |
+| [tarot-reader](https://tarot-reader.hive.pollinations.ai) | [./tarot-reader](./tarot-reader) | 2025-01-14 |
+| [image-prompt](https://image-prompt.hive.pollinations.ai) | [./image-prompt](./image-prompt) | 2025-01-13 |
 
 For detailed API documentation and examples:
 - [API Documentation](POLLINATIONS_APIDOCS.md)
