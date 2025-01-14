@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devil's Advocate Chat</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a0000;
+            color: #ff3333;
+            font-family: 'Times New Roman', Times, serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2em;
+            text-shadow: 0 0 10px #ff0000;
+        }
+
+        .chat-box {
+            flex-grow: 1;
+            background-color: #2a0000;
+            border: 2px solid #4a0000;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            overflow-y: auto;
+            min-height: 400px;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .user-message {
+            background-color: #3a0000;
+            margin-left: 20%;
+            border-left: 3px solid #ff3333;
+        }
+
+        .ai-message {
+            background-color: #300;
+            margin-right: 20%;
+            border-right: 3px solid #800;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        #message-input {
+            flex-grow: 1;
+            padding: 10px;
+            background-color: #2a0000;
+            border: 2px solid #4a0000;
+            color: #ff3333;
+            border-radius: 5px;
+            font-family: inherit;
+        }
+
+        #send-button {
+            padding: 10px 20px;
+            background-color: #4a0000;
+            border: none;
+            color: #ff3333;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #send-button:hover {
+            background-color: #600;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .typing-indicator {
+            display: none;
+            color: #800;
+            font-style: italic;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chat-header">🔥 Devil's Advocate Chat 👿</div>
+        <div class="chat-box" id="chat-box"></div>
+        <div class="typing-indicator" id="typing-indicator">The devil is typing...</div>
+        <div class="input-area">
+            <input type="text" id="message-input" placeholder="Speak your dark thoughts...">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            messageInput.value = '';
+
+            // Show typing indicator
+            typingIndicator.style.display = 'block';
+
+            try {
+                // Call Pollinations API
+                const response = await fetch('https://pollinations.ai/api/text', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: message,
+                        mode: 'evil'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+
+                const data = await response.json();
+                
+                // Hide typing indicator
+                typingIndicator.style.display = 'none';
+
+                // Add AI response
+                addMessage(data.response, 'ai');
+            } catch (error) {
+                console.error('Error:', error);
+                typingIndicator.style.display = 'none';
+                addMessage('Something went terribly wrong... 😈', 'ai');
+            }
+        }
+
+        function addMessage(text, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', `${type}-message`);
+            messageDiv.textContent = text;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Add initial message
+        addMessage('Welcome, mortal. I am your devil\'s advocate. What dark thoughts shall we explore today? 😈', 'ai');
+    </script>
+</body>
+</html>
