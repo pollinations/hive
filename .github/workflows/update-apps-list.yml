@@ -46,16 +46,29 @@ jobs:
             echo "| [$app_name]($deploy_url) | [$app_dir]($app_dir) | $last_update |" >> apps_section.md
           done
           
-          # Update README.md
-          # First, try to replace existing apps section
-          if grep -q "^## 📱 Available Apps" README.md; then
-            # If section exists, replace it
-            sed -i '/^## 📱 Available Apps/,/^##/{ /^##/{p; r apps_section.md
-                }; d}' README.md
-          else
-            # If section doesn't exist, add it before the Documentation section
-            sed -i '/^## 📚 Documentation/e cat apps_section.md' README.md
-          fi
+          # Update README.md using awk for more precise section replacement
+          awk '
+          BEGIN { printing = 1; first_apps = 1 }
+          /^## 📱 Available Apps/ {
+            if (first_apps) {
+              # First occurrence: insert new content
+              system("cat apps_section.md")
+              first_apps = 0
+              printing = 0
+              next
+            } else {
+              # Skip additional occurrences
+              printing = 0
+              next
+            }
+          }
+          /^##[^#]/ {
+            if (!printing) {
+              printing = 1
+            }
+          }
+          printing { print }
+          ' README.md > README.md.tmp && mv README.md.tmp README.md
           
           rm apps_section.md
 
