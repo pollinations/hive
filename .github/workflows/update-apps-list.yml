@@ -39,8 +39,8 @@ jobs:
             # Get the last update date
             last_update=$(git log -1 --format="%ad" --date=short -- "$app_dir")
             
-            # Create the deployment URL (using the directory name)
-            deploy_url="https://$app_name.hive.pollinations.ai"
+            # Create the deployment URL (using GitHub Pages format)
+            deploy_url="https://pollinations.github.io/hive/$app_name/"
             
             # Add the app to the list
             echo "| [$app_name]($deploy_url) | [$app_dir]($app_dir) | $last_update |" >> apps_section.md
