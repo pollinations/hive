@@ -80,6 +80,11 @@
             <option value="futurism">Dynamic Explosions (Futurism)</option>
             <option value="concrete">Geometric Precision (Concrete)</option>
             <option value="flowing">Flowing Representations (Carroll)</option>
+            <option value="quantum">Quantum Interference Patterns</option>
+            <option value="glitch">Digital Glitch Artifacts</option>
+            <option value="neural">Neural Activity Maps</option>
+            <option value="tictactoe">Tic Tac Toe Game</option>
+            <option value="weather">Weather System Patterns</option>
         </select>
         
         <label>
@@ -135,6 +140,26 @@
             flowing: {
                 prompt: "Lewis Carroll's The Mouse's Tale: Organic, flowing ASCII patterns that wind and curve across space. Serpentine arrangements of characters forming narrative shapes, like a winding river or climbing vine.",
                 temperature: 0.8
+            },
+            quantum: {
+                prompt: "Quantum wave function interference: ASCII patterns showing probability clouds and wave-particle duality. Rippling interference fringes, quantum tunneling effects, and probability density distributions emerge and collapse. Characters form Schrödinger equation solutions and quantum uncertainty visualizations.",
+                temperature: 0.95
+            },
+            glitch: {
+                prompt: "Corrupted digital artifacts: ASCII patterns of broken data and compression artifacts. Glitch art aesthetics with misaligned characters, data corruption patterns, and broken encodings. Like damaged VHS tapes, corrupted memory dumps, and digital decay - both systematic and chaotic.",
+                temperature: 1.0
+            },
+            neural: {
+                prompt: "Brain activity visualization: ASCII patterns depicting neural firing patterns and synaptic connections. Dynamic networks of neurons lighting up in waves of activation, showing thought patterns emerging from chaos. Like EEG readings mixed with neural network architectures and consciousness emergence patterns.",
+                temperature: 0.85
+            },
+            tictactoe: {
+                prompt: "ASCII Tic Tac Toe game simulation: Create a 3x3 grid using | and - characters for the board. Place X and O moves strategically, showing game progression. Include empty spaces for potential moves. Make it feel like a real game in progress, with moves that follow valid Tic Tac Toe rules. Sometimes show near-wins or blocking moves.",
+                temperature: 0.7
+            },
+            weather: {
+                prompt: "Dynamic weather system visualization: ASCII patterns showing atmospheric conditions and weather fronts. Create swirling cloud formations, precipitation patterns, and pressure systems. Show wind flows with arrows (← → ↑ ↓), storm cells with symbols (* # @), and temperature gradients. Like a weather radar map coming alive with movement and transformation.",
+                temperature: 0.85
             }
         };
 
@@ -157,20 +182,22 @@
 
         // Core functions
         function createEmptyCanvas() {
-            return '.'.repeat(40) + '\n' + 
-                   ('.' + ' '.repeat(38) + '.' + '\n').repeat(18) +
-                   '.'.repeat(40);
+            return 'no input yet. please create the first state';
+            // return '.'.repeat(40) + '\n' + 
+            //        ('.' + ' '.repeat(38) + '.' + '\n').repeat(18) +
+            //      '.'.repeat(40);
         }
 
         function extractDisplayContent(text) {
             const match = text.match(/```([\s\S]*?)```/);
-            return match ? match[1].trim() : text;
+            return match ? match[1] : text;
         }
 
         function startPreviewAnimation() {
             // Update preview every 300ms
             setInterval(() => {
                 if (frames.length > 0) {
+                    // console.log('Displaying frame:', frameIndex, frames.length);
                     elements.preview.textContent = extractDisplayContent(frames[frameIndex]);
                     frameIndex = (frameIndex + 1) % frames.length;
                 }
@@ -185,10 +212,9 @@
 - If there is no input state, use the prompt to come up with a starting state. Be creative
 - Maintain consistent style and theme
 
-Current state:
-${currentState}`;
+Prompt:
+${prompt}`;
 
-            frames = []; // Clear previous frames
             try {
                 console.log('Generation started');
                 console.log('Current state:', currentState);
@@ -197,7 +223,7 @@ ${currentState}`;
                 
                 elements.start.textContent = 'Generating...';
                 
-                const encodedPrompt = encodeURIComponent(prompt);
+                const encodedPrompt = encodeURIComponent(currentState);
                 const encodedSystem = encodeURIComponent(formatInstructions);
                 
                 let seed = elements.seed.value ? parseInt(elements.seed.value) : Math.floor(Math.random() * 10);
@@ -241,7 +267,6 @@ ${currentState}`;
                         break;
                     }
 
-                    // Extract content between backticks for display only
                     frames.push(text);
                     currentState = text; // Keep full text for LLM context
                     console.log('State updated, frame count:', frames.length);
@@ -255,7 +280,7 @@ ${currentState}`;
                     
                     // Wait 3 seconds before next iteration
                     console.log('Waiting 3 seconds...');
-                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                     console.log('Wait complete');
                 } catch (error) {
                     console.error('Evolution error:', error);
@@ -269,6 +294,8 @@ ${currentState}`;
         }
 
         async function startEvolution() {
+            frames = []; // Clear frames array
+            frameIndex = 0; // Reset frame index
             isRunning = true;
             elements.start.disabled = true;
             elements.stop.disabled = false;
