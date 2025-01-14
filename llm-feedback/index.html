@@ -309,8 +309,21 @@
         // State variables
         let isRunning = false;
         let currentIteration = 0;
-        let loopInterval;
+        let loopInterval = null;
         let currentPreset = presets.cellular;
+        let isProcessing = false;  // Flag to prevent concurrent operations
+
+        // Cleanup function to ensure proper state reset
+        function cleanup() {
+            if (loopInterval) {
+                clearInterval(loopInterval);
+                loopInterval = null;
+            }
+            isRunning = false;
+            isProcessing = false;
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
 
         // Initialize prompts with preset values
         function initializePrompts() {
@@ -338,20 +351,22 @@
         }
 
         // Handle preset changes
-        presetSelect.addEventListener('change', (e) => {
+        presetSelect.addEventListener('change', async (e) => {
+            if (isProcessing) return; // Prevent changing preset while processing
+            
             const select = e.target;
             select.style.backgroundColor = '#e8f4ff';
             setTimeout(() => {
                 select.style.backgroundColor = '';
             }, 300);
 
+            // Clean up any existing evolution
+            cleanup();
+            currentDisplay.textContent = '';  // Clear current display
+            historyDisplay.innerHTML = '';    // Clear history
+
             currentPreset = presets[e.target.value];
             initializePrompts();
-            
-            if (isRunning) {
-                stopLoop();
-                startLoop();
-            }
 
             // Flash the description for visual feedback
             const description = document.getElementById('preset-description');
@@ -416,9 +431,10 @@
         }
 
         async function runIteration() {
-            if (!isRunning) return;
+            if (!isRunning || isProcessing) return;
 
             try {
+                isProcessing = true;
                 const prompt = currentDisplay.textContent || initialPromptInput.value;
                 currentIteration++;
                 
@@ -431,45 +447,65 @@ ${prompt}`;
 
                 const response = await generateText(newPrompt);
                 
-                addToHistory(currentDisplay.textContent);
-                currentDisplay.textContent = response;
+                if (isRunning) {  // Check if still running after await
+                    addToHistory(currentDisplay.textContent);
+                    currentDisplay.textContent = response;
+                }
                 
             } catch (error) {
                 console.error('Error:', error);
-                stopLoop();
+                cleanup();
+            } finally {
+                isProcessing = false;
             }
         }
 
-        function startLoop() {
-            isRunning = true;
-            startBtn.disabled = true;
-            stopBtn.disabled = false;
+        async function startLoop() {
+            if (isProcessing) return;  // Prevent starting while processing
             
-            if (!currentDisplay.textContent) {
-                generateText(initialPromptInput.value).then(response => {
-                    currentDisplay.textContent = response;
+            try {
+                isProcessing = true;
+                isRunning = true;
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                
+                if (!currentDisplay.textContent) {
+                    const response = await generateText(initialPromptInput.value);
+                    if (isRunning) {  // Check if still running after await
+                        currentDisplay.textContent = response;
+                        loopInterval = setInterval(runIteration, parseInt(delayInput.value));
+                    }
+                } else {
                     loopInterval = setInterval(runIteration, parseInt(delayInput.value));
-                });
-            } else {
-                loopInterval = setInterval(runIteration, parseInt(delayInput.value));
+                }
+            } catch (error) {
+                console.error('Error starting loop:', error);
+                cleanup();
+            } finally {
+                isProcessing = false;
             }
         }
 
         function stopLoop() {
-            isRunning = false;
-            startBtn.disabled = false;
-            stopBtn.disabled = true;
-            clearInterval(loopInterval);
+            cleanup();
         }
 
         startBtn.addEventListener('click', startLoop);
         stopBtn.addEventListener('click', stopLoop);
         delayInput.addEventListener('change', () => {
-            if (isRunning) {
-                stopLoop();
-                startLoop();
+            if (isRunning && !isProcessing) {
+                const currentDelay = parseInt(delayInput.value);
+                if (currentDelay >= 1000) {  // Ensure minimum delay
+                    cleanup();
+                    startLoop();
+                } else {
+                    delayInput.value = '1000';
+                }
             }
         });
+
+        // Cleanup on page unload
+        window.addEventListener('unload', cleanup);
     </script>
 
     <style>
