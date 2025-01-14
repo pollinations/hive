@@ -172,7 +172,8 @@
         <select id="preset-select" class="preset-selector">
             <option value="ascii_animation">ASCII Animation</option>
             <option value="cellular">Cellular Automata</option>
-            <option value="story">Story Evolution</option>
+            <option value="story">ASCII Story Evolution</option>
+            <option value="typography">Typographic Poetry Evolution</option>
             <option value="emoji">Emoji Art Evolution</option>
             <option value="math">Mathematical Pattern Evolution</option>
             <option value="weather">Weather System Evolution</option>
@@ -250,12 +251,22 @@
                 description: "Simulates true cellular automata following Conway's Game of Life rules."
             },
             story: {
-                name: "Story Evolution",
+                name: "ASCII Story Evolution",
                 systemPrompt: "You are an ASCII art storyteller. Create evolving scenes that tell a story. Only respond with ASCII art, no explanations.",
-                initialPrompt: "Create a simple ASCII art scene depicting a character or setting. Keep it under 20 lines and 40 characters wide.",
-                evolutionPrompt: "Evolve this scene to show the next moment in the story. Characters can move, interact, or transform. Keep some elements consistent for continuity.",
+                initialPrompt: "Create a simple ASCII art scene depicting a character or setting. Keep it under 20 lines and 40 characters wide. Use only ASCII characters to create the art.",
+                evolutionPrompt: "Evolve this scene to show the next moment in the story. Characters can move, interact, or transform. Keep some elements consistent for continuity. IMPORTANT: Use only ASCII characters in your response, maintaining the artistic style of ASCII art throughout the evolution.",
                 temperature: 0.8,
-                delay: 4000
+                delay: 4000,
+                description: "Creates an evolving story using pure ASCII art characters, with each scene building on the previous one."
+            },
+            typography: {
+                name: "Typographic Poetry Evolution",
+                systemPrompt: "You are a typographic poetry artist. Create evolving poems that use creative formatting and typography. Only respond with the poem, no explanations.",
+                initialPrompt: "Create a short poem (4-8 lines) that uses creative typography and spacing to enhance its meaning. The poem should be simple enough that it can evolve gradually.",
+                evolutionPrompt: "Evolve the previous poem by making small changes to either individual words or the formatting. Change only 1-2 elements at a time to maintain continuity. The changes should enhance the poem's meaning or visual impact.",
+                temperature: 0.7,
+                delay: 4000,
+                description: "Evolves a poem through subtle changes in words and formatting, creating a flowing typographic experience."
             },
             emoji: {
                 name: "Emoji Art Evolution",
