@@ -3,21 +3,6 @@
 Welcome to Pollinations Hive - a revolutionary repository where AI meets collaborative development! This project showcases a unique approach to software development where applications are created and modified entirely through AI assistance.
 
 ## 📱 Available Apps
-## 📱 Available Apps
-
-| App | Source | Last Updated |
-|-----|--------|--------------|
-| [llm-feedback](https://llm-feedback.hive.pollinations.ai) | [./llm-feedback](./llm-feedback) | 2025-01-14 |
-| [tarot-reader](https://tarot-reader.hive.pollinations.ai) | [./tarot-reader](./tarot-reader) | 2025-01-14 |
-| [image-prompt](https://image-prompt.hive.pollinations.ai) | [./image-prompt](./image-prompt) | 2025-01-13 |
-## 📱 Available Apps
-## 📱 Available Apps
-
-| App | Source | Last Updated |
-|-----|--------|--------------|
-| [llm-feedback](https://llm-feedback.hive.pollinations.ai) | [./llm-feedback](./llm-feedback) | 2025-01-14 |
-| [tarot-reader](https://tarot-reader.hive.pollinations.ai) | [./tarot-reader](./tarot-reader) | 2025-01-14 |
-| [image-prompt](https://image-prompt.hive.pollinations.ai) | [./image-prompt](./image-prompt) | 2025-01-13 |
 
 | App | Source | Last Updated |
 |-----|--------|--------------|
@@ -25,39 +10,7 @@ Welcome to Pollinations Hive - a revolutionary repository where AI meets collabo
 | [tarot-reader](https://tarot-reader.hive.pollinations.ai) | [./tarot-reader](./tarot-reader) | 2025-01-14 |
 | [image-prompt](https://image-prompt.hive.pollinations.ai) | [./image-prompt](./image-prompt) | 2025-01-13 |
 ## 📚 Documentation
-## 📱 Available Apps
-## 📱 Available Apps
-
-| App | Source | Last Updated |
-|-----|--------|--------------|
-| [llm-feedback](https://llm-feedback.hive.pollinations.ai) | [./llm-feedback](./llm-feedback) | 2025-01-14 |
-| [tarot-reader](https://tarot-reader.hive.pollinations.ai) | [./tarot-reader](./tarot-reader) | 2025-01-14 |
-| [image-prompt](https://image-prompt.hive.pollinations.ai) | [./image-prompt](./image-prompt) | 2025-01-13 |
 ## 🌈 Features
-## 📱 Available Apps
-
-| App | Source | Last Updated |
-|-----|--------|--------------|
-| [llm-feedback](https://llm-feedback.hive.pollinations.ai) | [./llm-feedback](./llm-feedback) | 2025-01-14 |
-| [tarot-reader](https://tarot-reader.hive.pollinations.ai) | [./tarot-reader](./tarot-reader) | 2025-01-14 |
-| [image-prompt](https://image-prompt.hive.pollinations.ai) | [./image-prompt](./image-prompt) | 2025-01-13 |
-
-- **AI-Driven Development**: Leverage AI to implement features and fix bugs
-- **Interactive Development**: Real-time collaboration between humans and AI
-- **Self-Contained Apps**: Each application is independent and modular
-- **Automatic Deployment**: Apps are deployed to `{app-name}.hive.pollinations.ai`
-- **Version Control**: Full Git history of AI-generated changes
-- **Community-Driven**: Open for contributions and improvements
-
-### Deployment Features
-
-- **Automatic Detection**: System detects when apps are added or modified
-- **Smart Builds**: 
-  - Static sites deploy directly
-  - Node.js apps are built automatically
-- **Efficient Updates**: Only changed apps are redeployed
-- **Custom Domains**: Each app gets its own subdomain
-
 ## 🤝 Contributing
 
 1. Create an issue describing your proposed change
