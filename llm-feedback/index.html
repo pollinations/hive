@@ -301,12 +301,20 @@
         let loopInterval;
         let currentPreset = presets.cellular;
 
-        // Initialize prompts
+        // Initialize prompts with preset values
         function initializePrompts() {
-            initialPromptInput.value = currentPreset.initialPrompt;
-            evolutionPromptInput.value = currentPreset.evolutionPrompt;
-            temperatureInput.value = currentPreset.temperature;
-            delayInput.value = currentPreset.delay;
+            if (!currentPreset) {
+                currentPreset = presets[presetSelect.value];
+            }
+            
+            // Always set values from the current preset
+            initialPromptInput.value = currentPreset.initialPrompt || '';
+            evolutionPromptInput.value = currentPreset.evolutionPrompt || '';
+            temperatureInput.value = currentPreset.temperature || 0.7;
+            delayInput.value = currentPreset.delay || 3000;
+            
+            // Ensure the preset select matches the current preset
+            presetSelect.value = Object.keys(presets).find(key => presets[key] === currentPreset) || 'ascii_animation';
         }
 
         // Load saved prompts from localStorage or use defaults
@@ -314,18 +322,27 @@
             const saved = localStorage.getItem('promptConfig');
             if (saved) {
                 const config = JSON.parse(saved);
-                initialPromptInput.value = config.initialPrompt;
-                evolutionPromptInput.value = config.evolutionPrompt;
-            } else {
-                initializePrompts();
+                // If the saved preset matches the current selection, use saved values
+                if (config.preset === presetSelect.value) {
+                    initialPromptInput.value = config.initialPrompt;
+                    evolutionPromptInput.value = config.evolutionPrompt;
+                    temperatureInput.value = config.temperature;
+                    delayInput.value = config.delay;
+                    return;
+                }
             }
+            // If no matching saved config, initialize with current preset
+            initializePrompts();
         }
 
         // Save prompts to localStorage
         function savePrompts() {
             const config = {
+                preset: presetSelect.value,
                 initialPrompt: initialPromptInput.value,
-                evolutionPrompt: evolutionPromptInput.value
+                evolutionPrompt: evolutionPromptInput.value,
+                temperature: temperatureInput.value,
+                delay: delayInput.value
             };
             localStorage.setItem('promptConfig', JSON.stringify(config));
         }
@@ -352,8 +369,16 @@
             }, 300);
 
             currentPreset = presets[e.target.value];
+            
+            // Clear any existing localStorage data for clean initialization
+            localStorage.removeItem('promptConfig');
+            
+            // Initialize with the new preset's values
             initializePrompts();
+            
+            // Save the new configuration
             savePrompts();
+            
             if (isRunning) {
                 stopLoop();
                 startLoop();
