@@ -301,33 +301,17 @@
         let loopInterval;
         let currentPreset = presets.cellular;
 
-        // Initialize prompts
+        // Initialize prompts with preset values
         function initializePrompts() {
+            if (!currentPreset) {
+                currentPreset = presets[presetSelect.value];
+            }
+            
+            // Set values from the current preset
             initialPromptInput.value = currentPreset.initialPrompt;
             evolutionPromptInput.value = currentPreset.evolutionPrompt;
             temperatureInput.value = currentPreset.temperature;
             delayInput.value = currentPreset.delay;
-        }
-
-        // Load saved prompts from localStorage or use defaults
-        function loadSavedPrompts() {
-            const saved = localStorage.getItem('promptConfig');
-            if (saved) {
-                const config = JSON.parse(saved);
-                initialPromptInput.value = config.initialPrompt;
-                evolutionPromptInput.value = config.evolutionPrompt;
-            } else {
-                initializePrompts();
-            }
-        }
-
-        // Save prompts to localStorage
-        function savePrompts() {
-            const config = {
-                initialPrompt: initialPromptInput.value,
-                evolutionPrompt: evolutionPromptInput.value
-            };
-            localStorage.setItem('promptConfig', JSON.stringify(config));
         }
 
         // Reset prompt to preset default
@@ -340,7 +324,6 @@
                     evolutionPromptInput.value = currentPreset.evolutionPrompt;
                     break;
             }
-            savePrompts();
         }
 
         // Handle preset changes
@@ -353,7 +336,7 @@
 
             currentPreset = presets[e.target.value];
             initializePrompts();
-            savePrompts();
+            
             if (isRunning) {
                 stopLoop();
                 startLoop();
@@ -368,10 +351,6 @@
         });
 
 
-        // Save prompts when they're modified
-        [systemPromptInput, initialPromptInput, evolutionPromptInput].forEach(input => {
-            input.addEventListener('change', savePrompts);
-        });
 
         // Update preset description
         function updatePresetDescription() {
@@ -387,8 +366,8 @@
         presets.math.description = "Generates mathematical and geometric patterns that evolve following principles of symmetry and progression.";
         presets.weather.description = "Visualizes weather systems that change over time, showing patterns of clouds, rain, and other weather elements.";
 
-        // Load saved configuration on startup
-        loadSavedPrompts();
+        // Initialize configuration on startup
+        initializePrompts();
         updatePresetDescription();
 
         // Update description when preset changes
