@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web-Sim - Pollinations HIVE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #f5f5f5;
+        }
+
+        #initial-prompt {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 600px;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #initial-prompt input {
+            width: 100%;
+            padding: 1rem;
+            margin: 1rem 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        #initial-prompt button {
+            width: 100%;
+            padding: 1rem;
+            background: #0066ff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #initial-prompt button:hover {
+            background: #0052cc;
+        }
+
+        #projectView {
+            display: none;
+            height: 100vh;
+            position: relative;
+        }
+
+        #preview-container {
+            height: calc(100vh - 80px);
+            position: relative;
+        }
+
+        #preview {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+
+        #input-area {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: white;
+            padding: 1rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #modifyPrompt {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .button {
+            padding: 0.75rem 1.5rem;
+            background: #0066ff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .button:hover {
+            background: #0052cc;
+        }
+
+        .button.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .button.secondary:hover {
+            background: #e0e0e0;
+        }
+
+        #codePanel {
+            position: fixed;
+            top: 0;
+            right: -50%;
+            width: 50%;
+            height: 100vh;
+            background: #1e1e1e;
+            transition: right 0.3s ease;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .code-header {
+            padding: 1rem;
+            background: #2d2d2d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-header h3 {
+            color: white;
+            font-size: 1rem;
+        }
+
+        #codeText {
+            flex: 1;
+            padding: 1rem;
+            color: #d4d4d4;
+            font-family: 'Consolas', 'Monaco', monospace;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        #loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            z-index: 1000;
+        }
+
+        #error {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff4444;
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            z-index: 1000;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="initial-prompt">
+        <h2>Create Your Web Project</h2>
+        <p>Describe your web project and the AI will build it for you.</p>
+        <input type="text" id="prompt" placeholder="Describe your web project...">
+        <button onclick="generateProject()">Create Project</button>
+    </div>
+
+    <div id="projectView">
+        <div id="preview-container">
+            <iframe id="preview" sandbox="allow-scripts allow-same-origin"></iframe>
+        </div>
+
+        <div id="input-area">
+            <input type="text" id="modifyPrompt" placeholder="Describe changes or improvements..." onkeypress="handleModifyInput(event)">
+            <div class="button-group">
+                <button class="button" onclick="modifyProject()">Update</button>
+                <button class="button secondary" onclick="toggleCodePanel()">View Code</button>
+                <button class="button secondary" onclick="downloadCode()">Download</button>
+                <button class="button" onclick="saveToHive()">Save to HIVE</button>
+            </div>
+        </div>
+
+        <div id="codePanel">
+            <div class="code-header">
+                <h3>Generated Code</h3>
+                <button class="button secondary" onclick="copyCode()">Copy</button>
+            </div>
+            <pre id="codeText"></pre>
+        </div>
+    </div>
+
+    <div id="loading">Generating...</div>
+    <div id="error"></div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    let currentCode = '';
+    
+    const API_CONTEXT = `When creating web content:
+    1. For images: use https://image.pollinations.ai/prompt/{text}?seed={seed}&width=800&height=600
+    2. For text generation with OpenAI: use https://text.pollinations.ai/{text}?model=openai&seed={seed}
+    3. For Evil/Unity models: Always prefix with "CONTEXT: You are creating web content."
+    Output only the requested content with NO explanations.`;
+
+    async function analyzeCodeStructure(code) {
+        // Analyze what parts of the implementation are missing or incomplete
+        const analysis = {
+            hasMainStructure: code.includes('<!DOCTYPE') && code.includes('</html>'),
+            declaredFunctions: (code.match(/function\s+(\w+)/g) || []).map(f => f.split(' ')[1]),
+            implementedFunctions: [], // Will contain functions that are fully implemented
+            incompleteBlocks: [], // Will track any incomplete {} blocks
+            missingReferences: [] // Will track referenced but unimplemented functions
+        };
+
+        // Find implemented functions
+        const functionBlocks = code.match(/function\s+\w+\s*\(.*?\)\s*\{(?:[^{}]*|\{(?:[^{}]*|\{[^{}]*\})*\})*\}/g) || [];
+        analysis.implementedFunctions = functionBlocks.map(f => f.match(/function\s+(\w+)/)[1]);
+
+        // Find incomplete blocks
+        let openBraces = 0;
+        let lastOpenBraceIndex = -1;
+        for (let i = 0; i < code.length; i++) {
+            if (code[i] === '{') {
+                openBraces++;
+                lastOpenBraceIndex = i;
+            } else if (code[i] === '}') {
+                openBraces--;
+            }
+        }
+        if (openBraces > 0 && lastOpenBraceIndex !== -1) {
+            const context = code.slice(Math.max(0, lastOpenBraceIndex - 50), lastOpenBraceIndex + 1);
+            analysis.incompleteBlocks.push(context);
+        }
+
+        // Find function references that aren't implemented
+        const functionCalls = code.match(/\b\w+\(/g) || [];
+        const calledFunctions = functionCalls.map(f => f.slice(0, -1));
+        analysis.missingReferences = calledFunctions.filter(f => 
+            !analysis.implementedFunctions.includes(f) && 
+            !['console', 'fetch', 'alert', 'setTimeout', 'setInterval'].includes(f)
+        );
+
+        return analysis;
+    }
+
+    async function generateContinuation(code, originalPrompt, analysis) {
+        let continuationPrompt = '';
+        
+        if (analysis.incompleteBlocks.length > 0) {
+            continuationPrompt = `Complete this interrupted code block and continue implementation:
+            Last context: ${analysis.incompleteBlocks[analysis.incompleteBlocks.length - 1]}
+            Original request: ${originalPrompt}`;
+        } else if (analysis.missingReferences.length > 0) {
+            continuationPrompt = `Implement these missing functions and continue:
+            Missing functions: ${analysis.missingReferences.join(', ')}
+            Original request: ${originalPrompt}`;
+        } else if (!analysis.hasMainStructure) {
+            continuationPrompt = `Complete the HTML structure and continue implementation.
+            Original request: ${originalPrompt}`;
+        }
+
+        const response = await fetch('https://text.pollinations.ai/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                messages: [{
+                    role: "user",
+                    content: `CONTEXT: ${continuationPrompt}\nCurrent code: ${code}`
+                }],
+                max_tokens: 4000,
+                model: 'openai'
+            })
+        });
+
+        return await response.text();
+    }
+
+    async function verifyAndCompleteCode(code) {
+        let attemptedCompletion = false;
+        let currentCode = code;
+        
+        const needsCompletion = 
+            !code.includes('</html>') ||
+            !code.includes('</body>') ||
+            !code.includes('</head>') ||
+            !code.includes('<!DOCTYPE') ||
+            (code.match(/<script/g) || []).length !== (code.match(/<\/script>/g) || []).length ||
+            (code.match(/{/g) || []).length !== (code.match(/}/g) || []).length;
+
+        if (needsCompletion && !attemptedCompletion) {
+            attemptedCompletion = true;
+            try {
+                const completion = await fetch('https://text.pollinations.ai/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [{
+                            role: "user",
+                            content: `CONTEXT: Complete this HTML code and add any missing parts.
+                            Current code: ${currentCode}
+                            Requirements: 
+                            1. Complete all open tags and functions
+                            2. Ensure all script blocks are complete
+                            3. Keep all existing functionality
+                            4. Only add what's missing to complete the code
+                            OUTPUT: Complete valid HTML only, no explanations.`
+                        }],
+                        max_tokens: 4000,
+                        model: 'openai'
+                    })
+                });
+
+                const completedCode = await completion.text();
+                return extractCode(completedCode);
+            } catch (error) {
+                console.error('Completion error:', error);
+                return currentCode;
+            }
+        }
+
+        return currentCode;
+    }
+
+    function extractCode(response) {
+        let code = response;
+        if (code.includes('```html')) {
+            code = code.split('```html')[1].split('```')[0].trim();
+        } else if (code.includes('```')) {
+            code = code.split('```')[1].split('```')[0].trim();
+        }
+        return code;
+    }
+
+    async function generateProject() {
+        const prompt = document.getElementById('prompt').value;
+        if (!prompt) {
+            alert('Please enter a project description');
+            return;
+        }
+
+        document.getElementById('initial-prompt').style.display = 'none';
+        document.getElementById('error').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('projectView').style.display = 'block';
+
+        try {
+            const response = await fetch('https://text.pollinations.ai/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messages: [{
+                        role: "user",
+                        content: `CONTEXT: Create a complete web project. ${API_CONTEXT}\n\nUSER: ${prompt}`
+                    }],
+                    max_tokens: 4000,
+                    model: 'openai'
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('API response was not ok');
+            }
+
+            const result = await response.text();
+            let code = extractCode(result);
+
+            if (!code.includes('</html>') || !code.includes('</body>')) {
+                code = `<!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Generated Project</title>
+                    </head>
+                    <body>
+                        ${code}
+                    </body>
+                    </html>`;
+            }
+
+            if (code.includes('pollinations.ai')) {
+                const seed = Math.floor(Math.random() * 1000000);
+                code = code.replace(/(?:text|image)\.pollinations\.ai\/([^?\s"']+)/g, 
+                    (match, query) => `${match}?seed=${seed}`);
+            }
+
+            currentCode = code;
+            document.getElementById('preview').srcdoc = code;
+            document.getElementById('codeText').textContent = code;
+            document.getElementById('loading').style.display = 'none';
+
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('error').textContent = 'An error occurred while generating the project. Please try again.';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+    
+    async function modifyProject() {
+        const modifyPrompt = document.getElementById('modifyPrompt').value;
+        if (!modifyPrompt) return;
+
+        document.getElementById('loading').style.display = 'block';
+
+        try {
+            const response = await fetch('https://text.pollinations.ai/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messages: [{
+                        role: "user",
+                        content: `CONTEXT: Modify this web project. ${API_CONTEXT}\n\nCurrent code: ${currentCode}\n\nUSER: ${modifyPrompt}`
+                    }],
+                    max_tokens: 4000,
+                    model: 'openai'
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('API response was not ok');
+            }
+
+            const result = await response.text();
+            let code = extractCode(result);
+            code = await verifyAndCompleteCode(code);
+
+            if (code.includes('pollinations.ai')) {
+                const seed = Math.floor(Math.random() * 1000000);
+                code = code.replace(/(?:text|image)\.pollinations\.ai\/([^?\s"']+)/g, 
+                    (match, query) => `${match}?seed=${seed}`);
+            }
+
+            currentCode = code;
+            document.getElementById('preview').srcdoc = code;
+            document.getElementById('codeText').textContent = code;
+            document.getElementById('modifyPrompt').value = '';
+            document.getElementById('loading').style.display = 'none';
+
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('error').textContent = 'An error occurred while modifying the project. Please try again.';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+
+    function handleModifyInput(event) {
+        if (event.key === 'Enter') {
+            modifyProject();
+        }
+    }
+
+    function toggleCodePanel() {
+        const codePanel = document.getElementById('codePanel');
+        if (codePanel.style.right === '0px') {
+            codePanel.style.right = '-50%';
+        } else {
+            codePanel.style.right = '0px';
+            if (currentCode) {
+                document.getElementById('codeText').textContent = currentCode;
+            }
+        }
+    }
+
+    function downloadCode() {
+        const blob = new Blob([currentCode], { type: 'text/html' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'websim-project.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+
+    function copyCode() {
+        navigator.clipboard.writeText(currentCode);
+        const copyBtn = document.querySelector('.code-header button');
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => copyBtn.textContent = 'Copy', 2000);
+    }
+
+    async function saveToHive() {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('loading').textContent = 'Saving to HIVE...';
+
+        try {
+            // TODO: Implement GitHub API integration
+            // For now, show a message about the feature being in development
+            alert('Save to HIVE feature is coming soon! For now, you can download the code and create a pull request manually.');
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('error').textContent = 'Failed to save to HIVE. Please try again.';
+            document.getElementById('error').style.display = 'block';
+        }
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('loading').textContent = 'Generating...';
+    }
+
+    // Expose functions to window for HTML onclick handlers
+    window.generateProject = generateProject;
+    window.modifyProject = modifyProject;
+    window.handleModifyInput = handleModifyInput;
+    window.toggleCodePanel = toggleCodePanel;
+    window.downloadCode = downloadCode;
+    window.copyCode = copyCode;
+    window.saveToHive = saveToHive;
+    });
+    </script>
+</body>
+</html>
