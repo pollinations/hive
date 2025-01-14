@@ -11,7 +11,6 @@ Welcome to Pollinations Hive - a revolutionary repository where AI meets collabo
 | [web-sim](https://pollinations.github.io/hive/web-sim/) | [./web-sim](./web-sim) | 2025-01-14 |
 | [pollinations-image-show](https://pollinations.github.io/hive/pollinations-image-show/) | [./pollinations-image-show](./pollinations-image-show) | 2025-01-14 |
 | [image-prompt](https://pollinations.github.io/hive/image-prompt/) | [./image-prompt](./image-prompt) | 2025-01-14 |
-| [evil-chat](https://pollinations.github.io/hive/evil-chat/) | [./evil-chat](./evil-chat) | 2025-01-14 |
 | [placeholder-generator](https://pollinations.github.io/hive/placeholder-generator/) | [./placeholder-generator](./placeholder-generator) | 2025-01-14 |
 | [ai-chat](https://pollinations.github.io/hive/ai-chat/) | [./ai-chat](./ai-chat) | 2025-01-14 |
 ## 📚 Documentation
