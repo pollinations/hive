@@ -199,13 +199,9 @@
         </div>
     </div>
 
-    <div class="collapsible" style="margin: 20px 0;" id="prompt-customization">
-        <div class="collapsible-header" style="user-select: none;">
+    <div style="margin: 20px 0;" id="prompt-customization">
+        <div class="prompt-section">
             <h3>Customize Prompts</h3>
-            <span class="toggle-icon">▼</span>
-        </div>
-        <div class="collapsible-content">
-            <div class="prompt-section">
                 <div class="input-group">
                     <label for="system-prompt" class="input-label">System Prompt:</label>
                     <textarea id="system-prompt" class="prompt-editor"></textarea>
@@ -223,7 +219,6 @@
                     <textarea id="evolution-prompt" class="prompt-editor"></textarea>
                     <button onclick="resetPrompt('evolution')">Reset to Default</button>
                 </div>
-            </div>
         </div>
     </div>
     
@@ -373,32 +368,6 @@
             }, 300);
         });
 
-        // Initialize collapsible sections
-        document.querySelectorAll('.collapsible-header').forEach(header => {
-            const content = header.parentElement;
-            const icon = header.querySelector('.toggle-icon');
-            icon.textContent = '▶'; // Start closed
-            
-            header.addEventListener('click', () => {
-                content.classList.toggle('open');
-                icon.textContent = content.classList.contains('open') ? '▼' : '▶';
-                
-                // Add transition effect
-                const contentDiv = content.querySelector('.collapsible-content');
-                if (content.classList.contains('open')) {
-                    contentDiv.style.opacity = '0';
-                    contentDiv.style.display = 'block';
-                    setTimeout(() => {
-                        contentDiv.style.opacity = '1';
-                    }, 10);
-                } else {
-                    contentDiv.style.opacity = '0';
-                    setTimeout(() => {
-                        contentDiv.style.display = 'none';
-                    }, 300);
-                }
-            });
-        });
 
         // Save prompts when they're modified
         [systemPromptInput, initialPromptInput, evolutionPromptInput].forEach(input => {
@@ -492,7 +461,7 @@ ${prompt}`;
             stopBtn.disabled = false;
             
             if (!currentDisplay.textContent) {
-                generateText(initialPrompt).then(response => {
+                generateText(initialPromptInput.value).then(response => {
                     currentDisplay.textContent = response;
                     loopInterval = setInterval(runIteration, parseInt(delayInput.value));
                 });
