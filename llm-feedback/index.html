@@ -32,7 +32,7 @@
             font-family: 'Courier New', Courier, monospace;
             white-space: pre;
             display: block;
-            width: 480px;
+            width: 720px;
             height: 600px;
             overflow: auto;
             background: #f8f8f8;
@@ -252,11 +252,25 @@ ${prompt}`;
                 let seed = elements.seed.value ? parseInt(elements.seed.value) : Math.floor(Math.random() * 10);
                 elements.seed.value = seed; // Update input with chosen seed
                 
-                const url = `https://text.pollinations.ai/${encodedPrompt}?system=${encodedSystem}&seed=${seed}&model=${getSelectedModel()}`;
-                console.log('Request URL:', url);
+
                 
+                let response = null;
                 console.log('Fetching...');
-                const response = await fetch(url);
+                do {
+                    const url = `https://text.pollinations.ai/${encodedPrompt}?system=${encodedSystem}&seed=${seed}&model=${getSelectedModel()}`;
+                    console.log('Request URL:', url);
+
+                    try {
+                        response = await fetch(url);
+                    } catch (error) {
+                        console.error('Fetch error:', error);
+                    }
+                    if (!response.ok) {
+                        seed = seed + 1;
+                        await new Promise(resolve => setTimeout(resolve, 10000));
+                    }
+                    console.log('Trying fetch...', url);
+                } while (!response.ok);
                 console.log('Response received:', response.status);
                 
                 const text = await response.text();
