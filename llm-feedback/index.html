@@ -170,7 +170,8 @@
     <div id="preset-control" class="prompt-section">
         <label for="preset-select" class="input-label">Choose a Preset:</label>
         <select id="preset-select" class="preset-selector">
-            <option value="cellular">Cellular Automata Evolution</option>
+            <option value="ascii_animation">ASCII Animation</option>
+            <option value="cellular">Cellular Automata</option>
             <option value="story">Story Evolution</option>
             <option value="emoji">Emoji Art Evolution</option>
             <option value="math">Mathematical Pattern Evolution</option>
@@ -203,20 +204,16 @@
         <div class="prompt-section">
             <h3>Customize Prompts</h3>
                 <div class="input-group">
-                    <label for="system-prompt" class="input-label">System Prompt:</label>
-                    <textarea id="system-prompt" class="prompt-editor"></textarea>
-                    <button onclick="resetPrompt('system')">Reset to Default</button>
-                </div>
-
-                <div class="input-group">
                     <label for="initial-prompt" class="input-label">Initial Prompt:</label>
                     <textarea id="initial-prompt" class="prompt-editor"></textarea>
+                    <div class="input-help">Sets the context and creates the initial ASCII art</div>
                     <button onclick="resetPrompt('initial')">Reset to Default</button>
                 </div>
 
                 <div class="input-group">
                     <label for="evolution-prompt" class="input-label">Evolution Prompt:</label>
                     <textarea id="evolution-prompt" class="prompt-editor"></textarea>
+                    <div class="input-help">Defines how the art should evolve in each iteration</div>
                     <button onclick="resetPrompt('evolution')">Reset to Default</button>
                 </div>
         </div>
@@ -236,13 +233,21 @@
     <script>
         // Preset configurations
         const presets = {
+            ascii_animation: {
+                name: "ASCII Animation",
+                initialPrompt: "You are an ASCII art animator. Create a simple animated scene using ASCII characters. Keep it under 20 lines and 40 characters wide. Use basic ASCII characters to create a scene that can be animated smoothly.",
+                evolutionPrompt: "Evolve the previous ASCII art to create smooth animation. Maintain the overall scene while making small changes that create a sense of motion or transformation. Keep the style and elements consistent.",
+                temperature: 0.7,
+                delay: 3000,
+                description: "Creates smooth ASCII animations with gradual transitions between frames."
+            },
             cellular: {
-                name: "Cellular Automata Evolution",
-                systemPrompt: "You are an ASCII art generator specializing in cellular automata patterns. Create evolving patterns that follow simple rules. Only respond with ASCII art, no explanations.",
-                initialPrompt: "Create a cellular automata pattern using ASCII characters. Keep it under 20 lines and 40 characters wide. Use simple symbols like . and # to represent cells.",
-                evolutionPrompt: "Evolve this cellular pattern following these rules:\n1. Living cells (# or filled characters) with 2-3 neighbors survive\n2. Empty cells (. or spaces) with 3 neighbors become alive\n3. All other cells die or stay empty\nMaintain some connection to the previous pattern.",
-                temperature: 0.6,
-                delay: 3000
+                name: "Cellular Automata",
+                initialPrompt: "You are a cellular automata simulator using ASCII art. Create a grid pattern using only two states: '#' for live cells and '.' for dead cells. The grid should be exactly 15 lines high and 30 characters wide. Fill about 30% of cells randomly.",
+                evolutionPrompt: "Apply these exact cellular automata rules to the previous pattern:\n1. Count live neighbors (including diagonals)\n2. A live cell (#) survives if it has 2 or 3 live neighbors\n3. A dead cell (.) becomes alive if it has exactly 3 live neighbors\n4. All other cells die or stay dead\nOnly output the new grid pattern using # and . characters.",
+                temperature: 0.3,
+                delay: 2000,
+                description: "Simulates true cellular automata following Conway's Game of Life rules."
             },
             story: {
                 name: "Story Evolution",
@@ -298,7 +303,6 @@
 
         // Initialize prompts
         function initializePrompts() {
-            systemPromptInput.value = currentPreset.systemPrompt;
             initialPromptInput.value = currentPreset.initialPrompt;
             evolutionPromptInput.value = currentPreset.evolutionPrompt;
             temperatureInput.value = currentPreset.temperature;
@@ -310,7 +314,6 @@
             const saved = localStorage.getItem('promptConfig');
             if (saved) {
                 const config = JSON.parse(saved);
-                systemPromptInput.value = config.systemPrompt;
                 initialPromptInput.value = config.initialPrompt;
                 evolutionPromptInput.value = config.evolutionPrompt;
             } else {
@@ -321,7 +324,6 @@
         // Save prompts to localStorage
         function savePrompts() {
             const config = {
-                systemPrompt: systemPromptInput.value,
                 initialPrompt: initialPromptInput.value,
                 evolutionPrompt: evolutionPromptInput.value
             };
@@ -331,9 +333,6 @@
         // Reset prompt to preset default
         function resetPrompt(type) {
             switch(type) {
-                case 'system':
-                    systemPromptInput.value = currentPreset.systemPrompt;
-                    break;
                 case 'initial':
                     initialPromptInput.value = currentPreset.initialPrompt;
                     break;
@@ -409,10 +408,6 @@
                 },
                 body: JSON.stringify({
                     messages: [
-                        {
-                            role: 'system',
-                            content: systemPromptInput.value
-                        },
                         { role: 'user', content: prompt }
                     ],
                     temperature: parseFloat(temperatureInput.value)
