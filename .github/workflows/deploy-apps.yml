@@ -8,6 +8,12 @@ on:
       - '*/package.json'
       - '*/index.html'
       - '*/**'
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '*/package.json'
+      - '*/index.html'
+      - '*/**'
 
 jobs:
   build-and-deploy:
@@ -16,6 +22,7 @@ jobs:
       contents: read
       pages: write
       id-token: write
+      pull-requests: write
 
     environment:
       name: github-pages
@@ -37,6 +44,14 @@ jobs:
           # Create a directory for the built apps
           mkdir -p _site
 
+          # Set the output directory based on whether this is a PR or main branch
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            OUTPUT_DIR="_site/pr-${{ github.event.pull_request.number }}"
+            mkdir -p $OUTPUT_DIR
+          else
+            OUTPUT_DIR="_site"
+          fi
+
           # Process each app directory
           for APP in */; do
             APP=${APP%/}  # Remove trailing slash
@@ -54,33 +69,40 @@ jobs:
               npm install
               npm run build
               
-              # Copy build output to _site
+              # Copy build output to output directory
               if [ -d "build" ]; then
-                mkdir -p ../_site/$APP
-                cp -r build/* ../_site/$APP/
+                mkdir -p ../$OUTPUT_DIR/$APP
+                cp -r build/* ../$OUTPUT_DIR/$APP/
               elif [ -d "dist" ]; then
-                mkdir -p ../_site/$APP
-                cp -r dist/* ../_site/$APP/
+                mkdir -p ../$OUTPUT_DIR/$APP
+                cp -r dist/* ../$OUTPUT_DIR/$APP/
               fi
               cd ..
             elif [ -f "$APP/index.html" ]; then
               echo "Static site detected: $APP"
-              mkdir -p _site/$APP
-              cp -r $APP/* _site/$APP/
+              mkdir -p $OUTPUT_DIR/$APP
+              cp -r $APP/* $OUTPUT_DIR/$APP/
             fi
           done
           
-          # Create main index page that links to all apps
-          echo "<html><head><title>Hive Apps</title><style>body{font-family:sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem}</style></head><body>" > _site/index.html
-          echo "<h1>Hive Apps</h1><ul>" >> _site/index.html
-          for APP in _site/*/; do
+          # Create index page
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "<html><head><title>PR #${{ github.event.pull_request.number }} Preview</title><style>body{font-family:sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem}</style></head><body>" > $OUTPUT_DIR/index.html
+            echo "<h1>PR #${{ github.event.pull_request.number }} Preview</h1>" >> $OUTPUT_DIR/index.html
+            echo "<p><a href='../'>&larr; Back to main site</a></p><ul>" >> $OUTPUT_DIR/index.html
+          else
+            echo "<html><head><title>Hive Apps</title><style>body{font-family:sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem}</style></head><body>" > $OUTPUT_DIR/index.html
+            echo "<h1>Hive Apps</h1><ul>" >> $OUTPUT_DIR/index.html
+          fi
+          
+          for APP in $OUTPUT_DIR/*/; do
             APP=${APP%/}  # Remove trailing slash
-            APP=${APP#_site/}  # Remove _site/ prefix
+            APP=${APP##*/}  # Get just the directory name
             if [ "$APP" != "index.html" ]; then
-              echo "<li><a href='$APP'>$APP</a></li>" >> _site/index.html
+              echo "<li><a href='$APP'>$APP</a></li>" >> $OUTPUT_DIR/index.html
             fi
           done
-          echo "</ul></body></html>" >> _site/index.html
+          echo "</ul></body></html>" >> $OUTPUT_DIR/index.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -88,3 +110,18 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Comment PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const previewUrl = `${{ steps.deployment.outputs.page_url }}pr-${{ github.event.pull_request.number }}/`;
+            const comment = `🚀 Preview deployment is ready!\n\nView your changes at: ${previewUrl}`;
+            
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.name,
+              issue_number: context.issue.number,
+              body: comment
+            });
