@@ -2,6 +2,14 @@
 
 Welcome to Pollinations Hive - a revolutionary repository where AI meets collaborative development! This project showcases a unique approach to software development where applications are created and modified entirely through AI assistance.
 
+## 📱 Available Apps
+
+| App | Source | Creator | Last Updated |
+|-----|--------|---------|--------------|
+| [llm-feedback](https://llm-feedback.hive.pollinations.ai) | [./llm-feedback](./llm-feedback) | mentatbot[bot] | 2025-01-14 |
+| [hello-world](https://hello-world.hive.pollinations.ai) | [./hello-world](./hello-world) | MentatBot | 2025-01-13 |
+| [tarot-reader](https://tarot-reader.hive.pollinations.ai) | [./tarot-reader](./tarot-reader) | mentatbot[bot] | 2025-01-14 |
+| [image-prompt](https://image-prompt.hive.pollinations.ai) | [./image-prompt](./image-prompt) | mentatbot[bot] | 2025-01-13 |
 ## 📚 Documentation
 
 For detailed API documentation and examples:
