@@ -4,19 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web-Sim - Pollinations HIVE</title>
+    <link rel="stylesheet" href="../styles.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            background: #f5f5f5;
+            background: linear-gradient(to bottom right, var(--color-bg), #f0f4f8);
         }
 
         #initial-prompt {
@@ -26,35 +20,48 @@
             transform: translate(-50%, -50%);
             width: 90%;
             max-width: 600px;
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: var(--color-card-bg);
+            padding: var(--spacing-8);
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        #initial-prompt h2 {
+            margin-bottom: var(--spacing-4);
+            color: var(--color-text);
+            font-weight: 600;
+        }
+
+        #initial-prompt p {
+            color: var(--color-secondary);
+            margin-bottom: var(--spacing-6);
         }
 
         #initial-prompt input {
             width: 100%;
-            padding: 1rem;
-            margin: 1rem 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: var(--spacing-4);
+            margin: var(--spacing-4) 0;
+            border: 1px solid var(--color-border);
+            border-radius: 0.5rem;
             font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        #initial-prompt input:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
         }
 
         #initial-prompt button {
             width: 100%;
-            padding: 1rem;
-            background: #0066ff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.2s;
+            padding: var(--spacing-4);
+            font-size: 1.125rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
 
         #initial-prompt button:hover {
-            background: #0052cc;
+            transform: translateY(-1px);
         }
 
         #projectView {
@@ -66,13 +73,14 @@
         #preview-container {
             height: calc(100vh - 80px);
             position: relative;
+            background: var(--color-card-bg);
         }
 
         #preview {
             width: 100%;
             height: 100%;
             border: none;
-            background: white;
+            background: var(--color-card-bg);
         }
 
         #input-area {
@@ -81,44 +89,53 @@
             left: 0;
             right: 0;
             height: 80px;
-            background: white;
-            padding: 1rem;
+            background: var(--color-card-bg);
+            padding: var(--spacing-4);
             display: flex;
-            gap: 1rem;
+            gap: var(--spacing-4);
             align-items: center;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
         }
 
         #modifyPrompt {
             flex: 1;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: var(--spacing-3);
+            border: 1px solid var(--color-border);
+            border-radius: 0.5rem;
             font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        #modifyPrompt:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
         }
 
         .button {
-            padding: 0.75rem 1.5rem;
-            background: #0066ff;
+            padding: var(--spacing-3) var(--spacing-6);
+            background: var(--color-primary);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 0.5rem;
             font-size: 1rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
         }
 
         .button:hover {
-            background: #0052cc;
+            background: var(--color-primary-hover);
+            transform: translateY(-1px);
         }
 
         .button.secondary {
-            background: #f0f0f0;
-            color: #333;
+            background: var(--color-secondary);
+            color: white;
         }
 
         .button.secondary:hover {
-            background: #e0e0e0;
+            background: #4b5563;
         }
 
         #codePanel {
@@ -127,35 +144,39 @@
             right: -50%;
             width: 50%;
             height: 100vh;
-            background: #1e1e1e;
-            transition: right 0.3s ease;
-            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+            background: #1a1a1a;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-lg);
             display: flex;
             flex-direction: column;
+            z-index: 20;
         }
 
         .code-header {
-            padding: 1rem;
+            padding: var(--spacing-4);
             background: #2d2d2d;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid #404040;
         }
 
         .code-header h3 {
             color: white;
-            font-size: 1rem;
+            font-size: 1.125rem;
+            font-weight: 500;
         }
 
         #codeText {
             flex: 1;
-            padding: 1rem;
+            padding: var(--spacing-4);
             color: #d4d4d4;
-            font-family: 'Consolas', 'Monaco', monospace;
+            font-family: var(--font-mono);
             white-space: pre-wrap;
             overflow-y: auto;
-            font-size: 0.9rem;
-            line-height: 1.5;
+            font-size: 0.875rem;
+            line-height: 1.7;
+            background: #1a1a1a;
         }
 
         #loading {
@@ -164,29 +185,40 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             color: white;
-            padding: 1rem 2rem;
-            border-radius: 4px;
+            padding: var(--spacing-4) var(--spacing-8);
+            border-radius: 0.5rem;
+            font-weight: 500;
             z-index: 1000;
+            box-shadow: var(--shadow-lg);
         }
 
         #error {
             display: none;
             position: fixed;
-            top: 1rem;
+            top: var(--spacing-4);
             left: 50%;
             transform: translateX(-50%);
-            background: #ff4444;
+            background: #ef4444;
             color: white;
-            padding: 1rem;
-            border-radius: 4px;
+            padding: var(--spacing-4);
+            border-radius: 0.5rem;
+            font-weight: 500;
             z-index: 1000;
+            box-shadow: var(--shadow);
         }
 
         .button-group {
             display: flex;
-            gap: 0.5rem;
+            gap: var(--spacing-2);
+        }
+
+        @media (max-width: 768px) {
+            #codePanel {
+                width: 100%;
+                right: -100%;
+            }
         }
     </style>
 </head>
