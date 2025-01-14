@@ -21,6 +21,13 @@ Welcome to Pollinations Hive - a revolutionary repository where AI meets collabo
 3. Provide feedback on the AI's implementation
 4. Review and refine through comments
 
+## 🙏 Credits
+
+This repository is powered by:
+
+- [Mentat.ai](https://mentat.ai/) - Hosting the running coding agent that enables AI-driven development
+- [OpenHands](https://github.com/All-Hands-AI/OpenHands) - The underlying AI agent platform that makes automated development possible
+
 ## 🔗 Related Resources
 
 - [Pollinations AI Platform](https://pollinations.ai)
