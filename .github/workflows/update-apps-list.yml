@@ -1,0 +1,67 @@
+name: Update Apps List
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * *'  # Run daily at midnight UTC
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for git log
+
+      - name: Update README with apps list
+        run: |
+          # Create temporary file for the new apps list
+          echo "## 📱 Available Apps" > apps_section.md
+          echo "" >> apps_section.md
+          echo "| App | Source | Last Updated |" >> apps_section.md
+          echo "|-----|--------|--------------|" >> apps_section.md
+          
+          # Find all index.html files, excluding node_modules
+          for app_path in $(find . -name "index.html" -not -path "*/node_modules/*" -not -path "*/.git/*"); do
+            # Get the app directory name
+            app_dir=$(dirname "$app_path")
+            app_name=$(basename "$app_dir")
+            
+            # Skip if it's the root directory
+            if [ "$app_dir" = "." ]; then
+              continue
+            fi
+            
+            # Get the last update date
+            last_update=$(git log -1 --format="%ad" --date=short -- "$app_dir")
+            
+            # Create the deployment URL (using the directory name)
+            deploy_url="https://$app_name.hive.pollinations.ai"
+            
+            # Add the app to the list
+            echo "| [$app_name]($deploy_url) | [$app_dir]($app_dir) | $last_update |" >> apps_section.md
+          done
+          
+          # Update README.md
+          # First, try to replace existing apps section
+          if grep -q "^## 📱 Available Apps" README.md; then
+            # If section exists, replace it
+            sed -i '/^## 📱 Available Apps/,/^##/{ /^##/{p; r apps_section.md
+                }; d}' README.md
+          else
+            # If section doesn't exist, add it before the Documentation section
+            sed -i '/^## 📚 Documentation/e cat apps_section.md' README.md
+          fi
+          
+          rm apps_section.md
+
+      - name: Commit and push if changed
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add README.md
+          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: Update apps list in README [skip ci]" && git push)
