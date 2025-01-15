@@ -42,34 +42,12 @@ jobs:
         with:
           script: |
             const baseUrl = 'https://pollinations.github.io/hive/pr-${{ github.event.pull_request.number }}/';
-            const body = `🚀 PR Preview deployed!\n\nPreview URLs:\n- [Index Page](${baseUrl})\n`;
-            
-            const comments = await github.rest.issues.listComments({
+            github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
+              body: `🚀 PR Preview deployed!\n\nPreview URL: ${baseUrl}`
             });
-            
-            const botComment = comments.data.find(comment => 
-              comment.user.login === 'github-actions[bot]' && 
-              comment.body.includes('PR Preview deployed!')
-            );
-            
-            if (botComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: botComment.id,
-                body
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body
-              });
-            }
 
   cleanup:
     if: github.event.action == 'closed'
