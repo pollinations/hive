@@ -13,7 +13,7 @@ Welcome to Pollinations Hive - a revolutionary repository where AI meets collabo
 | [image-prompt](https://pollinations.github.io/hive/image-prompt/) | [./image-prompt](./image-prompt) | 2025-01-15 |
 | [graphics-editor](https://pollinations.github.io/hive/graphics-editor/) | [./graphics-editor](./graphics-editor) | 2025-01-15 |
 | [placeholder-generator](https://pollinations.github.io/hive/placeholder-generator/) | [./placeholder-generator](./placeholder-generator) | 2025-01-14 |
-| [ai-chat](https://pollinations.github.io/hive/ai-chat/) | [./ai-chat](./ai-chat) | 2025-01-14 |
+| [ai-chat](https://pollinations.github.io/hive/ai-chat/) | [./ai-chat](./ai-chat) | 2025-01-15 |
 ## 📚 Documentation
 
 ### 🔍 Pull Request Previews
