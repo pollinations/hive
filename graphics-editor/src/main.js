@@ -129,9 +129,171 @@ function addText(e) {
 // Shape tool implementation
 let shapeStartX, shapeStartY;
 
+// Mouse event listeners
 canvas.addEventListener('mousedown', handleMouseDown);
 canvas.addEventListener('mousemove', handleMouseMove);
 canvas.addEventListener('mouseup', handleMouseUp);
+
+// Touch event listeners
+canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+// Touch gesture handling
+let lastTouchDistance = 0;
+let initialObjectScale = 1;
+
+function handleTouchStart(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    startX = touch.clientX - rect.left;
+    startY = touch.clientY - rect.top;
+
+    if (currentTool === 'select') {
+        // Check for resize handles first
+        if (selectedObject) {
+            resizeHandle = getResizeHandle(startX, startY);
+            if (resizeHandle) {
+                isResizing = true;
+                return;
+            }
+        }
+
+        // Check for object selection
+        selectedObject = canvasObjects
+            .slice()
+            .reverse()
+            .find(obj => obj.isPointInside(startX, startY));
+
+        if (selectedObject) {
+            isDragging = true;
+        }
+        updateLayersList();
+    } else if (currentTool === 'shape') {
+        shapeStartX = startX;
+        shapeStartY = startY;
+        isDrawing = true;
+    }
+
+    // Handle pinch-to-zoom with two fingers
+    if (e.touches.length === 2 && selectedObject) {
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        lastTouchDistance = Math.hypot(
+            touch2.clientX - touch1.clientX,
+            touch2.clientY - touch1.clientY
+        );
+        initialObjectScale = selectedObject.props.scale || 1;
+    }
+}
+
+function handleTouchMove(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    if (e.touches.length === 2 && selectedObject) {
+        // Handle pinch-to-zoom
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        const currentDistance = Math.hypot(
+            touch2.clientX - touch1.clientX,
+            touch2.clientY - touch1.clientY
+        );
+
+        if (lastTouchDistance > 0) {
+            const scale = currentDistance / lastTouchDistance;
+            selectedObject.props.scale = initialObjectScale * scale;
+            selectedObject.props.width *= scale;
+            selectedObject.props.height *= scale;
+            updateCanvas();
+        }
+
+        lastTouchDistance = currentDistance;
+        return;
+    }
+
+    if (isDragging && selectedObject) {
+        const dx = x - startX;
+        const dy = y - startY;
+        selectedObject.props.x += dx;
+        selectedObject.props.y += dy;
+        startX = x;
+        startY = y;
+        updateCanvas();
+        drawSelectionHandles();
+    } else if (isResizing && selectedObject) {
+        const newWidth = x - selectedObject.props.x;
+        const newHeight = y - selectedObject.props.y;
+        
+        if (resizeHandle.includes('e')) {
+            selectedObject.props.width = newWidth;
+        }
+        if (resizeHandle.includes('s')) {
+            selectedObject.props.height = newHeight;
+        }
+        if (resizeHandle.includes('w')) {
+            const dx = x - startX;
+            selectedObject.props.x += dx;
+            selectedObject.props.width -= dx;
+        }
+        if (resizeHandle.includes('n')) {
+            const dy = y - startY;
+            selectedObject.props.y += dy;
+            selectedObject.props.height -= dy;
+        }
+        
+        startX = x;
+        startY = y;
+        updateCanvas();
+        drawSelectionHandles();
+    } else if (isDrawing && currentTool === 'shape') {
+        updateCanvas();
+        // Preview shape
+        ctx.beginPath();
+        ctx.fillStyle = document.getElementById('color-picker').value;
+        ctx.rect(
+            shapeStartX,
+            shapeStartY,
+            x - shapeStartX,
+            y - shapeStartY
+        );
+        ctx.fill();
+    }
+}
+
+function handleTouchEnd(e) {
+    e.preventDefault();
+    if (isDrawing && currentTool === 'shape') {
+        const touch = e.changedTouches[0];
+        const rect = canvas.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+
+        const shapeObject = new CanvasObject('shape', {
+            shapeType: 'rectangle',
+            x: Math.min(shapeStartX, x),
+            y: Math.min(shapeStartY, y),
+            width: Math.abs(x - shapeStartX),
+            height: Math.abs(y - shapeStartY),
+            color: document.getElementById('color-picker').value,
+            scale: 1
+        });
+
+        canvasObjects.push(shapeObject);
+        updateCanvas();
+        updateLayersList();
+    }
+
+    lastTouchDistance = 0;
+    isDrawing = false;
+    isDragging = false;
+    isResizing = false;
+    resizeHandle = null;
+}
 
 function handleMouseDown(e) {
     const rect = canvas.getBoundingClientRect();
@@ -398,5 +560,36 @@ document.getElementById('export-btn').addEventListener('click', () => {
     link.click();
 });
 
+// Layers panel toggle for mobile
+const layersToggle = document.getElementById('layers-toggle');
+const layersPanel = document.querySelector('.layers-panel');
+
+layersToggle.addEventListener('click', () => {
+    layersPanel.classList.toggle('show');
+});
+
+// Close layers panel when clicking outside on mobile
+document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 768 && 
+        !layersPanel.contains(e.target) && 
+        e.target !== layersToggle) {
+        layersPanel.classList.remove('show');
+    }
+});
+
 // Initialize the canvas
 initCanvas();
+
+// Adjust canvas size on window resize
+window.addEventListener('resize', () => {
+    const container = document.querySelector('.canvas-container');
+    const maxWidth = container.clientWidth - 40;
+    const maxHeight = container.clientHeight - 40;
+    
+    if (canvas.width > maxWidth || canvas.height > maxHeight) {
+        const scale = Math.min(maxWidth / canvas.width, maxHeight / canvas.height);
+        canvas.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    } else {
+        canvas.style.transform = 'translate(-50%, -50%)';
+    }
+});
