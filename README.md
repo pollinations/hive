@@ -49,7 +49,6 @@ Every pull request in this repository gets an automatic preview deployment. Here
 
 | PR | Title | Preview |
 |-----|--------|---------|
-| [#115](https://github.com/pollinations/hive/pull/115) | Implement ChatGPT-style interface with enhanced features | [Preview](https://pollinations.github.io/hive/pr-115/) |
 | [#114](https://github.com/pollinations/hive/pull/114) | Implement mobile-friendly AI chat with model selection and file attachments | [Preview](https://pollinations.github.io/hive/pr-114/) |
 
 _This list is automatically updated when PRs are opened or closed._
