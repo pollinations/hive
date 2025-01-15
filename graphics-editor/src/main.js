@@ -7,6 +7,10 @@ let startX, startY;
 let isDragging = false;
 let isResizing = false;
 let resizeHandle = null;
+let lastTouchDistance = 0;
+let canvasScale = 1;
+let canvasOffsetX = 0;
+let canvasOffsetY = 0;
 
 // Object to store all canvas elements
 const canvasObjects = [];
@@ -16,13 +20,203 @@ let selectedObject = null;
 const HANDLE_SIZE = 8;
 const HANDLE_POSITIONS = ['nw', 'ne', 'se', 'sw'];
 
-// Initialize canvas size
+// Initialize canvas size and setup responsive behavior
 function initCanvas() {
-    canvas.width = 800;
-    canvas.height = 600;
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    function updateCanvasSize() {
+        const container = canvas.parentElement;
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+        const aspectRatio = 4/3;
+        
+        let width = containerWidth * 0.9;
+        let height = width / aspectRatio;
+        
+        if (height > containerHeight * 0.9) {
+            height = containerHeight * 0.9;
+            width = height * aspectRatio;
+        }
+        
+        canvas.width = Math.round(width);
+        canvas.height = Math.round(height);
+        
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Redraw all objects
+        updateCanvas();
+    }
+    
+    // Initial size
+    updateCanvasSize();
+    
+    // Update on resize
+    window.addEventListener('resize', updateCanvasSize);
+    
+    // Setup layers panel toggle
+    setupLayersPanel();
 }
+
+// Setup layers panel and toggle functionality
+function setupLayersPanel() {
+    const layersPanel = document.querySelector('.layers-panel');
+    const toggleButtons = document.querySelectorAll('.layers-toggle');
+    
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            layersPanel.classList.toggle('open');
+        });
+    });
+}
+
+// Convert page coordinates to canvas coordinates
+function getCanvasCoordinates(pageX, pageY) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    return {
+        x: (pageX - rect.left) * scaleX,
+        y: (pageY - rect.top) * scaleY
+    };
+}
+
+// Handle both mouse and touch events
+function handleStart(e) {
+    e.preventDefault();
+    const coords = e.touches ? 
+        getCanvasCoordinates(e.touches[0].pageX, e.touches[0].pageY) :
+        getCanvasCoordinates(e.pageX, e.pageY);
+    
+    startX = coords.x;
+    startY = coords.y;
+
+    if (currentTool === 'select') {
+        // Check for resize handles first
+        if (selectedObject) {
+            resizeHandle = getResizeHandle(startX, startY);
+            if (resizeHandle) {
+                isResizing = true;
+                return;
+            }
+        }
+
+        // Check for object selection
+        selectedObject = canvasObjects
+            .slice()
+            .reverse()
+            .find(obj => obj.isPointInside(startX, startY));
+
+        if (selectedObject) {
+            isDragging = true;
+        }
+        updateLayersList();
+    } else if (currentTool === 'shape') {
+        shapeStartX = startX;
+        shapeStartY = startY;
+        isDrawing = true;
+    }
+}
+
+function handleMove(e) {
+    e.preventDefault();
+    if (!isDrawing && !isDragging && !isResizing) return;
+
+    const coords = e.touches ? 
+        getCanvasCoordinates(e.touches[0].pageX, e.touches[0].pageY) :
+        getCanvasCoordinates(e.pageX, e.pageY);
+    
+    const x = coords.x;
+    const y = coords.y;
+
+    if (isDragging && selectedObject) {
+        const dx = x - startX;
+        const dy = y - startY;
+        selectedObject.props.x += dx;
+        selectedObject.props.y += dy;
+        startX = x;
+        startY = y;
+        updateCanvas();
+        drawSelectionHandles();
+    } else if (isResizing && selectedObject) {
+        const newWidth = x - selectedObject.props.x;
+        const newHeight = y - selectedObject.props.y;
+        
+        if (resizeHandle.includes('e')) {
+            selectedObject.props.width = newWidth;
+        }
+        if (resizeHandle.includes('s')) {
+            selectedObject.props.height = newHeight;
+        }
+        if (resizeHandle.includes('w')) {
+            const dx = x - startX;
+            selectedObject.props.x += dx;
+            selectedObject.props.width -= dx;
+        }
+        if (resizeHandle.includes('n')) {
+            const dy = y - startY;
+            selectedObject.props.y += dy;
+            selectedObject.props.height -= dy;
+        }
+        
+        startX = x;
+        startY = y;
+        updateCanvas();
+        drawSelectionHandles();
+    } else if (isDrawing && currentTool === 'shape') {
+        updateCanvas();
+        // Preview shape
+        ctx.beginPath();
+        ctx.fillStyle = document.getElementById('color-picker').value;
+        ctx.rect(
+            shapeStartX,
+            shapeStartY,
+            x - shapeStartX,
+            y - shapeStartY
+        );
+        ctx.fill();
+    }
+}
+
+function handleEnd(e) {
+    e.preventDefault();
+    if (isDrawing && currentTool === 'shape') {
+        const coords = e.changedTouches ? 
+            getCanvasCoordinates(e.changedTouches[0].pageX, e.changedTouches[0].pageY) :
+            getCanvasCoordinates(e.pageX, e.pageY);
+        
+        const x = coords.x;
+        const y = coords.y;
+
+        const shapeObject = new CanvasObject('shape', {
+            shapeType: 'rectangle',
+            x: Math.min(shapeStartX, x),
+            y: Math.min(shapeStartY, y),
+            width: Math.abs(x - shapeStartX),
+            height: Math.abs(y - shapeStartY),
+            color: document.getElementById('color-picker').value
+        });
+
+        canvasObjects.push(shapeObject);
+        updateCanvas();
+        updateLayersList();
+    }
+
+    isDrawing = false;
+    isDragging = false;
+    isResizing = false;
+    resizeHandle = null;
+}
+
+// Add event listeners for both mouse and touch
+canvas.addEventListener('mousedown', handleStart);
+canvas.addEventListener('mousemove', handleMove);
+canvas.addEventListener('mouseup', handleEnd);
+canvas.addEventListener('mouseleave', handleEnd);
+
+canvas.addEventListener('touchstart', handleStart, { passive: false });
+canvas.addEventListener('touchmove', handleMove, { passive: false });
+canvas.addEventListener('touchend', handleEnd, { passive: false });
+canvas.addEventListener('touchcancel', handleEnd, { passive: false });
 
 // Tool selection
 const tools = document.querySelectorAll('.tool-btn');
@@ -98,33 +292,76 @@ class CanvasObject {
 }
 
 // Text tool implementation
-document.getElementById('text-tool').addEventListener('click', () => {
-    canvas.addEventListener('click', addText);
-});
+let textMode = false;
+let shapeStartX, shapeStartY;
 
-function addText(e) {
+function handleTextTool(e) {
     if (currentTool !== 'text') return;
     
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const coords = e.touches ? 
+        getCanvasCoordinates(e.touches[0].pageX, e.touches[0].pageY) :
+        getCanvasCoordinates(e.pageX, e.pageY);
     
-    const text = prompt('Enter text:', '');
-    if (!text) return;
-
-    const textObject = new CanvasObject('text', {
-        text,
-        x,
-        y,
-        fontSize: parseInt(document.getElementById('font-size').value),
-        fontFamily: document.getElementById('font-family').value,
-        color: document.getElementById('color-picker').value
-    });
-
-    canvasObjects.push(textObject);
-    updateCanvas();
-    updateLayersList();
+    // Create a temporary input element for mobile-friendly text entry
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.style.position = 'fixed';
+    input.style.left = (e.touches ? e.touches[0].pageX : e.pageX) + 'px';
+    input.style.top = (e.touches ? e.touches[0].pageY : e.pageY) + 'px';
+    input.style.transform = 'translate(-50%, -50%)';
+    input.style.fontSize = document.getElementById('font-size').value + 'px';
+    input.style.fontFamily = document.getElementById('font-family').value;
+    input.style.padding = '4px';
+    input.style.border = '1px solid #ccc';
+    input.style.borderRadius = '4px';
+    input.style.zIndex = '1000';
+    
+    document.body.appendChild(input);
+    input.focus();
+    
+    function handleTextInput(event) {
+        if (event.key === 'Enter' || event.type === 'blur') {
+            const text = input.value.trim();
+            if (text) {
+                const textObject = new CanvasObject('text', {
+                    text,
+                    x: coords.x,
+                    y: coords.y,
+                    fontSize: parseInt(document.getElementById('font-size').value),
+                    fontFamily: document.getElementById('font-family').value,
+                    color: document.getElementById('color-picker').value
+                });
+                
+                canvasObjects.push(textObject);
+                updateCanvas();
+                updateLayersList();
+            }
+            input.remove();
+            document.removeEventListener('keydown', handleTextInput);
+        }
+    }
+    
+    input.addEventListener('keydown', handleTextInput);
+    input.addEventListener('blur', handleTextInput);
 }
+
+// Update tool selection to handle text tool properly
+document.getElementById('text-tool').addEventListener('click', () => {
+    textMode = true;
+    canvas.addEventListener('mousedown', handleTextTool);
+    canvas.addEventListener('touchstart', handleTextTool);
+});
+
+// Remove text tool listeners when switching to other tools
+tools.forEach(tool => {
+    if (tool.id !== 'text-tool') {
+        tool.addEventListener('click', () => {
+            textMode = false;
+            canvas.removeEventListener('mousedown', handleTextTool);
+            canvas.removeEventListener('touchstart', handleTextTool);
+        });
+    }
+});
 
 // Shape tool implementation
 let shapeStartX, shapeStartY;
