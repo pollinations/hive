@@ -7,13 +7,13 @@ Welcome to Pollinations Hive - a revolutionary repository where AI meets collabo
 
 | App | Source | Last Updated |
 |-----|--------|--------------|
-| [llm-feedback](https://pollinations.github.io/hive/llm-feedback/) | [./llm-feedback](./llm-feedback) | 2025-01-14 |
-| [tarot-reader](https://pollinations.github.io/hive/tarot-reader/) | [./tarot-reader](./tarot-reader) | 2025-01-14 |
-| [pollinations-image-show](https://pollinations.github.io/hive/pollinations-image-show/) | [./pollinations-image-show](./pollinations-image-show) | 2025-01-14 |
-| [image-prompt](https://pollinations.github.io/hive/image-prompt/) | [./image-prompt](./image-prompt) | 2025-01-15 |
-| [graphics-editor](https://pollinations.github.io/hive/graphics-editor/) | [./graphics-editor](./graphics-editor) | 2025-01-15 |
-| [placeholder-generator](https://pollinations.github.io/hive/placeholder-generator/) | [./placeholder-generator](./placeholder-generator) | 2025-01-14 |
-| [ai-chat](https://pollinations.github.io/hive/ai-chat/) | [./ai-chat](./ai-chat) | 2025-01-15 |
+| [llm-feedback](https://pollinations.github.io/hive/main/llm-feedback/) | [./llm-feedback](./llm-feedback) | 2025-01-14 |
+| [tarot-reader](https://pollinations.github.io/hive/main/tarot-reader/) | [./tarot-reader](./tarot-reader) | 2025-01-14 |
+| [pollinations-image-show](https://pollinations.github.io/hive/main/pollinations-image-show/) | [./pollinations-image-show](./pollinations-image-show) | 2025-01-14 |
+| [image-prompt](https://pollinations.github.io/hive/main/image-prompt/) | [./image-prompt](./image-prompt) | 2025-01-15 |
+| [graphics-editor](https://pollinations.github.io/hive/main/graphics-editor/) | [./graphics-editor](./graphics-editor) | 2025-01-15 |
+| [placeholder-generator](https://pollinations.github.io/hive/main/placeholder-generator/) | [./placeholder-generator](./placeholder-generator) | 2025-01-14 |
+| [ai-chat](https://pollinations.github.io/hive/main/ai-chat/) | [./ai-chat](./ai-chat) | 2025-01-15 |
 ## 📚 Documentation
 
 ### 🔍 Pull Request Previews
