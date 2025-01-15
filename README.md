@@ -49,8 +49,6 @@ Every pull request in this repository gets an automatic preview deployment. Here
 
 | PR | Title | Preview |
 |-----|--------|---------|
-| [#116](https://github.com/pollinations/hive/pull/116) | Fix PR preview visibility and add debugging tools | [Preview](https://pollinations.github.io/hive/pr-116/) |
-| [#114](https://github.com/pollinations/hive/pull/114) | Implement mobile-friendly AI chat with model selection and file attachments | [Preview](https://pollinations.github.io/hive/pr-114/) |
 
 _This list is automatically updated when PRs are opened or closed._
 ## 🌈 Features
