@@ -1,21 +1,17 @@
 name: Deploy Apps
 
 on:
-  # For main branch, we run after tests pass
   workflow_run:
     workflows: ["Test Apps"]
     types:
       - completed
     branches: [main]
-  # For PRs, we run directly on changes
   pull_request:
     types: [opened, synchronize, reopened, closed]
-
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+    paths:
+      - '*/package.json'
+      - '*/index.html'
+      - '*/**'
 
 jobs:
   build-and-deploy:
@@ -23,9 +19,9 @@ jobs:
       (github.event_name == 'pull_request' && github.event.action != 'closed') ||
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: write
+      pull-requests: write
       
     steps:
       - uses: actions/checkout@v3
@@ -57,17 +53,62 @@ jobs:
             tree _site -L 3
           fi
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: ${{ github.event_name == 'pull_request' && './pr-preview' || './_site' }}
-
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ github.event_name == 'pull_request' && './pr-preview' || './_site' }}
+          destination_dir: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}
+          keep_files: true
+          enable_jekyll: false
+          force_orphan: ${{ github.event_name != 'pull_request' }}
+
+      - name: Create and deploy root index.html
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p root
+          cat > root/index.html << 'EOL'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Pollinations Hive</title>
+              <meta http-equiv="refresh" content="0; url=./main/" />
+              <style>
+                  body {
+                      font-family: system-ui, -apple-system, sans-serif;
+                      max-width: 800px;
+                      margin: 2rem auto;
+                      padding: 0 1rem;
+                      line-height: 1.5;
+                  }
+                  a {
+                      color: #0366d6;
+                      text-decoration: none;
+                  }
+                  a:hover {
+                      text-decoration: underline;
+                  }
+              </style>
+          </head>
+          <body>
+              <h1>Pollinations Hive</h1>
+              <p>Redirecting to <a href="./main/">main deployment</a>...</p>
+              <script>
+                  window.location.href = './main/';
+              </script>
+          </body>
+          </html>
+          EOL
+
+      - name: Deploy root index
+        if: github.event_name != 'pull_request'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./root
+          destination_dir: .
+          keep_files: true
+          enable_jekyll: false
 
       - name: Comment PR
         if: github.event_name == 'pull_request'
@@ -85,21 +126,28 @@ jobs:
   cleanup-preview:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     permissions:
-      pages: write
-      id-token: write
+      contents: write
     steps:
-      - name: Create empty PR preview directory
-        run: mkdir -p pr-${{ github.event.pull_request.number }}
-          
-      - name: Upload empty artifact
-        uses: actions/upload-pages-artifact@v2
+      - uses: actions/checkout@v3
         with:
-          path: pr-${{ github.event.pull_request.number }}
-
-      - name: Deploy empty directory
-        id: deployment
-        uses: actions/deploy-pages@v2
+          ref: gh-pages
+          
+      - name: Show directory before cleanup
+        run: |
+          echo "Directory structure before cleanup:"
+          tree -L 3 || (apt-get update && apt-get install -y tree && tree -L 3)
+          
+      - name: Remove PR Preview
+        run: |
+          rm -rf pr-${{ github.event.pull_request.number }}
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "Remove PR preview for #${{ github.event.pull_request.number }}" || echo "No changes to commit"
+          git push
+          
+      - name: Show directory after cleanup
+        run: |
+          echo "Directory structure after cleanup:"
+          tree -L 3 || (apt-get update && apt-get install -y tree && tree -L 3)
