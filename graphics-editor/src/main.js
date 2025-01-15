@@ -1,3 +1,5 @@
+import { handleTextCommand, executeAction } from './textInterface.js';
+
 // Canvas state and context
 const canvas = document.getElementById('main-canvas');
 const ctx = canvas.getContext('2d');
@@ -9,8 +11,8 @@ let isResizing = false;
 let resizeHandle = null;
 
 // Object to store all canvas elements
-const canvasObjects = [];
-let selectedObject = null;
+export const canvasObjects = [];
+export let selectedObject = null;
 
 // Transformation handles size
 const HANDLE_SIZE = 8;
@@ -398,5 +400,31 @@ document.getElementById('export-btn').addEventListener('click', () => {
     link.click();
 });
 
+// Text command handling
+document.getElementById('execute-command').addEventListener('click', async () => {
+    const commandInput = document.getElementById('text-command');
+    const command = commandInput.value.trim();
+    
+    if (!command) return;
+    
+    try {
+        const action = await handleTextCommand(command);
+        executeAction(action);
+        commandInput.value = ''; // Clear input after successful execution
+    } catch (error) {
+        console.error('Failed to execute command:', error);
+        alert('Failed to execute command. Please try again.');
+    }
+});
+
+document.getElementById('text-command').addEventListener('keypress', async (e) => {
+    if (e.key === 'Enter') {
+        document.getElementById('execute-command').click();
+    }
+});
+
 // Initialize the canvas
 initCanvas();
+
+// Export canvas-related functions and classes
+export { CanvasObject, updateCanvas, updateLayersList };
