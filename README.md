@@ -39,7 +39,17 @@ Every pull request in this repository gets an automatic preview deployment. Here
 - Each PR gets a dedicated preview URL
 - The GitHub Actions bot comments on the PR with preview links
 - Preview URL format: `https://pollinations.github.io/hive/pr-{PR_NUMBER}/`
-- An index page lists all apps available in the preview
+- Each preview includes an index page that lists all apps available in that preview
+- You can find active PR previews by:
+  1. Looking at open pull requests in the repository
+  2. Finding the GitHub Actions bot comment with the preview link
+  3. Visiting the index page at `https://pollinations.github.io/hive/pr-{PR_NUMBER}/`
+
+#### Available PR Previews
+To see what PR previews are currently available:
+1. Visit the [Pull Requests page](https://github.com/pollinations/hive/pulls)
+2. Look for open PRs with a "PR Preview deployed!" comment
+3. Click the "Index Page" link in those comments to view the preview
 
 #### Cleanup
 - Preview deployments are automatically removed when the PR is closed
