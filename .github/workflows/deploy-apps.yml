@@ -33,13 +33,29 @@ jobs:
       - name: Install root dependencies
         run: npm install
 
+      - name: Show initial directory structure
+        run: |
+          echo "Current directory structure:"
+          tree -L 3 || (apt-get update && apt-get install -y tree && tree -L 3)
+
       - name: Build all apps
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             npm run build pr-preview ${{ github.event.pull_request.number }}
+            echo "PR Preview build output structure:"
+            tree pr-preview -L 3
           else
             npm run build _site
+            echo "_site build output structure:"
+            tree _site -L 3
           fi
+
+      - name: Checkout gh-pages branch
+        run: |
+          git fetch
+          git checkout gh-pages || git checkout -b gh-pages
+          echo "Current gh-pages branch structure:"
+          tree -L 3 || (apt-get update && apt-get install -y tree && tree -L 3)
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
@@ -73,6 +89,11 @@ jobs:
         with:
           ref: gh-pages
           
+      - name: Show directory before cleanup
+        run: |
+          echo "Directory structure before cleanup:"
+          tree -L 3 || (apt-get update && apt-get install -y tree && tree -L 3)
+          
       - name: Remove PR Preview
         run: |
           rm -rf pr-${{ github.event.pull_request.number }}
@@ -81,3 +102,8 @@ jobs:
           git add .
           git commit -m "Remove PR preview for #${{ github.event.pull_request.number }}" || echo "No changes to commit"
           git push
+          
+      - name: Show directory after cleanup
+        run: |
+          echo "Directory structure after cleanup:"
+          tree -L 3 || (apt-get update && apt-get install -y tree && tree -L 3)
