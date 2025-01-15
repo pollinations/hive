@@ -1,5 +1,11 @@
 // Import required dependencies from main.js
-import { CanvasObject, canvasObjects, selectedObject, updateCanvas, updateLayersList } from './main.js';
+import { CanvasObject, canvasObjects, selectedObject, updateCanvas, updateLayersList, canvas } from './main.js';
+
+// Helper function to validate and parse position
+function parsePosition(value, defaultValue) {
+    const parsed = parseInt(value);
+    return !isNaN(parsed) && parsed >= 0 ? parsed : defaultValue;
+}
 
 // Text interface handler for graphics editor
 export async function handleTextCommand(command) {
@@ -54,9 +60,9 @@ export function executeAction(action) {
         case 'addText':
             const textObject = new CanvasObject('text', {
                 text: action.params.text,
-                x: action.params.x,
-                y: action.params.y,
-                fontSize: action.params.fontSize || 16,
+                x: parsePosition(action.params.x, canvas.width / 2),
+                y: parsePosition(action.params.y, canvas.height / 2),
+                fontSize: parsePosition(action.params.fontSize, 16),
                 fontFamily: action.params.fontFamily || 'Arial',
                 color: action.params.color || '#000000'
             });
@@ -65,11 +71,11 @@ export function executeAction(action) {
 
         case 'addShape':
             const shapeObject = new CanvasObject('shape', {
-                shapeType: action.params.type,
-                x: action.params.x,
-                y: action.params.y,
-                width: action.params.width,
-                height: action.params.height,
+                shapeType: action.params.type || 'rectangle',
+                x: parsePosition(action.params.x, canvas.width / 2),
+                y: parsePosition(action.params.y, canvas.height / 2),
+                width: parsePosition(action.params.width, 100),
+                height: parsePosition(action.params.height, 100),
                 color: action.params.color || '#000000'
             });
             canvasObjects.push(shapeObject);
@@ -80,10 +86,10 @@ export function executeAction(action) {
             img.onload = () => {
                 const imageObject = new CanvasObject('image', {
                     image: img,
-                    x: action.params.x,
-                    y: action.params.y,
-                    width: action.params.width || img.width,
-                    height: action.params.height || img.height
+                    x: parsePosition(action.params.x, (canvas.width - img.width) / 2),
+                    y: parsePosition(action.params.y, (canvas.height - img.height) / 2),
+                    width: parsePosition(action.params.width, img.width),
+                    height: parsePosition(action.params.height, img.height)
                 });
                 canvasObjects.push(imageObject);
                 updateCanvas();
@@ -98,15 +104,15 @@ export function executeAction(action) {
 
         case 'move':
             if (selectedObject) {
-                selectedObject.props.x = action.params.x;
-                selectedObject.props.y = action.params.y;
+                selectedObject.props.x = parsePosition(action.params.x, selectedObject.props.x);
+                selectedObject.props.y = parsePosition(action.params.y, selectedObject.props.y);
             }
             break;
 
         case 'resize':
             if (selectedObject) {
-                selectedObject.props.width = action.params.width;
-                selectedObject.props.height = action.params.height;
+                selectedObject.props.width = parsePosition(action.params.width, selectedObject.props.width);
+                selectedObject.props.height = parsePosition(action.params.height, selectedObject.props.height);
             }
             break;
 

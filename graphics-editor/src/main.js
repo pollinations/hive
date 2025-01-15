@@ -441,4 +441,4 @@ if (document.readyState === 'loading') {
 }
 
 // Export canvas-related functions and classes
-export { CanvasObject, updateCanvas, updateLayersList };
+export { CanvasObject, updateCanvas, updateLayersList, canvas };
