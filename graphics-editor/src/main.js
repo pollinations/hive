@@ -4,6 +4,7 @@ const ctx = canvas.getContext('2d');
 let currentTool = 'select';
 let isDrawing = false;
 let startX, startY;
+let shapeStartX, shapeStartY;
 let isDragging = false;
 let isResizing = false;
 let resizeHandle = null;
@@ -218,6 +219,15 @@ canvas.addEventListener('touchmove', handleMove, { passive: false });
 canvas.addEventListener('touchend', handleEnd, { passive: false });
 canvas.addEventListener('touchcancel', handleEnd, { passive: false });
 
+// Remove old event listeners that were causing duplicates
+canvas.removeEventListener('mousedown', handleMouseDown);
+canvas.removeEventListener('mousemove', handleMouseMove);
+canvas.removeEventListener('mouseup', handleMouseUp);
+
+canvas.removeEventListener('touchstart', handleTouchStart);
+canvas.removeEventListener('touchmove', handleTouchMove);
+canvas.removeEventListener('touchend', handleTouchEnd);
+
 // Tool selection
 const tools = document.querySelectorAll('.tool-btn');
 tools.forEach(tool => {
@@ -293,7 +303,6 @@ class CanvasObject {
 
 // Text tool implementation
 let textMode = false;
-let shapeStartX, shapeStartY;
 
 function handleTextTool(e) {
     if (currentTool !== 'text') return;
@@ -363,286 +372,10 @@ tools.forEach(tool => {
     }
 });
 
-// Shape tool implementation
-let shapeStartX, shapeStartY;
-
-// Mouse event listeners
-canvas.addEventListener('mousedown', handleMouseDown);
-canvas.addEventListener('mousemove', handleMouseMove);
-canvas.addEventListener('mouseup', handleMouseUp);
-
-// Touch event listeners
-canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
-
 // Touch gesture handling
-let lastTouchDistance = 0;
 let initialObjectScale = 1;
 
-function handleTouchStart(e) {
-    e.preventDefault();
-    const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    startX = touch.clientX - rect.left;
-    startY = touch.clientY - rect.top;
-
-    if (currentTool === 'select') {
-        // Check for resize handles first
-        if (selectedObject) {
-            resizeHandle = getResizeHandle(startX, startY);
-            if (resizeHandle) {
-                isResizing = true;
-                return;
-            }
-        }
-
-        // Check for object selection
-        selectedObject = canvasObjects
-            .slice()
-            .reverse()
-            .find(obj => obj.isPointInside(startX, startY));
-
-        if (selectedObject) {
-            isDragging = true;
-        }
-        updateLayersList();
-    } else if (currentTool === 'shape') {
-        shapeStartX = startX;
-        shapeStartY = startY;
-        isDrawing = true;
-    }
-
-    // Handle pinch-to-zoom with two fingers
-    if (e.touches.length === 2 && selectedObject) {
-        const touch1 = e.touches[0];
-        const touch2 = e.touches[1];
-        lastTouchDistance = Math.hypot(
-            touch2.clientX - touch1.clientX,
-            touch2.clientY - touch1.clientY
-        );
-        initialObjectScale = selectedObject.props.scale || 1;
-    }
-}
-
-function handleTouchMove(e) {
-    e.preventDefault();
-    const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-
-    if (e.touches.length === 2 && selectedObject) {
-        // Handle pinch-to-zoom
-        const touch1 = e.touches[0];
-        const touch2 = e.touches[1];
-        const currentDistance = Math.hypot(
-            touch2.clientX - touch1.clientX,
-            touch2.clientY - touch1.clientY
-        );
-
-        if (lastTouchDistance > 0) {
-            const scale = currentDistance / lastTouchDistance;
-            selectedObject.props.scale = initialObjectScale * scale;
-            selectedObject.props.width *= scale;
-            selectedObject.props.height *= scale;
-            updateCanvas();
-        }
-
-        lastTouchDistance = currentDistance;
-        return;
-    }
-
-    if (isDragging && selectedObject) {
-        const dx = x - startX;
-        const dy = y - startY;
-        selectedObject.props.x += dx;
-        selectedObject.props.y += dy;
-        startX = x;
-        startY = y;
-        updateCanvas();
-        drawSelectionHandles();
-    } else if (isResizing && selectedObject) {
-        const newWidth = x - selectedObject.props.x;
-        const newHeight = y - selectedObject.props.y;
-        
-        if (resizeHandle.includes('e')) {
-            selectedObject.props.width = newWidth;
-        }
-        if (resizeHandle.includes('s')) {
-            selectedObject.props.height = newHeight;
-        }
-        if (resizeHandle.includes('w')) {
-            const dx = x - startX;
-            selectedObject.props.x += dx;
-            selectedObject.props.width -= dx;
-        }
-        if (resizeHandle.includes('n')) {
-            const dy = y - startY;
-            selectedObject.props.y += dy;
-            selectedObject.props.height -= dy;
-        }
-        
-        startX = x;
-        startY = y;
-        updateCanvas();
-        drawSelectionHandles();
-    } else if (isDrawing && currentTool === 'shape') {
-        updateCanvas();
-        // Preview shape
-        ctx.beginPath();
-        ctx.fillStyle = document.getElementById('color-picker').value;
-        ctx.rect(
-            shapeStartX,
-            shapeStartY,
-            x - shapeStartX,
-            y - shapeStartY
-        );
-        ctx.fill();
-    }
-}
-
-function handleTouchEnd(e) {
-    e.preventDefault();
-    if (isDrawing && currentTool === 'shape') {
-        const touch = e.changedTouches[0];
-        const rect = canvas.getBoundingClientRect();
-        const x = touch.clientX - rect.left;
-        const y = touch.clientY - rect.top;
-
-        const shapeObject = new CanvasObject('shape', {
-            shapeType: 'rectangle',
-            x: Math.min(shapeStartX, x),
-            y: Math.min(shapeStartY, y),
-            width: Math.abs(x - shapeStartX),
-            height: Math.abs(y - shapeStartY),
-            color: document.getElementById('color-picker').value,
-            scale: 1
-        });
-
-        canvasObjects.push(shapeObject);
-        updateCanvas();
-        updateLayersList();
-    }
-
-    lastTouchDistance = 0;
-    isDrawing = false;
-    isDragging = false;
-    isResizing = false;
-    resizeHandle = null;
-}
-
-function handleMouseDown(e) {
-    const rect = canvas.getBoundingClientRect();
-    startX = e.clientX - rect.left;
-    startY = e.clientY - rect.top;
-
-    if (currentTool === 'select') {
-        // Check for resize handles first
-        if (selectedObject) {
-            resizeHandle = getResizeHandle(startX, startY);
-            if (resizeHandle) {
-                isResizing = true;
-                return;
-            }
-        }
-
-        // Check for object selection
-        selectedObject = canvasObjects
-            .slice()
-            .reverse()
-            .find(obj => obj.isPointInside(startX, startY));
-
-        if (selectedObject) {
-            isDragging = true;
-        }
-        updateLayersList();
-    } else if (currentTool === 'shape') {
-        shapeStartX = startX;
-        shapeStartY = startY;
-        isDrawing = true;
-    }
-}
-
-function handleMouseMove(e) {
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    if (isDragging && selectedObject) {
-        const dx = x - startX;
-        const dy = y - startY;
-        selectedObject.props.x += dx;
-        selectedObject.props.y += dy;
-        startX = x;
-        startY = y;
-        updateCanvas();
-        drawSelectionHandles();
-    } else if (isResizing && selectedObject) {
-        const newWidth = x - selectedObject.props.x;
-        const newHeight = y - selectedObject.props.y;
-        
-        if (resizeHandle.includes('e')) {
-            selectedObject.props.width = newWidth;
-        }
-        if (resizeHandle.includes('s')) {
-            selectedObject.props.height = newHeight;
-        }
-        if (resizeHandle.includes('w')) {
-            const dx = x - startX;
-            selectedObject.props.x += dx;
-            selectedObject.props.width -= dx;
-        }
-        if (resizeHandle.includes('n')) {
-            const dy = y - startY;
-            selectedObject.props.y += dy;
-            selectedObject.props.height -= dy;
-        }
-        
-        startX = x;
-        startY = y;
-        updateCanvas();
-        drawSelectionHandles();
-    } else if (isDrawing && currentTool === 'shape') {
-        updateCanvas();
-        // Preview shape
-        ctx.beginPath();
-        ctx.fillStyle = document.getElementById('color-picker').value;
-        ctx.rect(
-            shapeStartX,
-            shapeStartY,
-            x - shapeStartX,
-            y - shapeStartY
-        );
-        ctx.fill();
-    }
-}
-
-function handleMouseUp(e) {
-    if (isDrawing && currentTool === 'shape') {
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        const shapeObject = new CanvasObject('shape', {
-            shapeType: 'rectangle',
-            x: Math.min(shapeStartX, x),
-            y: Math.min(shapeStartY, y),
-            width: Math.abs(x - shapeStartX),
-            height: Math.abs(y - shapeStartY),
-            color: document.getElementById('color-picker').value
-        });
-
-        canvasObjects.push(shapeObject);
-        updateCanvas();
-        updateLayersList();
-    }
-
-    isDrawing = false;
-    isDragging = false;
-    isResizing = false;
-    resizeHandle = null;
-}
+// Touch gesture handling is now integrated into the unified handle functions
 
 function getResizeHandle(x, y) {
     if (!selectedObject) return null;
