@@ -50,8 +50,6 @@ Every pull request in this repository gets an automatic preview deployment. Here
 | PR | Title | Preview |
 |-----|--------|---------|
 | [#109](https://github.com/pollinations/hive/pull/109) | Add mobile touch support to graphics editor | [Preview](https://pollinations.github.io/hive/pr-109/) |
-| [#108](https://github.com/pollinations/hive/pull/108) | Generate Mentat Scripts | [Preview](https://pollinations.github.io/hive/pr-108/) |
-| [#105](https://github.com/pollinations/hive/pull/105) | Add text interface to graphics editor | [Preview](https://pollinations.github.io/hive/pr-105/) |
 
 _This list is automatically updated when PRs are opened or closed._
 ## 🌈 Features
