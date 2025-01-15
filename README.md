@@ -45,11 +45,12 @@ Every pull request in this repository gets an automatic preview deployment. Here
   2. Finding the GitHub Actions bot comment with the preview link
   3. Visiting the index page at `https://pollinations.github.io/hive/pr-{PR_NUMBER}/`
 
-#### Available PR Previews
-To see what PR previews are currently available:
-1. Visit the [Pull Requests page](https://github.com/pollinations/hive/pulls)
-2. Look for open PRs with a "PR Preview deployed!" comment
-3. Click the "Index Page" link in those comments to view the preview
+## 🔍 Active PR Previews
+
+| PR | Title | Preview |
+|-----|--------|---------|
+
+_This list is automatically updated when PRs are opened or closed._
 
 #### Cleanup
 - Preview deployments are automatically removed when the PR is closed

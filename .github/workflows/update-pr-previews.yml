@@ -1,0 +1,60 @@
+name: Update PR Previews List
+
+on:
+  pull_request:
+    types: [opened, closed, reopened]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - name: Update README with PR previews list
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Create temporary file for the new previews list
+          echo "## 🔍 Active PR Previews" > previews_section.md
+          echo "" >> previews_section.md
+          echo "| PR | Title | Preview |" >> previews_section.md
+          echo "|-----|--------|---------|" >> previews_section.md
+          
+          # Get list of open PRs and their preview URLs
+          gh pr list --json number,title,url --state open | jq -r '.[] | select(.number) | "| [#\(.number)](\(.url)) | \(.title) | [Preview](https://pollinations.github.io/hive/pr-\(.number)/) |"' >> previews_section.md
+          echo "" >> previews_section.md
+          echo "_This list is automatically updated when PRs are opened or closed._" >> previews_section.md
+          
+          # Update README.md using awk for section replacement
+          awk '
+          BEGIN { printing = 1; first_previews = 1 }
+          /^## 🔍 Active PR Previews/ {
+            if (first_previews) {
+              system("cat previews_section.md")
+              first_previews = 0
+              printing = 0
+              next
+            }
+          }
+          /^##[^#]/ {
+            if (!printing) {
+              printing = 1
+            }
+          }
+          printing { print }
+          ' README.md > README.md.tmp && mv README.md.tmp README.md
+          
+          rm previews_section.md
+
+      - name: Commit and push if changed
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add README.md
+          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: Update PR previews list in README [skip ci]" && git push)
