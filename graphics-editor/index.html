@@ -48,7 +48,19 @@
             </div>
         </div>
     </div>
-    <script type="module" src="src/main.js"></script>
+    <script type="module">
+        // Handle module loading errors
+        window.addEventListener('error', function(e) {
+            if (e.message.includes('Failed to load module script')) {
+                console.error('Module loading error:', e);
+            }
+        });
+
+        // Import and initialize the editor
+        import('./src/main.js').catch(error => {
+            console.error('Failed to load editor:', error);
+        });
+    </script>
     <script>
         // Expose canvas objects globally for debugging
         window.getCanvasState = () => ({

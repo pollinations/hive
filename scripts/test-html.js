@@ -10,13 +10,19 @@ function createServer(rootDir) {
     const ext = path.extname(filePath);
     const contentTypes = {
       '.html': 'text/html',
-      '.js': 'text/javascript',
+      '.js': 'text/javascript;charset=utf-8',
+      '.mjs': 'text/javascript;charset=utf-8',
       '.css': 'text/css',
       '.json': 'application/json',
       '.png': 'image/png',
       '.jpg': 'image/jpeg',
       '.gif': 'image/gif',
     };
+
+    // Add proper MIME type for ES modules
+    if (ext === '.js' && req.url.includes('type=module')) {
+      res.setHeader('Content-Type', 'text/javascript;charset=utf-8');
+    }
     const contentType = contentTypes[ext] || 'text/plain';
 
     fs.readFile(filePath, (error, content) => {
@@ -59,7 +65,17 @@ async function testHtmlFile(htmlPath) {
   try {
     await new Promise((resolve) => server.listen(port, resolve));
     await page.goto(`http://localhost:${port}/${path.basename(htmlPath)}`);
-    await page.waitForTimeout(2000);
+    
+    // Wait for potential module loading and initialization
+    try {
+      await page.waitForFunction(() => {
+        return document.querySelector('canvas') && 
+               typeof window.getCanvasState === 'function';
+      }, { timeout: 5000 });
+    } catch (error) {
+      console.error('Timeout waiting for editor initialization');
+      hasErrors = true;
+    }
   } catch (error) {
     console.error(`Failed to load ${htmlPath}:`, error);
     hasErrors = true;

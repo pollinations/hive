@@ -423,8 +423,22 @@ document.getElementById('text-command').addEventListener('keypress', async (e) =
     }
 });
 
-// Initialize the canvas
-initCanvas();
+// Initialize the editor
+function initEditor() {
+    try {
+        initCanvas();
+        console.log('Graphics editor initialized successfully');
+    } catch (error) {
+        console.error('Failed to initialize editor:', error);
+    }
+}
+
+// Wait for DOM content to be loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEditor);
+} else {
+    initEditor();
+}
 
 // Export canvas-related functions and classes
 export { CanvasObject, updateCanvas, updateLayersList };
