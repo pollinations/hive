@@ -30,6 +30,15 @@ jobs:
       - name: Build all apps
         run: npm run build pr-preview ${{ github.event.pull_request.number }}
 
+      - name: Debug directory structure
+        run: |
+          echo "Contents of current directory:"
+          ls -la
+          echo "\nContents of pr-preview directory:"
+          ls -la pr-preview/
+          echo "\nFull directory tree:"
+          tree pr-preview/
+
       - name: Deploy PR Preview
         uses: peaceiris/actions-gh-pages@v3
         with:
