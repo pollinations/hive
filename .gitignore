@@ -12,6 +12,8 @@
 **/dist/
 **/build/
 **/out/
+/_site/
+/pr-preview/
 
 # Environment files
 **/.env
