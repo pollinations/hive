@@ -14,8 +14,8 @@ let canvasOffsetX = 0;
 let canvasOffsetY = 0;
 
 // Object to store all canvas elements
-const canvasObjects = [];
-let selectedObject = null;
+export const canvasObjects = [];
+export let selectedObject = null;
 
 // Transformation handles size
 const HANDLE_SIZE = 8;
@@ -523,36 +523,84 @@ document.getElementById('export-btn').addEventListener('click', () => {
     link.click();
 });
 
+// Initialize text command handling after export to avoid circular dependency
+async function initTextCommands() {
+    const { handleTextCommand, executeAction } = await import('./textInterface.js');
+
+    document.getElementById('execute-command').addEventListener('click', async () => {
+        const commandInput = document.getElementById('text-command');
+        const command = commandInput.value.trim();
+        
+        if (!command) return;
+        
+        try {
+            const action = await handleTextCommand(command);
+            executeAction(action);
+            commandInput.value = ''; // Clear input after successful execution
+        } catch (error) {
+            console.error('Failed to execute command:', error);
+            alert('Failed to execute command. Please try again.');
+        }
+    });
+
+    document.getElementById('text-command').addEventListener('keypress', async (e) => {
+        if (e.key === 'Enter') {
+            document.getElementById('execute-command').click();
+        }
+    });
+}
+
 // Layers panel toggle for mobile
-const layersToggle = document.getElementById('layers-toggle');
-const layersPanel = document.querySelector('.layers-panel');
+function initMobileUI() {
+    const layersToggle = document.getElementById('layers-toggle');
+    const layersPanel = document.querySelector('.layers-panel');
 
-layersToggle.addEventListener('click', () => {
-    layersPanel.classList.toggle('show');
-});
+    layersToggle.addEventListener('click', () => {
+        layersPanel.classList.toggle('show');
+    });
 
-// Close layers panel when clicking outside on mobile
-document.addEventListener('click', (e) => {
-    if (window.innerWidth <= 768 && 
-        !layersPanel.contains(e.target) && 
-        e.target !== layersToggle) {
-        layersPanel.classList.remove('show');
+    // Close layers panel when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768 && 
+            !layersPanel.contains(e.target) && 
+            e.target !== layersToggle) {
+            layersPanel.classList.remove('show');
+        }
+    });
+
+    // Adjust canvas size on window resize
+    window.addEventListener('resize', () => {
+        const container = document.querySelector('.canvas-container');
+        const maxWidth = container.clientWidth - 40;
+        const maxHeight = container.clientHeight - 40;
+        
+        if (canvas.width > maxWidth || canvas.height > maxHeight) {
+            const scale = Math.min(maxWidth / canvas.width, maxHeight / canvas.height);
+            canvas.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        } else {
+            canvas.style.transform = 'translate(-50%, -50%)';
+        }
+    });
+}
+
+// Initialize the editor
+async function initEditor() {
+    try {
+        initCanvas();
+        initMobileUI();
+        await initTextCommands();
+        console.log('Graphics editor initialized successfully');
+    } catch (error) {
+        console.error('Failed to initialize editor:', error);
     }
-});
+}
 
-// Initialize the canvas
-initCanvas();
+// Wait for DOM content to be loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEditor);
+} else {
+    initEditor();
+}
 
-// Adjust canvas size on window resize
-window.addEventListener('resize', () => {
-    const container = document.querySelector('.canvas-container');
-    const maxWidth = container.clientWidth - 40;
-    const maxHeight = container.clientHeight - 40;
-    
-    if (canvas.width > maxWidth || canvas.height > maxHeight) {
-        const scale = Math.min(maxWidth / canvas.width, maxHeight / canvas.height);
-        canvas.style.transform = `translate(-50%, -50%) scale(${scale})`;
-    } else {
-        canvas.style.transform = 'translate(-50%, -50%)';
-    }
-});
+// Export canvas-related functions and classes
+export { CanvasObject, updateCanvas, updateLayersList, canvas };

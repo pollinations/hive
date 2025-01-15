@@ -31,6 +31,10 @@
             <div class="tool-group">
                 <button id="export-btn" aria-label="Export">Export</button>
             </div>
+            <div class="tool-group text-command">
+                <input type="text" id="text-command" placeholder="Enter text command..." />
+                <button id="execute-command">Execute</button>
+            </div>
         </div>
         
         <div class="main-content">
@@ -52,6 +56,25 @@
             </div>
         </div>
     </div>
-    <script type="module" src="src/main.js"></script>
+    <script type="module">
+        // Handle module loading errors
+        window.addEventListener('error', function(e) {
+            if (e.message.includes('Failed to load module script')) {
+                console.error('Module loading error:', e);
+            }
+        });
+
+        // Import and initialize the editor
+        import('./src/main.js').catch(error => {
+            console.error('Failed to load editor:', error);
+        });
+    </script>
+    <script>
+        // Expose canvas objects globally for debugging
+        window.getCanvasState = () => ({
+            objects: window.canvasObjects,
+            selected: window.selectedObject
+        });
+    </script>
 </body>
 </html>
