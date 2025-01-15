@@ -1,9 +1,14 @@
-name: Deploy Apps to GitHub Pages
+name: Deploy Apps
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+    paths:
+      - '*/package.json'
+      - '*/index.html'
+      - '*/**'
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
     paths:
       - '*/package.json'
       - '*/index.html'
@@ -11,16 +16,12 @@ on:
 
 jobs:
   build-and-deploy:
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pages: write
-      id-token: write
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
+      contents: write
+      pull-requests: write
+      
     steps:
       - uses: actions/checkout@v3
 
@@ -29,22 +30,54 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
       - name: Install root dependencies
         run: npm install
 
       - name: Build all apps
-        run: npm run build _site
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            npm run build pr-preview ${{ github.event.pull_request.number }}
+          else
+            npm run build _site
+          fi
 
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          preview: false
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ github.event_name == 'pull_request' && './pr-preview' || './_site' }}
+          destination_dir: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || '.' }}
+          keep_files: true
+          enable_jekyll: false
+
+      - name: Comment PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const baseUrl = 'https://pollinations.github.io/hive/pr-${{ github.event.pull_request.number }}/';
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `🚀 PR Preview deployed!\n\nPreview URL: ${baseUrl}`
+            })
+
+  cleanup-preview:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          
+      - name: Remove PR Preview
+        run: |
+          rm -rf pr-${{ github.event.pull_request.number }}
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "Remove PR preview for #${{ github.event.pull_request.number }}" || echo "No changes to commit"
+          git push
