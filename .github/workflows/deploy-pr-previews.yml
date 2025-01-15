@@ -24,57 +24,11 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Process apps
-        run: |
-          # Create a directory for the built apps
-          mkdir -p pr-preview
+      - name: Install root dependencies
+        run: npm install
 
-          # Process each app directory
-          for APP in */; do
-            APP=${APP%/}  # Remove trailing slash
-            
-            # Skip special directories
-            if [[ "$APP" == "pr-preview" || "$APP" == ".*" || "$APP" == "node_modules" || "$APP" == ".git" || "$APP" == ".github" ]]; then
-              continue
-            fi
-            
-            echo "Processing $APP"
-            
-            if [ -f "$APP/package.json" ]; then
-              echo "Building Node.js app: $APP"
-              cd $APP
-              npm install
-              npm run build
-              
-              # Copy build output to pr-preview
-              if [ -d "build" ]; then
-                mkdir -p ../pr-preview/$APP
-                cp -r build/* ../pr-preview/$APP/
-              elif [ -d "dist" ]; then
-                mkdir -p ../pr-preview/$APP
-                cp -r dist/* ../pr-preview/$APP/
-              fi
-              cd ..
-            elif [ -f "$APP/index.html" ]; then
-              echo "Static site detected: $APP"
-              mkdir -p pr-preview/$APP
-              cp -r $APP/* pr-preview/$APP/
-            fi
-          done
-          
-          # Create index page that links to all PR preview apps
-          echo "<html><head><title>PR #${PR_NUMBER} Preview</title><style>body{font-family:sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem}</style></head><body>" > pr-preview/index.html
-          echo "<h1>PR #${PR_NUMBER} Preview</h1><ul>" >> pr-preview/index.html
-          for APP in pr-preview/*/; do
-            APP=${APP%/}  # Remove trailing slash
-            APP=${APP#pr-preview/}  # Remove pr-preview/ prefix
-            if [ "$APP" != "index.html" ]; then
-              echo "<li><a href='$APP'>$APP</a></li>" >> pr-preview/index.html
-            fi
-          done
-          echo "</ul></body></html>" >> pr-preview/index.html
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+      - name: Build all apps
+        run: npm run build pr-preview ${{ github.event.pull_request.number }}
 
       - name: Deploy PR Preview
         uses: peaceiris/actions-gh-pages@v3
@@ -106,14 +60,14 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 comment_id: botComment.id,
-                body: body
+                body
               });
             } else {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body: body
+                body
               });
             }
 
@@ -124,15 +78,13 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: gh-pages
-          
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Delete PR Preview
-        run: |
-          rm -rf pr-${{ github.event.pull_request.number }}
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add -A
-          git commit -m "Remove PR preview for #${{ github.event.pull_request.number }}" || echo "No changes to commit"
-          git push
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./pr-preview
+          destination_dir: pr-${{ github.event.pull_request.number }}
+          force_orphan: true

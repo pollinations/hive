@@ -1,4 +1,5 @@
 # 🐝 Pollinations Hive
+<!-- Placeholder for deployment simplification changes -->
 
 Welcome to Pollinations Hive - a revolutionary repository where AI meets collaborative development! This project showcases a unique approach to software development where applications are created and modified entirely through AI assistance.
 
