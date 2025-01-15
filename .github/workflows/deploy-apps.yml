@@ -32,55 +32,11 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Process apps
-        run: |
-          # Create a directory for the built apps
-          mkdir -p _site
+      - name: Install root dependencies
+        run: npm install
 
-          # Process each app directory
-          for APP in */; do
-            APP=${APP%/}  # Remove trailing slash
-            
-            # Skip special directories
-            if [[ "$APP" == "_site" || "$APP" == ".*" || "$APP" == "node_modules" || "$APP" == ".git" || "$APP" == ".github" ]]; then
-              continue
-            fi
-            
-            echo "Processing $APP"
-            
-            if [ -f "$APP/package.json" ]; then
-              echo "Building Node.js app: $APP"
-              cd $APP
-              npm install
-              npm run build
-              
-              # Copy build output to _site
-              if [ -d "build" ]; then
-                mkdir -p ../_site/$APP
-                cp -r build/* ../_site/$APP/
-              elif [ -d "dist" ]; then
-                mkdir -p ../_site/$APP
-                cp -r dist/* ../_site/$APP/
-              fi
-              cd ..
-            elif [ -f "$APP/index.html" ]; then
-              echo "Static site detected: $APP"
-              mkdir -p _site/$APP
-              cp -r $APP/* _site/$APP/
-            fi
-          done
-          
-          # Create main index page that links to all apps
-          echo "<html><head><title>Hive Apps</title><style>body{font-family:sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem}</style></head><body>" > _site/index.html
-          echo "<h1>Hive Apps</h1><ul>" >> _site/index.html
-          for APP in _site/*/; do
-            APP=${APP%/}  # Remove trailing slash
-            APP=${APP#_site/}  # Remove _site/ prefix
-            if [ "$APP" != "index.html" ]; then
-              echo "<li><a href='$APP'>$APP</a></li>" >> _site/index.html
-            fi
-          done
-          echo "</ul></body></html>" >> _site/index.html
+      - name: Build all apps
+        run: npm run build _site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

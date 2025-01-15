@@ -5,6 +5,7 @@
   "scripts": {
     "test": "node scripts/test-apps.js",
     "test:html": "node scripts/test-html.js",
+    "build": "node scripts/build-all.js",
     "postinstall": "npx playwright install chromium"
   },
   "repository": {
