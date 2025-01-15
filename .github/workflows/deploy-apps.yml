@@ -1,11 +1,12 @@
 name: Deploy Apps
 
 on:
-  workflow_run:
-    workflows: ["Test Apps"]
-    types:
-      - completed
-    branches: [main]
+  push:
+    branches: [ main ]
+    paths:
+      - '*/package.json'
+      - '*/index.html'
+      - '*/**'
   pull_request:
     types: [opened, synchronize, reopened, closed]
     paths:
@@ -15,9 +16,7 @@ on:
 
 jobs:
   build-and-deploy:
-    if: |
-      (github.event_name == 'pull_request' && github.event.action != 'closed') ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -25,8 +24,6 @@ jobs:
       
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
