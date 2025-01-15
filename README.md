@@ -49,7 +49,6 @@ Every pull request in this repository gets an automatic preview deployment. Here
 
 | PR | Title | Preview |
 |-----|--------|---------|
-| [#109](https://github.com/pollinations/hive/pull/109) | Add mobile touch support to graphics editor | [Preview](https://pollinations.github.io/hive/pr-109/) |
 
 _This list is automatically updated when PRs are opened or closed._
 ## 🌈 Features
