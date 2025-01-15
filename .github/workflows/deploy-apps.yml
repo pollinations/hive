@@ -40,6 +40,7 @@ jobs:
 
       - name: Build all apps
         run: |
+          echo "Event name: ${{ github.event_name }}"
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             npm run build pr-preview ${{ github.event.pull_request.number }}
             echo "PR Preview build output structure:"
