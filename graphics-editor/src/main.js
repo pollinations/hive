@@ -4,6 +4,7 @@ const ctx = canvas.getContext('2d');
 let currentTool = 'select';
 let isDrawing = false;
 let startX, startY;
+let shapeStartX, shapeStartY;
 let isDragging = false;
 let isResizing = false;
 let resizeHandle = null;
@@ -218,6 +219,8 @@ canvas.addEventListener('touchmove', handleMove, { passive: false });
 canvas.addEventListener('touchend', handleEnd, { passive: false });
 canvas.addEventListener('touchcancel', handleEnd, { passive: false });
 
+// All event handling is now unified in handleStart, handleMove, and handleEnd
+
 // Tool selection
 const tools = document.querySelectorAll('.tool-btn');
 tools.forEach(tool => {
@@ -293,7 +296,6 @@ class CanvasObject {
 
 // Text tool implementation
 let textMode = false;
-let shapeStartX, shapeStartY;
 
 function handleTextTool(e) {
     if (currentTool !== 'text') return;
@@ -363,124 +365,10 @@ tools.forEach(tool => {
     }
 });
 
-// Shape tool implementation
-let shapeStartX, shapeStartY;
+// Touch gesture handling
+let initialObjectScale = 1;
 
-canvas.addEventListener('mousedown', handleMouseDown);
-canvas.addEventListener('mousemove', handleMouseMove);
-canvas.addEventListener('mouseup', handleMouseUp);
-
-function handleMouseDown(e) {
-    const rect = canvas.getBoundingClientRect();
-    startX = e.clientX - rect.left;
-    startY = e.clientY - rect.top;
-
-    if (currentTool === 'select') {
-        // Check for resize handles first
-        if (selectedObject) {
-            resizeHandle = getResizeHandle(startX, startY);
-            if (resizeHandle) {
-                isResizing = true;
-                return;
-            }
-        }
-
-        // Check for object selection
-        selectedObject = canvasObjects
-            .slice()
-            .reverse()
-            .find(obj => obj.isPointInside(startX, startY));
-
-        if (selectedObject) {
-            isDragging = true;
-        }
-        updateLayersList();
-    } else if (currentTool === 'shape') {
-        shapeStartX = startX;
-        shapeStartY = startY;
-        isDrawing = true;
-    }
-}
-
-function handleMouseMove(e) {
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    if (isDragging && selectedObject) {
-        const dx = x - startX;
-        const dy = y - startY;
-        selectedObject.props.x += dx;
-        selectedObject.props.y += dy;
-        startX = x;
-        startY = y;
-        updateCanvas();
-        drawSelectionHandles();
-    } else if (isResizing && selectedObject) {
-        const newWidth = x - selectedObject.props.x;
-        const newHeight = y - selectedObject.props.y;
-        
-        if (resizeHandle.includes('e')) {
-            selectedObject.props.width = newWidth;
-        }
-        if (resizeHandle.includes('s')) {
-            selectedObject.props.height = newHeight;
-        }
-        if (resizeHandle.includes('w')) {
-            const dx = x - startX;
-            selectedObject.props.x += dx;
-            selectedObject.props.width -= dx;
-        }
-        if (resizeHandle.includes('n')) {
-            const dy = y - startY;
-            selectedObject.props.y += dy;
-            selectedObject.props.height -= dy;
-        }
-        
-        startX = x;
-        startY = y;
-        updateCanvas();
-        drawSelectionHandles();
-    } else if (isDrawing && currentTool === 'shape') {
-        updateCanvas();
-        // Preview shape
-        ctx.beginPath();
-        ctx.fillStyle = document.getElementById('color-picker').value;
-        ctx.rect(
-            shapeStartX,
-            shapeStartY,
-            x - shapeStartX,
-            y - shapeStartY
-        );
-        ctx.fill();
-    }
-}
-
-function handleMouseUp(e) {
-    if (isDrawing && currentTool === 'shape') {
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        const shapeObject = new CanvasObject('shape', {
-            shapeType: 'rectangle',
-            x: Math.min(shapeStartX, x),
-            y: Math.min(shapeStartY, y),
-            width: Math.abs(x - shapeStartX),
-            height: Math.abs(y - shapeStartY),
-            color: document.getElementById('color-picker').value
-        });
-
-        canvasObjects.push(shapeObject);
-        updateCanvas();
-        updateLayersList();
-    }
-
-    isDrawing = false;
-    isDragging = false;
-    isResizing = false;
-    resizeHandle = null;
-}
+// Touch gesture handling is now integrated into the unified handle functions
 
 function getResizeHandle(x, y) {
     if (!selectedObject) return null;
@@ -662,10 +550,44 @@ async function initTextCommands() {
     });
 }
 
+// Layers panel toggle for mobile
+function initMobileUI() {
+    const layersToggle = document.getElementById('layers-toggle');
+    const layersPanel = document.querySelector('.layers-panel');
+
+    layersToggle.addEventListener('click', () => {
+        layersPanel.classList.toggle('show');
+    });
+
+    // Close layers panel when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768 && 
+            !layersPanel.contains(e.target) && 
+            e.target !== layersToggle) {
+            layersPanel.classList.remove('show');
+        }
+    });
+
+    // Adjust canvas size on window resize
+    window.addEventListener('resize', () => {
+        const container = document.querySelector('.canvas-container');
+        const maxWidth = container.clientWidth - 40;
+        const maxHeight = container.clientHeight - 40;
+        
+        if (canvas.width > maxWidth || canvas.height > maxHeight) {
+            const scale = Math.min(maxWidth / canvas.width, maxHeight / canvas.height);
+            canvas.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        } else {
+            canvas.style.transform = 'translate(-50%, -50%)';
+        }
+    });
+}
+
 // Initialize the editor
 async function initEditor() {
     try {
         initCanvas();
+        initMobileUI();
         await initTextCommands();
         console.log('Graphics editor initialized successfully');
     } catch (error) {
