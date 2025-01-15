@@ -1,3 +1,2 @@
-cd tarot-reader
 npm install
-npm run build
+npx playwright install chromium
