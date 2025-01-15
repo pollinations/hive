@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Image Chat - Pollinations</title>
+    <title>Pollinations AI Chat</title>
     <style>
         :root {
             --primary-bg: #121212;
@@ -14,6 +14,11 @@
             --button-bg: #3a3a3a;
             --button-hover: #4a4a4a;
             --accent-color: #6b46c1;
+            --dropdown-bg: #2a2a2a;
+            --dropdown-hover: #3a3a3a;
+            --attachment-bg: #2a2a2a;
+            --success-color: #48bb78;
+            --error-color: #f56565;
         }
 
         * {
@@ -81,12 +86,74 @@
             align-self: flex-start;
         }
 
-        #inputArea {
+        #controlsArea {
             padding: 1rem;
             background-color: var(--secondary-bg);
             border-top: 1px solid var(--border-color);
             display: flex;
+            flex-direction: column;
             gap: 0.5rem;
+        }
+
+        #inputArea {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        #modelControls {
+            display: flex;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        #modelSelect {
+            flex: 1;
+            padding: 0.5rem;
+            background-color: var(--dropdown-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #modelSelect:hover {
+            background-color: var(--dropdown-hover);
+        }
+
+        #modelSelect option {
+            background-color: var(--dropdown-bg);
+        }
+
+        #attachmentArea {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .attachment-preview {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background-color: var(--attachment-bg);
+            border-radius: 4px;
+            margin-top: 0.5rem;
+        }
+
+        .attachment-preview img {
+            max-width: 50px;
+            max-height: 50px;
+            border-radius: 4px;
+        }
+
+        .remove-attachment {
+            cursor: pointer;
+            color: var(--error-color);
         }
 
         #inputField {
@@ -205,25 +272,97 @@
                     Feel free to ask me anything or request images, and I'll do my best to help!
                 </div>
             </div>
-            <div id="inputArea">
-                <textarea 
-                    id="inputField" 
-                    placeholder="Type your message..." 
-                    rows="1"
-                    maxlength="500"
-                ></textarea>
-                <button id="sendButton" class="button">Send</button>
+            <div id="controlsArea">
+                <div id="modelControls">
+                    <select id="modelSelect" class="button">
+                        <option value="gpt4">ChatGPT 4o</option>
+                        <option value="gpt3">ChatGPT o1</option>
+                        <option value="claude">Claude</option>
+                        <option value="deepseek">Deepseek</option>
+                        <option value="llama">Llama</option>
+                    </select>
+                    <button id="attachButton" class="button">📎</button>
+                    <button id="imageButton" class="button">🖼️</button>
+                </div>
+                <div id="attachmentArea"></div>
+                <div id="inputArea">
+                    <textarea 
+                        id="inputField" 
+                        placeholder="Type your message..." 
+                        rows="1"
+                        maxlength="500"
+                    ></textarea>
+                    <button id="sendButton" class="button">Send</button>
+                </div>
+                <input type="file" id="fileInput" accept="image/*,.pdf,.txt,.doc,.docx">
             </div>
         </div>
     </div>
 
     <script>
+        // DOM Elements
         const inputField = document.getElementById('inputField');
         const chatArea = document.getElementById('chatArea');
         const imagePane = document.getElementById('imagePane');
         const sendButton = document.getElementById('sendButton');
+        const modelSelect = document.getElementById('modelSelect');
+        const attachButton = document.getElementById('attachButton');
+        const imageButton = document.getElementById('imageButton');
+        const fileInput = document.getElementById('fileInput');
+        const attachmentArea = document.getElementById('attachmentArea');
 
         let isProcessing = false;
+        let currentAttachment = null;
+
+        // Initialize IndexedDB
+        let db;
+        const DB_NAME = 'PollinationsChat';
+        const STORE_NAME = 'messages';
+
+        const request = indexedDB.open(DB_NAME, 1);
+
+        request.onerror = (event) => {
+            console.error('IndexedDB error:', event.target.error);
+        };
+
+        request.onupgradeneeded = (event) => {
+            db = event.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: 'timestamp' });
+            }
+        };
+
+        request.onsuccess = (event) => {
+            db = event.target.result;
+            loadChatHistory();
+        };
+
+        // Load chat history from IndexedDB
+        async function loadChatHistory() {
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.getAll();
+
+            request.onsuccess = () => {
+                const messages = request.result;
+                messages.forEach(msg => {
+                    appendMessage(msg.content, msg.sender, msg.attachment);
+                });
+            };
+        }
+
+        // Save message to IndexedDB
+        function saveMessage(content, sender, attachment = null) {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const message = {
+                timestamp: Date.now(),
+                content,
+                sender,
+                attachment
+            };
+            store.add(message);
+        }
 
         // Auto-resize textarea
         inputField.addEventListener('input', function() {
@@ -250,29 +389,28 @@
         }
 
         async function sendMessage() {
-            if (isProcessing || !inputField.value.trim()) return;
+            if (isProcessing || (!inputField.value.trim() && !currentAttachment)) return;
 
             const message = sanitizeInput(inputField.value);
-            if (!message) return;
-
             isProcessing = true;
             sendButton.disabled = true;
+
+            // Add user message with attachment if present
+            appendMessage(message, 'user', currentAttachment);
+            saveMessage(message, 'user', currentAttachment);
+
+            // Clear input and attachment
             inputField.value = '';
             inputField.style.height = 'auto';
-
-            // Add user message
-            appendMessage(message, 'user');
+            currentAttachment = null;
+            attachmentArea.innerHTML = '';
 
             try {
-                // Generate image
-                appendLoadingImage();
-                const imageUrl = await generateImage(message);
-                updateLastImage(imageUrl);
-
                 // Get AI response
                 appendMessage('...', 'ai');
                 const aiResponse = await getAIResponse(message);
                 updateLastMessage(aiResponse);
+                saveMessage(aiResponse, 'ai');
             } catch (error) {
                 appendError(error.message);
             } finally {
@@ -282,10 +420,94 @@
             }
         }
 
-        function appendMessage(text, sender) {
+        // Handle file attachments
+        attachButton.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        imageButton.addEventListener('click', () => {
+            if (inputField.value.trim()) {
+                generateImage(inputField.value.trim());
+            }
+        });
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentAttachment = {
+                    name: file.name,
+                    type: file.type,
+                    data: e.target.result
+                };
+                
+                displayAttachmentPreview(file);
+            };
+            
+            if (file.type.startsWith('image/')) {
+                reader.readAsDataURL(file);
+            } else {
+                reader.readAsText(file);
+            }
+        }
+
+        function displayAttachmentPreview(file) {
+            attachmentArea.innerHTML = '';
+            
+            const preview = document.createElement('div');
+            preview.className = 'attachment-preview';
+            
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                preview.appendChild(img);
+            }
+            
+            const name = document.createElement('span');
+            name.textContent = file.name;
+            preview.appendChild(name);
+            
+            const remove = document.createElement('span');
+            remove.textContent = '✕';
+            remove.className = 'remove-attachment';
+            remove.onclick = () => {
+                attachmentArea.innerHTML = '';
+                currentAttachment = null;
+                fileInput.value = '';
+            };
+            preview.appendChild(remove);
+            
+            attachmentArea.appendChild(preview);
+        }
+
+        function appendMessage(text, sender, attachment = null) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `${sender}-message message`;
-            messageDiv.textContent = text;
+            
+            const textDiv = document.createElement('div');
+            textDiv.textContent = text;
+            messageDiv.appendChild(textDiv);
+
+            if (attachment) {
+                if (attachment.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = attachment.data;
+                    img.style.maxWidth = '100%';
+                    img.style.borderRadius = '4px';
+                    img.style.marginTop = '0.5rem';
+                    messageDiv.appendChild(img);
+                } else {
+                    const attachmentDiv = document.createElement('div');
+                    attachmentDiv.className = 'attachment-preview';
+                    attachmentDiv.textContent = `📎 ${attachment.name}`;
+                    messageDiv.appendChild(attachmentDiv);
+                }
+            }
+
             chatArea.appendChild(messageDiv);
             scrollToBottom();
         }
@@ -328,29 +550,70 @@
         }
 
         async function generateImage(prompt) {
-            const seed = Math.floor(Math.random() * 1000000);
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&width=800&height=600`;
+            appendLoadingImage();
             
-            // Wait for image to load
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => resolve(imageUrl);
-                img.onerror = () => reject(new Error('Failed to generate image'));
-                img.src = imageUrl;
-            });
+            try {
+                const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=800&height=600&model=flux`;
+                
+                // Wait for image to load
+                await new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = resolve;
+                    img.onerror = reject;
+                    img.src = imageUrl;
+                });
+
+                updateLastImage(imageUrl);
+                
+                // Save the generated image as a message
+                const imageAttachment = {
+                    name: 'Generated Image',
+                    type: 'image/jpeg',
+                    data: imageUrl
+                };
+                appendMessage(`Generated image for: ${prompt}`, 'ai', imageAttachment);
+                saveMessage(`Generated image for: ${prompt}`, 'ai', imageAttachment);
+            } catch (error) {
+                appendError('Failed to generate image');
+                const loadingElement = imagePane.querySelector('.loading');
+                if (loadingElement) {
+                    loadingElement.remove();
+                }
+            }
         }
 
         async function getAIResponse(prompt) {
-            const seed = Math.floor(Math.random() * 1000000);
-            const response = await fetch(
-                `https://text.pollinations.ai/${encodeURIComponent(prompt)}?seed=${seed}&model=openai`
-            );
+            const model = modelSelect.value;
+            let endpoint = 'https://text.pollinations.ai/';
+            let payload;
+
+            if (model === 'gpt4' || model === 'gpt3') {
+                endpoint += 'openai';
+                payload = {
+                    messages: [{ role: 'user', content: prompt }],
+                    model: model === 'gpt4' ? 'gpt-4' : 'gpt-3.5-turbo'
+                };
+            } else {
+                payload = {
+                    messages: [{ role: 'user', content: prompt }],
+                    model: model
+                };
+            }
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
             
             if (!response.ok) {
                 throw new Error('Failed to get AI response');
             }
             
-            return await response.text();
+            const data = await response.json();
+            return data.choices[0].message.content;
         }
     </script>
 </body>
