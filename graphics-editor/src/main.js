@@ -1,5 +1,3 @@
-import { handleTextCommand, executeAction } from './textInterface.js';
-
 // Canvas state and context
 const canvas = document.getElementById('main-canvas');
 const ctx = canvas.getContext('2d');
@@ -400,33 +398,38 @@ document.getElementById('export-btn').addEventListener('click', () => {
     link.click();
 });
 
-// Text command handling
-document.getElementById('execute-command').addEventListener('click', async () => {
-    const commandInput = document.getElementById('text-command');
-    const command = commandInput.value.trim();
-    
-    if (!command) return;
-    
-    try {
-        const action = await handleTextCommand(command);
-        executeAction(action);
-        commandInput.value = ''; // Clear input after successful execution
-    } catch (error) {
-        console.error('Failed to execute command:', error);
-        alert('Failed to execute command. Please try again.');
-    }
-});
+// Initialize text command handling after export to avoid circular dependency
+async function initTextCommands() {
+    const { handleTextCommand, executeAction } = await import('./textInterface.js');
 
-document.getElementById('text-command').addEventListener('keypress', async (e) => {
-    if (e.key === 'Enter') {
-        document.getElementById('execute-command').click();
-    }
-});
+    document.getElementById('execute-command').addEventListener('click', async () => {
+        const commandInput = document.getElementById('text-command');
+        const command = commandInput.value.trim();
+        
+        if (!command) return;
+        
+        try {
+            const action = await handleTextCommand(command);
+            executeAction(action);
+            commandInput.value = ''; // Clear input after successful execution
+        } catch (error) {
+            console.error('Failed to execute command:', error);
+            alert('Failed to execute command. Please try again.');
+        }
+    });
+
+    document.getElementById('text-command').addEventListener('keypress', async (e) => {
+        if (e.key === 'Enter') {
+            document.getElementById('execute-command').click();
+        }
+    });
+}
 
 // Initialize the editor
-function initEditor() {
+async function initEditor() {
     try {
         initCanvas();
+        await initTextCommands();
         console.log('Graphics editor initialized successfully');
     } catch (error) {
         console.error('Failed to initialize editor:', error);
