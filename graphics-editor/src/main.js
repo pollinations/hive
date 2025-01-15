@@ -13,8 +13,8 @@ let canvasOffsetX = 0;
 let canvasOffsetY = 0;
 
 // Object to store all canvas elements
-const canvasObjects = [];
-let selectedObject = null;
+export const canvasObjects = [];
+export let selectedObject = null;
 
 // Transformation handles size
 const HANDLE_SIZE = 8;
@@ -635,5 +635,50 @@ document.getElementById('export-btn').addEventListener('click', () => {
     link.click();
 });
 
-// Initialize the canvas
-initCanvas();
+// Initialize text command handling after export to avoid circular dependency
+async function initTextCommands() {
+    const { handleTextCommand, executeAction } = await import('./textInterface.js');
+
+    document.getElementById('execute-command').addEventListener('click', async () => {
+        const commandInput = document.getElementById('text-command');
+        const command = commandInput.value.trim();
+        
+        if (!command) return;
+        
+        try {
+            const action = await handleTextCommand(command);
+            executeAction(action);
+            commandInput.value = ''; // Clear input after successful execution
+        } catch (error) {
+            console.error('Failed to execute command:', error);
+            alert('Failed to execute command. Please try again.');
+        }
+    });
+
+    document.getElementById('text-command').addEventListener('keypress', async (e) => {
+        if (e.key === 'Enter') {
+            document.getElementById('execute-command').click();
+        }
+    });
+}
+
+// Initialize the editor
+async function initEditor() {
+    try {
+        initCanvas();
+        await initTextCommands();
+        console.log('Graphics editor initialized successfully');
+    } catch (error) {
+        console.error('Failed to initialize editor:', error);
+    }
+}
+
+// Wait for DOM content to be loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEditor);
+} else {
+    initEditor();
+}
+
+// Export canvas-related functions and classes
+export { CanvasObject, updateCanvas, updateLayersList, canvas };

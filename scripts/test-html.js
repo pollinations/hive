@@ -27,7 +27,24 @@ async function testHtmlFile(htmlPath) {
   try {
     await new Promise((resolve) => server.listen(port, resolve));
     await page.goto(`http://localhost:${port}/${path.basename(htmlPath)}`);
-    await page.waitForTimeout(2000);
+    
+    // Wait for app-specific initialization
+    try {
+      const appName = path.basename(path.dirname(htmlPath));
+      if (appName === 'graphics-editor') {
+        await page.waitForFunction(() => {
+          return document.querySelector('canvas') && 
+                 typeof window.getCanvasState === 'function';
+        }, { timeout: 5000 });
+      } else {
+        // For other apps, just wait for basic page load
+        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(1000);
+      }
+    } catch (error) {
+      console.error(`Timeout waiting for ${path.basename(path.dirname(htmlPath))} initialization`);
+      hasErrors = true;
+    }
   } catch (error) {
     console.error(`Failed to load ${htmlPath}:`, error);
     hasErrors = true;
