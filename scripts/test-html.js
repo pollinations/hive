@@ -66,14 +66,21 @@ async function testHtmlFile(htmlPath) {
     await new Promise((resolve) => server.listen(port, resolve));
     await page.goto(`http://localhost:${port}/${path.basename(htmlPath)}`);
     
-    // Wait for potential module loading and initialization
+    // Wait for app-specific initialization
     try {
-      await page.waitForFunction(() => {
-        return document.querySelector('canvas') && 
-               typeof window.getCanvasState === 'function';
-      }, { timeout: 5000 });
+      const appName = path.basename(path.dirname(htmlPath));
+      if (appName === 'graphics-editor') {
+        await page.waitForFunction(() => {
+          return document.querySelector('canvas') && 
+                 typeof window.getCanvasState === 'function';
+        }, { timeout: 5000 });
+      } else {
+        // For other apps, just wait for basic page load
+        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(1000);
+      }
     } catch (error) {
-      console.error('Timeout waiting for editor initialization');
+      console.error(`Timeout waiting for ${path.basename(path.dirname(htmlPath))} initialization`);
       hasErrors = true;
     }
   } catch (error) {
