@@ -1,4 +1,40 @@
 const { chromium } = require('@playwright/test');
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+
+function createServer(rootDir) {
+  return http.createServer((req, res) => {
+    let filePath = path.join(rootDir, req.url === '/' ? 'index.html' : req.url);
+    
+    const ext = path.extname(filePath);
+    const contentTypes = {
+      '.html': 'text/html',
+      '.js': 'text/javascript',
+      '.css': 'text/css',
+      '.json': 'application/json',
+      '.png': 'image/png',
+      '.jpg': 'image/jpeg',
+      '.gif': 'image/gif',
+    };
+    const contentType = contentTypes[ext] || 'text/plain';
+
+    fs.readFile(filePath, (error, content) => {
+      if (error) {
+        if (error.code === 'ENOENT') {
+          res.writeHead(404);
+          res.end('File not found');
+        } else {
+          res.writeHead(500);
+          res.end('Internal server error');
+        }
+      } else {
+        res.writeHead(200, { 'Content-Type': contentType });
+        res.end(content, 'utf-8');
+      }
+    });
+  });
+}
 
 async function testHtmlFile(htmlPath) {
   const browser = await chromium.launch();
@@ -16,18 +52,22 @@ async function testHtmlFile(htmlPath) {
     console.error(`Page error in ${htmlPath}:`, error);
     hasErrors = true;
   });
+
+  const server = createServer(path.dirname(path.join(process.cwd(), htmlPath)));
+  const port = 3000;
   
   try {
-    // Use file:// protocol to load local HTML files
-    await page.goto(`file://${process.cwd()}/${htmlPath}`);
-    // Wait a bit for any async operations
+    await new Promise((resolve) => server.listen(port, resolve));
+    await page.goto(`http://localhost:${port}/${path.basename(htmlPath)}`);
     await page.waitForTimeout(2000);
   } catch (error) {
     console.error(`Failed to load ${htmlPath}:`, error);
     hasErrors = true;
+  } finally {
+    server.close();
+    await browser.close();
   }
   
-  await browser.close();
   return !hasErrors;
 }
 
