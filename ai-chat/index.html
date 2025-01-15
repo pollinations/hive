@@ -4,7 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pollinations AI Chat</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script>
+        // Debug logging
+        console.log('AI Chat App initializing...');
+        window.addEventListener('load', () => {
+            console.log('App loaded successfully');
+            console.log('Current URL:', window.location.href);
+            console.log('Font Awesome loaded:', !!document.querySelector('link[href*="font-awesome"]'));
+        });
+    </script>
     <style>
         :root {
             --primary-bg: #343541;
@@ -473,10 +482,23 @@
         };
 
         request.onsuccess = (event) => {
+            console.log('IndexedDB initialized successfully');
             db = event.target.result;
             loadChats();
             loadCurrentChat();
         };
+
+        // Add a test div to verify the app is working
+        const testDiv = document.createElement('div');
+        testDiv.style.position = 'fixed';
+        testDiv.style.top = '0';
+        testDiv.style.right = '0';
+        testDiv.style.background = 'var(--accent-color)';
+        testDiv.style.color = 'white';
+        testDiv.style.padding = '4px 8px';
+        testDiv.style.fontSize = '12px';
+        testDiv.textContent = 'App Ready';
+        document.body.appendChild(testDiv);
         // Chat Management Functions
         function createNewChat() {
             const chatId = Date.now().toString();
