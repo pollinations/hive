@@ -13,8 +13,26 @@ on:
       - '*/index.html'
       - '*/**'
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
   build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    # Only run if:
+    # 1. It's a PR and not a PR close action
+    # 2. OR it's from workflow_run (main branch) and the test workflow succeeded
     if: |
       (github.event_name == 'pull_request' && github.event.action != 'closed') ||
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
@@ -22,10 +40,13 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      pages: write
+      id-token: write
       
     steps:
       - uses: actions/checkout@v3
         with:
+          # For workflow_run events, we need to explicitly checkout the PR head
           ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Set up Node.js
@@ -53,6 +74,10 @@ jobs:
             tree _site -L 3
           fi
 
+      # Setup Pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -61,6 +86,8 @@ jobs:
           destination_dir: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}
           keep_files: true
           enable_jekyll: false
+          # Force push to ensure the deployment
+          force_orphan: true
 
       - name: Create and deploy root index.html
         if: github.event_name != 'pull_request'
@@ -108,6 +135,7 @@ jobs:
           destination_dir: .
           keep_files: true
           enable_jekyll: false
+          force_orphan: false
 
       - name: Comment PR
         if: github.event_name == 'pull_request'
