@@ -219,14 +219,7 @@ canvas.addEventListener('touchmove', handleMove, { passive: false });
 canvas.addEventListener('touchend', handleEnd, { passive: false });
 canvas.addEventListener('touchcancel', handleEnd, { passive: false });
 
-// Remove old event listeners that were causing duplicates
-canvas.removeEventListener('mousedown', handleMouseDown);
-canvas.removeEventListener('mousemove', handleMouseMove);
-canvas.removeEventListener('mouseup', handleMouseUp);
-
-canvas.removeEventListener('touchstart', handleTouchStart);
-canvas.removeEventListener('touchmove', handleTouchMove);
-canvas.removeEventListener('touchend', handleTouchEnd);
+// All event handling is now unified in handleStart, handleMove, and handleEnd
 
 // Tool selection
 const tools = document.querySelectorAll('.tool-btn');
