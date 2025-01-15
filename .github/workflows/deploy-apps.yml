@@ -50,19 +50,59 @@ jobs:
             tree _site -L 3
           fi
 
-      - name: Checkout gh-pages branch
-        run: |
-          git fetch
-          git checkout gh-pages || git checkout -b gh-pages
-          echo "Current gh-pages branch structure:"
-          tree -L 3 || (apt-get update && apt-get install -y tree && tree -L 3)
-
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ${{ github.event_name == 'pull_request' && './pr-preview' || './_site' }}
-          destination_dir: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || '.' }}
+          destination_dir: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}
+          keep_files: true
+          enable_jekyll: false
+
+      - name: Create and deploy root index.html
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p root
+          cat > root/index.html << 'EOL'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Pollinations Hive</title>
+              <meta http-equiv="refresh" content="0; url=./main/" />
+              <style>
+                  body {
+                      font-family: system-ui, -apple-system, sans-serif;
+                      max-width: 800px;
+                      margin: 2rem auto;
+                      padding: 0 1rem;
+                      line-height: 1.5;
+                  }
+                  a {
+                      color: #0366d6;
+                      text-decoration: none;
+                  }
+                  a:hover {
+                      text-decoration: underline;
+                  }
+              </style>
+          </head>
+          <body>
+              <h1>Pollinations Hive</h1>
+              <p>Redirecting to <a href="./main/">main deployment</a>...</p>
+              <script>
+                  window.location.href = './main/';
+              </script>
+          </body>
+          </html>
+          EOL
+
+      - name: Deploy root index
+        if: github.event_name != 'pull_request'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./root
+          destination_dir: .
           keep_files: true
           enable_jekyll: false
 
