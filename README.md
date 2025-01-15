@@ -49,6 +49,7 @@ Every pull request in this repository gets an automatic preview deployment. Here
 
 | PR | Title | Preview |
 |-----|--------|---------|
+| [#124](https://github.com/pollinations/hive/pull/124) | dummy pr 6 | [Preview](https://pollinations.github.io/hive/pr-124/) |
 
 _This list is automatically updated when PRs are opened or closed._
 ## 🌈 Features
