@@ -10,37 +10,44 @@
     <div class="app-container">
         <div class="toolbar">
             <div class="tool-group">
-                <button id="select-tool" class="tool-btn">Select</button>
-                <button id="text-tool" class="tool-btn">Text</button>
-                <button id="shape-tool" class="tool-btn">Shape</button>
-                <button id="image-tool" class="tool-btn">Image</button>
+                <button id="select-tool" class="tool-btn" aria-label="Select Tool">Select</button>
+                <button id="text-tool" class="tool-btn" aria-label="Text Tool">Text</button>
+                <button id="shape-tool" class="tool-btn" aria-label="Shape Tool">Shape</button>
+                <button id="image-tool" class="tool-btn" aria-label="Image Tool">Image</button>
             </div>
             <div class="tool-group">
-                <input type="color" id="color-picker" title="Color">
-                <select id="font-family">
+                <input type="color" id="color-picker" title="Color" aria-label="Color Picker">
+                <select id="font-family" aria-label="Font Family">
                     <option value="Arial">Arial</option>
                     <option value="Times New Roman">Times New Roman</option>
                     <option value="Helvetica">Helvetica</option>
                 </select>
-                <input type="number" id="font-size" value="16" min="8" max="72">
+                <input type="number" id="font-size" value="16" min="8" max="72" aria-label="Font Size">
             </div>
             <div class="tool-group">
-                <button id="bring-forward">Bring Forward</button>
-                <button id="send-backward">Send Backward</button>
+                <button id="bring-forward" aria-label="Bring Forward">Bring Forward</button>
+                <button id="send-backward" aria-label="Send Backward">Send Backward</button>
             </div>
             <div class="tool-group">
-                <button id="export-btn">Export</button>
+                <button id="export-btn" aria-label="Export">Export</button>
             </div>
         </div>
         
         <div class="main-content">
+            <button class="layers-toggle" aria-label="Toggle Layers Panel" title="Toggle Layers">
+                Layers
+            </button>
+            
             <div class="canvas-container">
                 <canvas id="main-canvas"></canvas>
             </div>
             
             <button id="layers-toggle">☰</button>
             <div class="layers-panel">
-                <h3>Layers</h3>
+                <h3>
+                    Layers
+                    <button class="layers-toggle" aria-label="Close Layers Panel">×</button>
+                </h3>
                 <div id="layers-list"></div>
             </div>
         </div>
