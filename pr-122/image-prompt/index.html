@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pollinations Image Generator</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: var(--spacing-4);
+            margin-bottom: var(--spacing-6);
+        }
+        
+        .form-group {
+            margin-bottom: var(--spacing-4);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: var(--spacing-2);
+            font-weight: 500;
+            color: var(--color-text);
+        }
+        
+        .image-container {
+            margin-top: var(--spacing-6);
+            text-align: center;
+        }
+        
+        .image-container img {
+            max-width: 100%;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow);
+        }
+        
+        #loading {
+            display: none;
+            text-align: center;
+            margin: var(--spacing-4) 0;
+        }
+        
+        .generate-button {
+            width: 100%;
+            padding: var(--spacing-4);
+            font-size: 1.125rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Pollinations Image Generator</h1>
+            <div class="form-group">
+                <label for="prompt">Image Prompt:</label>
+                <input type="text" id="prompt" placeholder="Describe the image you want to generate..." required>
+            </div>
+            <div class="controls">
+                <div class="form-group">
+                    <label for="width">Width:</label>
+                    <input type="number" id="width" value="1024" min="64" max="2048" step="64">
+                </div>
+                <div class="form-group">
+                    <label for="height">Height:</label>
+                    <input type="number" id="height" value="1024" min="64" max="2048" step="64">
+                </div>
+                <div class="form-group">
+                    <label for="seed">Seed (optional):</label>
+                    <input type="number" id="seed" placeholder="Random">
+                </div>
+            </div>
+            <button class="generate-button" onclick="generateImage()">Generate Image</button>
+            <div class="loading" id="loading">Generating image...</div>
+            <div class="image-container" id="imageContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        function generateImage() {
+            const prompt = document.getElementById('prompt').value.trim();
+            if (!prompt) {
+                alert('Please enter a prompt');
+                return;
+            }
+
+            const width = document.getElementById('width').value;
+            const height = document.getElementById('height').value;
+            const seed = document.getElementById('seed').value;
+
+            // Show loading message
+            document.getElementById('loading').style.display = 'block';
+
+            // Construct the URL with parameters
+            let url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`;
+            url += `?width=${width}&height=${height}`;
+            if (seed) url += `&seed=${seed}`;
+
+            // Create image element
+            const img = new Image();
+            img.onload = function() {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('imageContainer').innerHTML = '';
+                document.getElementById('imageContainer').appendChild(img);
+            };
+            img.onerror = function() {
+                document.getElementById('loading').style.display = 'none';
+                alert('Error generating image. Please try again.');
+            };
+            img.src = url;
+        }
+
+        // Allow generating image with Enter key
+        document.getElementById('prompt').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateImage();
+            }
+        });
+    </script>
+</body>
+</html>
