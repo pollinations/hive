@@ -11,6 +11,7 @@ class MillionaireGame {
         };
         this.moneyLadder = [500, 1000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000];
         this.safeHavens = [1000, 50000];
+        this.questionHistory = [];
         
         this.initializeElements();
         this.attachEventListeners();
@@ -50,6 +51,7 @@ class MillionaireGame {
         this.isGameActive = true;
         this.currentQuestion = 0;
         this.currentPrize = 0;
+        this.questionHistory = [];
         this.helpLinesUsed = {
             fiftyFifty: false,
             phoneFriend: false,
@@ -87,16 +89,24 @@ class MillionaireGame {
 
     async loadNextQuestion() {
         const difficulty = Math.min(9, Math.floor(this.currentQuestion / 2));
+        let historyContext = '';
+        if (this.questionHistory.length > 0) {
+            historyContext = `Previously asked questions (DO NOT REPEAT THESE):\n${this.questionHistory.map(q => 
+                `Question: "${q.question}"\nAnswers: ${q.answers.join(', ')}\nCorrect Answer: ${q.answers[q.correctIndex]}\n`
+            ).join('\n')}`;
+        }
+        
         const prompt = `Generate a multiple choice trivia question for "Who Wants to Be a Millionaire?" about artificial intelligence, consciousness, or the technological singularity.
                        Keep the questions accessible and interesting for a general audience.
                        Difficulty level: ${difficulty}/9 (0 being easiest, 9 being hardest).
+                       ${historyContext}
                        Format: Return a JSON object with the following structure:
                        {
                            "question": "The question text",
                            "answers": ["correct answer", "wrong answer 1", "wrong answer 2", "wrong answer 3"],
                            "correctIndex": 0
                        }
-                       Make sure the question is challenging but fair, and all answers are plausible.`;
+                       Make sure the question is challenging but fair, all answers are plausible, and the question has not been asked before.`;
 
         try {
             const randomSeed = Math.floor(Math.random() * 1000000);
@@ -117,6 +127,9 @@ class MillionaireGame {
 
             const data = await response.json();
             this.currentQuestionData = data;
+            
+            // Add question to history
+            this.questionHistory.push(data);
             
             // Update UI with new question
             this.questionElement.textContent = data.question;
