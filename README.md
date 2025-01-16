@@ -11,6 +11,7 @@ Welcome to Pollinations Hive - a revolutionary repository where AI meets collabo
 | [tarot-reader](https://pollinations.github.io/hive/main/tarot-reader/) | [./tarot-reader](./tarot-reader) | 2025-01-14 |
 | [pollinations-image-show](https://pollinations.github.io/hive/main/pollinations-image-show/) | [./pollinations-image-show](./pollinations-image-show) | 2025-01-14 |
 | [graphics-editor](https://pollinations.github.io/hive/main/graphics-editor/) | [./graphics-editor](./graphics-editor) | 2025-01-15 |
+| [millionaire-game](https://pollinations.github.io/hive/main/millionaire-game/) | [./millionaire-game](./millionaire-game) | 2025-01-16 |
 | [placeholder-generator](https://pollinations.github.io/hive/main/placeholder-generator/) | [./placeholder-generator](./placeholder-generator) | 2025-01-14 |
 | [ai-chat](https://pollinations.github.io/hive/main/ai-chat/) | [./ai-chat](./ai-chat) | 2025-01-15 |
 ## 📚 Documentation
