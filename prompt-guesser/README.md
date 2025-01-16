@@ -27,8 +27,11 @@ npm run dev
 # Run tests
 npm test
 
-# Build for production
+# Build for production (outputs to dist/ by default)
 npm run build
+
+# Build to a custom directory
+BUILD_DIR=custom/path npm run build
 ```
 
 ## How to Play
