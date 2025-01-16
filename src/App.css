@@ -5,6 +5,18 @@
   text-align: center;
 }
 
+.instructions {
+  margin: 1rem 0 2rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  color: #666;
+}
+
+.instructions p {
+  margin: 0.5rem 0;
+}
+
 .game-container {
   margin-top: 2rem;
 }
@@ -67,6 +79,15 @@ button:disabled {
 .feedback {
   margin-top: 1rem;
   font-weight: bold;
+}
+
+.hint {
+  margin-top: 1rem;
+  color: #856404;
+  background-color: #fff3cd;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-style: italic;
 }
 
 .error {

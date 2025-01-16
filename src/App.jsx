@@ -10,6 +10,8 @@ function App() {
   const [actualPrompt, setActualPrompt] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [showHint, setShowHint] = useState(false)
+  const [gameWon, setGameWon] = useState(false)
 
   const handleGuess = async (e) => {
     e.preventDefault()
@@ -22,10 +24,15 @@ function App() {
       setAttempts(prev => prev + 1)
 
       if (result.isCorrect) {
+        setGameWon(true)
+        setFeedback(`Perfect! The prompt was: "${actualPrompt}"`)
         setTimeout(() => {
-          alert('Congratulations! You guessed the prompt correctly!')
-          startNewGame()
-        }, 1500)
+          if (confirm('Congratulations! Would you like to play again?')) {
+            startNewGame()
+          }
+        }, 2000)
+      } else if (attempts >= 4 && !showHint) {
+        setShowHint(true)
       }
     } catch (err) {
       setError('Failed to evaluate guess. Please try again.')
@@ -39,6 +46,8 @@ function App() {
     try {
       setLoading(true)
       setError(null)
+      setShowHint(false)
+      setGameWon(false)
       
       // Generate new prompt
       const prompt = await generatePrompt()
@@ -60,9 +69,19 @@ function App() {
     }
   }
 
+  const getHint = () => {
+    const words = actualPrompt.split(' ')
+    return words.map(word => word[0] + '...').join(' ')
+  }
+
   return (
     <div className="app">
       <h1>Prompt Guessing Game</h1>
+      
+      <div className="instructions">
+        <p>Try to guess the AI-generated prompt that was used to create this image!</p>
+        <p>The more accurate your guess, the higher your score.</p>
+      </div>
       
       <div className="game-container">
         {error && <p className="error">{error}</p>}
@@ -81,9 +100,9 @@ function App() {
                 value={userGuess}
                 onChange={(e) => setUserGuess(e.target.value)}
                 placeholder="What's the prompt for this image?"
-                disabled={loading}
+                disabled={loading || gameWon}
               />
-              <button type="submit" disabled={loading || !userGuess.trim()}>
+              <button type="submit" disabled={loading || !userGuess.trim() || gameWon}>
                 Submit Guess
               </button>
             </form>
@@ -91,6 +110,11 @@ function App() {
             <div className="game-info">
               <p>Attempts: {attempts}</p>
               {feedback && <p className="feedback">{feedback}</p>}
+              {showHint && !gameWon && (
+                <p className="hint">
+                  Hint: The prompt starts with: {getHint()}
+                </p>
+              )}
             </div>
           </>
         ) : (
