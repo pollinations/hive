@@ -1,0 +1,150 @@
+name: Deploy Apps
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '*/package.json'
+      - '*/index.html'
+      - '*/**'
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    paths:
+      - '*/package.json'
+      - '*/index.html'
+      - '*/**'
+
+jobs:
+  build-and-deploy:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Show initial directory structure
+        run: |
+          echo "Current directory structure:"
+          tree -L 3 || (apt-get update && apt-get install -y tree && tree -L 3)
+
+      - name: Build all apps
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            npm run build pr-preview "${{ github.event.pull_request.number }}"
+            echo "PR Preview build output structure:"
+            tree pr-preview -L 3
+          else
+            npm run build _site
+            echo "_site build output structure:"
+            tree _site -L 3
+          fi
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ github.event_name == 'pull_request' && './pr-preview' || './_site' }}
+          destination_dir: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}
+          keep_files: true
+          enable_jekyll: false
+
+      - name: Create and deploy root index.html
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p root
+          cat > root/index.html << 'EOL'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Pollinations Hive</title>
+              <meta http-equiv="refresh" content="0; url=./main/" />
+              <style>
+                  body {
+                      font-family: system-ui, -apple-system, sans-serif;
+                      max-width: 800px;
+                      margin: 2rem auto;
+                      padding: 0 1rem;
+                      line-height: 1.5;
+                  }
+                  a {
+                      color: #0366d6;
+                      text-decoration: none;
+                  }
+                  a:hover {
+                      text-decoration: underline;
+                  }
+              </style>
+          </head>
+          <body>
+              <h1>Pollinations Hive</h1>
+              <p>Redirecting to <a href="./main/">main deployment</a>...</p>
+              <script>
+                  window.location.href = './main/';
+              </script>
+          </body>
+          </html>
+          EOL
+
+      - name: Deploy root index
+        if: github.event_name != 'pull_request'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./root
+          destination_dir: .
+          keep_files: true
+          enable_jekyll: false
+
+      - name: Comment PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const baseUrl = 'https://pollinations.github.io/hive/pr-${{ github.event.pull_request.number }}/';
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `🚀 PR Preview deployed!\n\nPreview URL: ${baseUrl}`
+            })
+
+  cleanup-preview:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          
+      - name: Show directory before cleanup
+        run: |
+          echo "Directory structure before cleanup:"
+          tree -L 3 || (apt-get update && apt-get install -y tree && tree -L 3)
+          
+      - name: Remove PR Preview
+        run: |
+          rm -rf pr-${{ github.event.pull_request.number }}
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "Remove PR preview for #${{ github.event.pull_request.number }}" || echo "No changes to commit"
+          git push
+          
+      - name: Show directory after cleanup
+        run: |
+          echo "Directory structure after cleanup:"
+          tree -L 3 || (apt-get update && apt-get install -y tree && tree -L 3)
