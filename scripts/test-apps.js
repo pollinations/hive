@@ -2,38 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const { execSync, spawnSync } = require('child_process');
 const testHtmlFile = require('./test-html');
-const https = require('https');
-
-async function postToGitHub(prNumber, body) {
-  if (!process.env.GITHUB_TOKEN) {
-    console.log('No GITHUB_TOKEN provided, skipping PR comment');
-    return;
-  }
-
-  const options = {
-    hostname: 'api.github.com',
-    path: `/repos/pollinations/hive/issues/${prNumber}/comments`,
-    method: 'POST',
-    headers: {
-      'User-Agent': 'node',
-      'Authorization': `token ${process.env.GITHUB_TOKEN}`,
-      'Content-Type': 'application/json',
-      'Accept': 'application/vnd.github.v3+json'
-    }
-  };
-
-  return new Promise((resolve, reject) => {
-    const req = https.request(options, (res) => {
-      let data = '';
-      res.on('data', (chunk) => data += chunk);
-      res.on('end', () => resolve(data));
-    });
-
-    req.on('error', reject);
-    req.write(JSON.stringify({ body }));
-    req.end();
-  });
-}
 
 function captureCommand(command, options = {}) {
   const result = spawnSync(command, [], {
@@ -48,7 +16,6 @@ async function main() {
   let testsFailed = false;
   let testLogs = [];
   const rootDir = process.cwd();
-  const prNumber = process.env.PR_NUMBER;
   
   // Get all directories in root (excluding node_modules, .git, etc)
   const dirs = fs.readdirSync(rootDir, { withFileTypes: true })
@@ -111,15 +78,11 @@ async function main() {
     }
   }
   
+  // Write test logs to file for the workflow to read
+  fs.writeFileSync('test-logs.txt', testLogs.join('\n'));
+
   if (testsFailed) {
     console.error('\n❌ Some tests failed');
-    
-    if (prNumber) {
-      console.log(`Posting test logs to PR #${prNumber}`);
-      const comment = `# Test Results\n\nTests failed. Here are the detailed logs:\n\n${testLogs.join('\n')}`;
-      await postToGitHub(prNumber, comment);
-    }
-    
     process.exit(1);
   } else {
     console.log('\n✅ All tests passed');
@@ -127,13 +90,8 @@ async function main() {
   }
 }
 
-main().catch(async error => {
+main().catch(error => {
   console.error('Unexpected error:', error);
-  
-  if (process.env.PR_NUMBER) {
-    const comment = `# Test Results\n\nAn unexpected error occurred while running tests:\n\n\`\`\`\n${error.stack}\n\`\`\``;
-    await postToGitHub(process.env.PR_NUMBER, comment);
-  }
-  
+  fs.writeFileSync('test-logs.txt', `# Test Results\n\nAn unexpected error occurred while running tests:\n\n\`\`\`\n${error.stack}\n\`\`\``);
   process.exit(1);
 });
