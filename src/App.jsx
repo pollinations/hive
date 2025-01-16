@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { generatePrompt, generateImage, evaluateGuess } from './utils'
 import './App.css'
 
 function App() {
@@ -7,19 +8,56 @@ function App() {
   const [feedback, setFeedback] = useState('')
   const [attempts, setAttempts] = useState(0)
   const [actualPrompt, setActualPrompt] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   const handleGuess = async (e) => {
     e.preventDefault()
-    // TODO: Implement guess evaluation logic using text.pollinations.ai
-    setAttempts(prev => prev + 1)
+    if (!userGuess.trim()) return
+
+    try {
+      setLoading(true)
+      const result = await evaluateGuess(userGuess, actualPrompt)
+      setFeedback(result.message)
+      setAttempts(prev => prev + 1)
+
+      if (result.isCorrect) {
+        setTimeout(() => {
+          alert('Congratulations! You guessed the prompt correctly!')
+          startNewGame()
+        }, 1500)
+      }
+    } catch (err) {
+      setError('Failed to evaluate guess. Please try again.')
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const startNewGame = async () => {
-    // TODO: Generate new prompt using text.pollinations.ai
-    // TODO: Generate image using image.pollinations.ai
-    setAttempts(0)
-    setFeedback('')
-    setUserGuess('')
+    try {
+      setLoading(true)
+      setError(null)
+      
+      // Generate new prompt
+      const prompt = await generatePrompt()
+      setActualPrompt(prompt)
+      
+      // Generate image from prompt
+      const imageUrl = await generateImage(prompt)
+      setCurrentImage(imageUrl)
+      
+      // Reset game state
+      setAttempts(0)
+      setFeedback('')
+      setUserGuess('')
+    } catch (err) {
+      setError('Failed to start new game. Please try again.')
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -27,7 +65,11 @@ function App() {
       <h1>Prompt Guessing Game</h1>
       
       <div className="game-container">
-        {currentImage ? (
+        {error && <p className="error">{error}</p>}
+        
+        {loading ? (
+          <div className="loading">Loading...</div>
+        ) : currentImage ? (
           <>
             <div className="image-container">
               <img src={currentImage} alt="AI generated" />
@@ -39,8 +81,11 @@ function App() {
                 value={userGuess}
                 onChange={(e) => setUserGuess(e.target.value)}
                 placeholder="What's the prompt for this image?"
+                disabled={loading}
               />
-              <button type="submit">Submit Guess</button>
+              <button type="submit" disabled={loading || !userGuess.trim()}>
+                Submit Guess
+              </button>
             </form>
             
             <div className="game-info">
@@ -49,7 +94,9 @@ function App() {
             </div>
           </>
         ) : (
-          <button onClick={startNewGame}>Start New Game</button>
+          <button onClick={startNewGame} disabled={loading}>
+            Start New Game
+          </button>
         )}
       </div>
     </div>

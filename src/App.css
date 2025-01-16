@@ -35,6 +35,11 @@ input {
   width: 300px;
 }
 
+input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
 button {
   padding: 0.5rem 1rem;
   font-size: 1rem;
@@ -46,8 +51,13 @@ button {
   transition: background-color 0.2s;
 }
 
-button:hover {
+button:hover:not(:disabled) {
   background-color: #45a049;
+}
+
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
 
 .game-info {
@@ -57,4 +67,28 @@ button:hover {
 .feedback {
   margin-top: 1rem;
   font-weight: bold;
+}
+
+.error {
+  color: #dc3545;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  border-radius: 4px;
+  background-color: #f8d7da;
+}
+
+.loading {
+  margin: 2rem 0;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.loading {
+  animation: pulse 1.5s infinite;
 }
