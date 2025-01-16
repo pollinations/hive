@@ -60,6 +60,7 @@ class MillionaireGame {
         this.startButton.style.display = 'none';
         this.quitButton.style.display = 'block';
         this.currentPrizeElement.textContent = '0';
+        this.updateMoneyLadder(-1);
         
         await this.loadNextQuestion();
     }
@@ -83,6 +84,7 @@ class MillionaireGame {
         });
         this.enableAllHelpLines();
         this.updateMoneyLadder(-1);
+        this.questionElement.textContent = 'Welcome to Who Wants to Be a Millionaire! Click Start Game to begin.';
     }
 
     async loadNextQuestion() {
@@ -309,7 +311,4 @@ class MillionaireGame {
     }
 }
 
-// Initialize the game when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-    window.game = new MillionaireGame();
-});
+export default MillionaireGame;

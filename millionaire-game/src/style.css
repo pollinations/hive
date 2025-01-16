@@ -176,6 +176,7 @@ h1 {
     min-height: 24px;
     color: #ffd700;
     font-size: 18px;
+    white-space: pre-line;
 }
 
 @media (max-width: 768px) {
