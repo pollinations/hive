@@ -49,8 +49,6 @@ Every pull request in this repository gets an automatic preview deployment. Here
 
 | PR | Title | Preview |
 |-----|--------|---------|
-| [#134](https://github.com/pollinations/hive/pull/134) | Add AI-based Who Wants to Be a Millionaire game with Vite | [Preview](https://pollinations.github.io/hive/pr-134/) |
-| [#132](https://github.com/pollinations/hive/pull/132) | Add PR comment functionality to test-apps script | [Preview](https://pollinations.github.io/hive/pr-132/) |
 | [#127](https://github.com/pollinations/hive/pull/127) | Add canvas dimensions to text AI prompt | [Preview](https://pollinations.github.io/hive/pr-127/) |
 
 _This list is automatically updated when PRs are opened or closed._
