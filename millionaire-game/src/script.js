@@ -87,7 +87,8 @@ class MillionaireGame {
 
     async loadNextQuestion() {
         const difficulty = Math.min(9, Math.floor(this.currentQuestion / 2));
-        const prompt = `Generate a multiple choice trivia question for "Who Wants to Be a Millionaire?" 
+        const prompt = `Generate a multiple choice trivia question for "Who Wants to Be a Millionaire?" about artificial intelligence, consciousness, or the technological singularity.
+                       Keep the questions accessible and interesting for a general audience.
                        Difficulty level: ${difficulty}/9 (0 being easiest, 9 being hardest).
                        Format: Return a JSON object with the following structure:
                        {
@@ -98,6 +99,7 @@ class MillionaireGame {
                        Make sure the question is challenging but fair, and all answers are plausible.`;
 
         try {
+            const randomSeed = Math.floor(Math.random() * 1000000);
             const response = await fetch('https://text.pollinations.ai/', {
                 method: 'POST',
                 headers: {
@@ -105,10 +107,11 @@ class MillionaireGame {
                 },
                 body: JSON.stringify({
                     messages: [
-                        { role: 'system', content: 'You are a game show question writer.' },
+                        { role: 'system', content: 'You are a game show question writer specializing in AI and technology topics.' },
                         { role: 'user', content: prompt }
                     ],
-                    jsonMode: true
+                    jsonMode: true,
+                    seed: randomSeed
                 }),
             });
 
@@ -219,14 +222,16 @@ class MillionaireGame {
                        Provide a natural response as if you're on the phone, with about 80% accuracy.`;
 
         try {
+            const randomSeed = Math.floor(Math.random() * 1000000);
             const response = await fetch('https://text.pollinations.ai/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     messages: [
-                        { role: 'system', content: 'You are an expert friend helping on Who Wants to Be a Millionaire.' },
+                        { role: 'system', content: 'You are an expert in AI and technology helping on Who Wants to Be a Millionaire.' },
                         { role: 'user', content: prompt }
-                    ]
+                    ],
+                    seed: randomSeed
                 }),
             });
 
@@ -280,14 +285,16 @@ class MillionaireGame {
                        Give a clever hint that helps narrow down the options without directly revealing the answer.`;
 
         try {
+            const randomSeed = Math.floor(Math.random() * 1000000);
             const response = await fetch('https://text.pollinations.ai/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     messages: [
-                        { role: 'system', content: 'You are the host of Who Wants to Be a Millionaire.' },
+                        { role: 'system', content: 'You are the host of Who Wants to Be a Millionaire with expertise in AI and technology.' },
                         { role: 'user', content: prompt }
-                    ]
+                    ],
+                    seed: randomSeed
                 }),
             });
 
