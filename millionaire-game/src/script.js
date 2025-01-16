@@ -57,9 +57,9 @@ class MillionaireGame {
             askHost: false
         };
         
-        this.updateUI();
         this.startButton.style.display = 'none';
         this.quitButton.style.display = 'block';
+        this.currentPrizeElement.textContent = '0';
         
         await this.loadNextQuestion();
     }
