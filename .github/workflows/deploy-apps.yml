@@ -46,16 +46,16 @@ jobs:
             echo "PR Preview build output structure:"
             tree pr-preview -L 3
           else
-            npm run build _site
-            echo "_site build output structure:"
-            tree _site -L 3
+            npm run build dist
+            echo "dist build output structure:"
+            tree dist -L 3
           fi
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ github.event_name == 'pull_request' && './pr-preview' || './_site' }}
+          publish_dir: ${{ github.event_name == 'pull_request' && './pr-preview' || './dist' }}
           destination_dir: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}
           keep_files: true
           enable_jekyll: false
