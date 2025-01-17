@@ -27,8 +27,11 @@
         </select>
         
         <label for="base-prompt">Animation Prompt:</label>
-        <textarea id="base-prompt" rows="4"></textarea>
+        <textarea id="base-prompt" rows="5" placeholder="Enter your base prompt here"></textarea>
         
+        <label for="initial-svg">Initial SVG (optional):</label>
+        <textarea id="initial-svg" rows="3" placeholder="Enter initial SVG code here (optional)"></textarea>
+
         <label for="model-select">Model:</label>
         <select id="model-select"></select>
 
@@ -75,11 +78,12 @@
             stop: document.getElementById('stop'),
             speedSlider: document.getElementById('speed-slider'),
             frameCounter: document.getElementById('frame-counter'),
-            history: document.getElementById('history')
+            history: document.getElementById('history'),
+            initialSvg: document.getElementById('initial-svg')
         };
 
         // Load saved presets from localStorage
-        const savedPresets = JSON.parse(localStorage.getItem('savedPresets') || '{}');
+        const savedPresets = JSON.parse(localStorage.getItem('savedPresets2') || '{}');
         
         // Base presets combined with saved presets
         const presets = {
@@ -164,10 +168,11 @@ with occasional golden sparks where the lightning meets the tree branches.`,
         let isRunning = false;
         let frames = [];
         let frameIndex = 0;
-        let currentSeed;
-        let initialSeed;
+        let currentSeed = 42;
+        let initialSeed = 42;
         let lastFrameTime = 0;
         let animationFrame = null;
+        let currentState = null;
 
         function createEmptyCanvas() {
             elements.preview.innerHTML = `
@@ -181,8 +186,22 @@ with occasional golden sparks where the lightning meets the tree branches.`,
         }
 
         function extractSvgContent(text) {
-            const svgMatch = text.match(/```(?:svg|xml)\n([\s\S]*?)\n```/);
-            return svgMatch ? svgMatch[1].trim() : null;
+            // Try to match SVG with language specifier
+            let svgMatch = text.match(/```(?:svg|xml)\n([\s\S]*?)\n```/);
+            if (svgMatch) return svgMatch[1].trim();
+            
+            // Try to match SVG without language specifier
+            svgMatch = text.match(/```([\s\S]*?)```/);
+            if (svgMatch && svgMatch[1].trim().startsWith('<svg')) {
+                return svgMatch[1].trim();
+            }
+            
+            // If the text itself starts with <svg, return it directly
+            if (text.trim().startsWith('<svg')) {
+                return text.trim();
+            }
+            
+            return null;
         }
 
         function updateFrame(currentFrame) {
@@ -209,15 +228,14 @@ with occasional golden sparks where the lightning meets the tree branches.`,
             }
             
             lastFrameTime = performance.now();
-            frameIndex = 0;
             
             function animate(currentTime) {
                 const frameDelay = parseInt(elements.speedSlider.value);
                 const elapsed = currentTime - lastFrameTime;
                 
                 if (elapsed >= frameDelay && frames.length > 0) {
-                    updateFrame(frameIndex);
                     frameIndex = (frameIndex + 1) % frames.length;
+                    updateFrame(frameIndex);
                     lastFrameTime = currentTime;
                 }
                 
@@ -294,6 +312,8 @@ with occasional golden sparks where the lightning meets the tree branches.`,
                     throw new Error('Incomplete SVG content');
                 }
                 
+                console.log(`Response character count: ${text.length}`);
+                
                 return svgContent;
 
             } catch (error) {
@@ -313,7 +333,6 @@ with occasional golden sparks where the lightning meets the tree branches.`,
             const basePrompt = elements.basePrompt.value || preset.prompt;
             
             try {
-                const currentState = frames.length > 0 ? frames[frames.length - 1] : null;
                 const evolutionPrompt = currentState 
                     ? `Evolve this SVG art while maintaining some consistency with the previous state. ${basePrompt}`
                     : basePrompt;
@@ -321,6 +340,7 @@ with occasional golden sparks where the lightning meets the tree branches.`,
                 const svgContent = await generateText(evolutionPrompt, currentState);
                 
                 if (svgContent) {
+                    currentState = svgContent;
                     frames.push(svgContent);
                     
                     // Add to history
@@ -333,20 +353,18 @@ with occasional golden sparks where the lightning meets the tree branches.`,
                     `;
                     elements.history.appendChild(historyItem);
 
-                    // If this is the first frame, start the animation
+                    // Update frame index to show the latest frame
+                    frameIndex = frames.length - 1;
+                    updateFrame(frameIndex);
+
+                    // Start animation if it's not already running
                     if (frames.length === 1) {
                         startPreviewAnimation();
                     }
                     
                     // Keep evolving
                     if (isRunning) {
-                        setTimeout(evolve, 1500);
-                    }
-                } else {
-                    console.error('Failed to generate SVG content');
-                    if (isRunning) {
                         currentSeed++;
-                        elements.seed.value = currentSeed;
                         setTimeout(evolve, 1500);
                     }
                 }
@@ -354,76 +372,114 @@ with occasional golden sparks where the lightning meets the tree branches.`,
                 console.error('Evolution error:', error);
                 if (isRunning) {
                     currentSeed++;
-                    elements.seed.value = currentSeed;
                     setTimeout(evolve, 1500);
                 }
             }
         }
 
-        function startEvolution() {
+        async function startEvolution() {
+            if (isRunning) return;
+            
             isRunning = true;
             elements.start.disabled = true;
             elements.stop.disabled = false;
+            
             frames = [];
             frameIndex = 0;
-            initialSeed = parseInt(elements.seed.value);
+            currentState = null;
+            
+            // Reset seed to initial value
             currentSeed = initialSeed;
-            elements.frameCounter.textContent = 'Frame 0/0';
-            evolve();
+            
+            if (elements.initialSvg.value?.trim?.()) {
+                const prompt = elements.basePrompt.value;
+                const initialSvg = elements.initialSvg.value.trim() + `\n\nPrompt: ${prompt}`;
+                try {
+                    const svgContent = extractSvgContent(initialSvg);
+                    if (svgContent) {
+                        currentState = svgContent;
+                        frames.push(svgContent);
+                        updateFrame(frameIndex);
+                    }
+                } catch (error) {
+                    console.error('Invalid initial SVG:', error);
+                }
+            }
+
+            await evolve();
         }
 
         function stopEvolution() {
             isRunning = false;
             elements.start.disabled = false;
             elements.stop.disabled = true;
-            currentSeed = initialSeed;
-            elements.seed.value = initialSeed;
             if (animationFrame) {
                 cancelAnimationFrame(animationFrame);
-                animationFrame = null;
             }
+            // Reset seed to initial value
+            currentSeed = initialSeed;
         }
 
-        function getFirstFourWords(str) {
-            return str.split(/\s+/).slice(0, 4).join(' ').toLowerCase().replace(/[^\w\s-]/g, '');
+        function getFirstThreeWords(str) {
+            return str.trim().split(/\s+/).slice(0, 3).join(' ');
         }
 
         function saveCurrentPreset() {
-            const prompt = elements.basePrompt.value;
-            const temperature = parseFloat(elements.temperature.value);
-            const key = getFirstFourWords(prompt);
+            const defaultName = getFirstThreeWords(elements.basePrompt.value);
+            const name = prompt('Enter a name for this preset:', defaultName);
+            if (!name) return;
             
-            const savedPresets = JSON.parse(localStorage.getItem('savedPresets') || '{}');
-            savedPresets[key] = {
-                prompt,
-                temperature,
-                name: key
+            const preset = {
+                name,
+                prompt: elements.basePrompt.value,
+                temperature: elements.temperature.value,
+                initialSvg: elements.initialSvg.value,
+                model: elements.modelSelect.value,
+                seed: currentSeed
             };
             
-            localStorage.setItem('savedPresets', JSON.stringify(savedPresets));
+            const savedPresets = JSON.parse(localStorage.getItem('savedPresets2') || '{}');
+            savedPresets[name] = preset;
+            
+            localStorage.setItem('savedPresets2', JSON.stringify(savedPresets));
             
             // Add to select if not exists
-            if (!elements.presetSelect.querySelector(`option[value="${key}"]`)) {
+            if (!elements.presetSelect.querySelector(`option[value="${name}"]`)) {
                 const option = document.createElement('option');
-                option.value = key;
-                option.textContent = key;
+                option.value = name;
+                option.textContent = name;
                 elements.presetSelect.appendChild(option);
             }
             
-            elements.presetSelect.value = key;
+            elements.presetSelect.value = name;
         }
+
+        elements.presetSelect.addEventListener('change', () => {
+            const preset = { ...presets[elements.presetSelect.value] };
+            console.log('Loading preset:', preset);
+            elements.basePrompt.value = preset.prompt;
+            elements.temperature.value = preset.temperature;
+            elements.temperatureValue.textContent = preset.temperature;
+            if (preset.initialSvg) {
+                elements.initialSvg.value = preset.initialSvg;
+            }
+            if (preset.model) {
+                elements.modelSelect.value = preset.model;
+            }
+            if (preset.seed) {
+                currentSeed = preset.seed;
+                initialSeed = preset.seed;
+            } else {
+                currentSeed = 42;
+                initialSeed = 42;
+            }
+        });
 
         // Event Listeners
         elements.start.addEventListener('click', startEvolution);
         elements.stop.addEventListener('click', stopEvolution);
         elements.temperature.addEventListener('input', (e) => {
             elements.temperatureValue.textContent = e.target.value;
-        });
-        elements.presetSelect.addEventListener('change', (e) => {
-            const preset = presets[e.target.value];
-            elements.basePrompt.value = preset.prompt;
-            elements.temperature.value = preset.temperature;
-            elements.temperatureValue.textContent = preset.temperature;
         });
 
         // Initialize
@@ -438,6 +494,9 @@ with occasional golden sparks where the lightning meets the tree branches.`,
             createEmptyCanvas();
             elements.presetSelect.value = 'digital-nature';
             elements.basePrompt.value = presets['digital-nature'].prompt;
+            if (presets['digital-nature'].initialSvg) {
+                elements.initialSvg.value = presets['digital-nature'].initialSvg;
+            }
         });
     </script>
 </body>
