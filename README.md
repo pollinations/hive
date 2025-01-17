@@ -51,7 +51,7 @@ Every pull request in this repository gets an automatic preview deployment. Here
 
 | PR | Title | Preview |
 |-----|--------|---------|
-| [#144](https://github.com/pollinations/hive/pull/144) | svg feedback | [Preview](https://pollinations.github.io/hive/pr-144/) |
+| [#145](https://github.com/pollinations/hive/pull/145) | svg feedback deterministic seeds | [Preview](https://pollinations.github.io/hive/pr-145/) |
 | [#127](https://github.com/pollinations/hive/pull/127) | Add canvas dimensions to text AI prompt | [Preview](https://pollinations.github.io/hive/pr-127/) |
 
 _This list is automatically updated when PRs are opened or closed._
