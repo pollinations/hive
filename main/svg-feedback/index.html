@@ -4,173 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LLM SVG Art Evolution</title>
-    <style>
-        :root {
-            --bg-primary: #1a1a1a;
-            --bg-secondary: #2d2d2d;
-            --text-primary: #ffffff;
-            --text-secondary: #b3b3b3;
-            --accent: #4f9eff;
-            --border: #404040;
-            --input-bg: #333333;
-        }
-        
-        body {
-            font-family: system-ui, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: var(--bg-primary);
-            line-height: 1.5;
-            color: var(--text-primary);
-        }
-        
-        h1, h2 {
-            color: var(--text-primary);
-            margin-bottom: 1em;
-        }
-        
-        .container {
-            background: var(--bg-secondary);
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border);
-        }
-        
-        select, textarea {
-            width: 100%;
-            padding: 8px;
-            margin: 8px 0;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            background: var(--input-bg);
-            color: var(--text-primary);
-            font-family: inherit;
-        }
-        
-        select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-        
-        .svg-container {
-            display: block;
-            width: 720px;
-            height: 600px;
-            overflow: auto;
-            background: var(--bg-primary);
-            padding: 10px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-        }
-        
-        button {
-            padding: 8px 16px;
-            background: var(--accent);
-            color: var(--text-primary);
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 8px;
-            transition: background-color 0.2s;
-        }
-        
-        button:hover {
-            background: #3d8be6;
-        }
-        
-        button:disabled {
-            background: var(--border);
-            cursor: not-allowed;
-        }
-        
-        #history {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .history-item {
-            padding: 10px;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        label {
-            display: block;
-            margin: 8px 0;
-            color: var(--text-secondary);
-        }
-        
-        #speed-slider {
-            -webkit-appearance: none;
-            background: var(--border);
-            height: 2px;
-            direction: rtl;
-        }
-        
-        #speed-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background: var(--accent);
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        
-        #speed-slider::-webkit-slider-thumb:hover {
-            background: #3d8be6;
-        }
-
-        #speed-slider::-moz-range-thumb {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background: var(--accent);
-            cursor: pointer;
-            border: none;
-            transition: background-color 0.2s;
-        }
-        
-        #speed-slider::-moz-range-thumb:hover {
-            background: #3d8be6;
-        }
-
-        #speed-slider::-moz-range-progress {
-            background-color: transparent;
-        }
-        
-        input[type="number"] {
-            background: var(--input-bg);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 4px 8px;
-        }
-        
-        input[type="range"] {
-            accent-color: var(--accent);
-        }
-        
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: var(--bg-primary);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--accent);
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>LLM SVG Art Evolution</h1>
@@ -178,12 +12,13 @@
     <div class="container">
         <label for="preset-select">Select Preset:</label>
         <select id="preset-select">
+            <option value="biomorphic">Biomorphic Systems</option>
+            <option value="boids">Flocking Boids</option>
+            <option value="retrogame">Retro Gaming</option>
             <option value="solarpunk">Solarpunk Utopia</option>
             <option value="isometric">Isometric Cityscape</option>
             <option value="cellular">Cellular Patterns</option>
-            <option value="bauhaus">Bauhaus Dreams</option>
             <option value="quantum">Quantum Realms</option>
-            <option value="biomorphic">Biomorphic Systems</option>
             <option value="cosmology">Cosmic Architecture</option>
             <option value="neural">Neural Gardens</option>
             <option value="meditation">Inner Landscapes</option>
@@ -196,28 +31,27 @@
         <label for="model-select">Model:</label>
         <select id="model-select"></select>
 
-        <div style="display: flex; align-items: center; gap: 20px; margin: 10px 0;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <label for="temperature">Temperature:</label>
-                <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.8">
-                <span id="temperature-value">0.8</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <label for="seed">Seed:</label>
-                <input type="number" id="seed" value="-1">
-            </div>
+        <div class="temperature-container">
+            <label for="temperature">Temperature:</label>
+            <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.8">
+            <span id="temperature-value">0.8</span>
+        </div>
+        <div class="seed-container">
+            <label for="seed">Seed:</label>
+            <input type="number" id="seed" value="42">
         </div>
 
         <div id="preview-window" class="svg-container"></div>
         
-        <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
-            <label for="speed-slider">Speed:</label>
-            <input type="range" id="speed-slider" min="100" max="2000" value="700" step="100" style="direction: rtl;">
+        <div class="speed-slider-container">
+            <label for="speed-slider">Frame Delay (ms):</label>
+            <input type="range" id="speed-slider" min="100" max="6000" value="2500" step="100">
         </div>
         
-        <div>
+        <div class="controls">
             <button id="startBtn">Start Evolution</button>
             <button id="stopBtn" disabled>Stop Evolution</button>
+            <span id="frame-counter" class="frame-counter">Frame 0/0</span>
         </div>
     </div>
 
@@ -235,14 +69,27 @@
             temperatureValue: document.getElementById('temperature-value'),
             seed: document.getElementById('seed'),
             preview: document.getElementById('preview-window'),
-            speedSlider: document.getElementById('speed-slider'),
             start: document.getElementById('startBtn'),
             stop: document.getElementById('stopBtn'),
+            speedSlider: document.getElementById('speed-slider'),
+            frameCounter: document.getElementById('frame-counter'),
             history: document.getElementById('history')
         };
 
         // Presets for SVG generation
         const presets = {
+            biomorphic: {
+                prompt: "Create a living system of biomorphic forms inspired by Ernst Haeckel's scientific illustrations. Design intricate organic shapes that grow, divide, and evolve. Use animated transformations to suggest cellular processes and biological rhythms. Include delicate details and symmetrical patterns.",
+                temperature: 0.9
+            },
+            boids: {
+                prompt: "Create a dynamic flock of abstract geometric birds (boids) following Craig Reynolds' flocking rules: alignment, cohesion, and separation. Use simple triangular or arrow-like shapes for the boids. Animate their movement with smooth paths, rotation, and subtle variations. Include emergent flocking behavior and occasional splitting/merging of groups. Use a minimal color palette inspired by early computer graphics.",
+                temperature: 0.85
+            },
+            retrogame: {
+                prompt: "Create an animated scene inspired by classic 8-bit and 16-bit video games. Use pixel-perfect geometric shapes, limited color palettes, and simple patterns. Include game elements like platforms, power-ups, or enemies with classic gaming animations (bouncing, rotating, pulsing). Add scan lines or CRT effects for authenticity. Think early Nintendo or Atari aesthetic with smooth sprite animations.",
+                temperature: 0.85
+            },
             solarpunk: {
                 prompt: "Isometric minimalism. Game engine. Create an evolving solarpunk cityscape where nature and technology harmoniously intertwine. Use flowing organic curves for plant life mixed with clean geometric shapes for sustainable architecture. Include animated elements like swaying trees, floating gardens, and shimmering solar panels. Use vibrant greens and warm sunlit colors.",
                 temperature: 0.9
@@ -262,10 +109,6 @@
             quantum: {
                 prompt: "Visualize quantum phenomena through abstract art - wave-particle duality, superposition, and entanglement. Create animated probability clouds, interference patterns, and quantum tunneling effects. Use ethereal colors and translucent layers to suggest the mysterious nature of quantum reality.",
                 temperature: 0.95
-            },
-            biomorphic: {
-                prompt: "Create a living system of biomorphic forms inspired by Ernst Haeckel's scientific illustrations. Design intricate organic shapes that grow, divide, and evolve. Use animated transformations to suggest cellular processes and biological rhythms. Include delicate details and symmetrical patterns.",
-                temperature: 0.9
             },
             cosmology: {
                 prompt: "Design an abstract representation of cosmic architecture - galaxy formations, gravitational lensing, and spacetime fabric. Create animated elements suggesting orbital motion and celestial mechanics. Use deep space colors and geometric patterns inspired by astronomical phenomena.",
@@ -302,11 +145,13 @@
         let isRunning = false;
         let frames = [];
         let frameIndex = 0;
-        let animationTimer = null;
+        let currentSeed;
+        let lastFrameTime = 0;
+        let animationFrame = null;
 
         function createEmptyCanvas() {
             elements.preview.innerHTML = `
-                <svg width="100%" height="100%" viewBox="0 0 800 600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 800 600" style="max-width: 100%; height: auto;">
                     <rect width="100%" height="100%" fill="var(--bg-primary)"/>
                     <text x="50%" y="50%" text-anchor="middle" fill="var(--text-secondary)" font-family="system-ui, sans-serif">
                         Start evolution to generate SVG art
@@ -320,15 +165,48 @@
             return svgMatch ? svgMatch[1].trim() : null;
         }
 
-        function startPreviewAnimation() {
-            if (animationTimer) clearInterval(animationTimer);
+        function updateFrame(currentFrame) {
+            // Update preview
+            elements.preview.innerHTML = frames[currentFrame];
             
-            animationTimer = setInterval(() => {
-                if (frames.length > 0) {
-                    elements.preview.innerHTML = frames[frameIndex];
-                    frameIndex = (frameIndex + 1) % frames.length;
+            // Update frame counter
+            elements.frameCounter.textContent = `Frame ${currentFrame + 1}/${frames.length}`;
+            
+            // Update history highlight
+            const historyItems = document.querySelectorAll('.history-item');
+            historyItems.forEach((item, index) => {
+                if (index === currentFrame) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
                 }
-            }, parseInt(elements.speedSlider.value));
+            });
+        }
+
+        function startPreviewAnimation() {
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+            
+            lastFrameTime = performance.now();
+            frameIndex = 0;
+            
+            function animate(currentTime) {
+                const frameDelay = parseInt(elements.speedSlider.value);
+                const elapsed = currentTime - lastFrameTime;
+                
+                if (elapsed >= frameDelay && frames.length > 0) {
+                    updateFrame(frameIndex);
+                    frameIndex = (frameIndex + 1) % frames.length;
+                    lastFrameTime = currentTime;
+                }
+                
+                if (isRunning) {
+                    animationFrame = requestAnimationFrame(animate);
+                }
+            }
+            
+            animationFrame = requestAnimationFrame(animate);
         }
 
         async function generateText(prompt, currentState, retryCount = 0) {
@@ -337,7 +215,7 @@
             const temperature = parseFloat(elements.temperature.value);
             const seed = parseInt(elements.seed.value) >= 0 ? 
                 parseInt(elements.seed.value) : 
-                Math.floor(Math.random() * 1000000) + retryCount; // Add retryCount to ensure different seeds
+                currentSeed++; // Use and increment the current seed
 
             const systemPrompt = `You are an animated SVG art generator. Create SVG code that fits within a 800x600 viewBox.
             Follow these rules:
@@ -355,6 +233,13 @@
             const userMessage = currentState ? 
                 `Here is the previous SVG state. Evolve it gradually while maintaining its essence:\n\n${currentState}` :
                 "Generate the initial SVG state following the creative direction.";
+
+            console.log('=== LLM Request ===');
+            console.log('System:', systemPrompt);
+            console.log('User:', userMessage);
+            console.log('Temperature:', temperature);
+            console.log('Seed:', seed);
+            console.log('Model:', model);
 
             try {
                 const response = await fetch('https://text.pollinations.ai/', {
@@ -374,6 +259,9 @@
                 if (!response.ok) throw new Error('API request failed');
                 
                 const text = await response.text();
+                console.log('=== LLM Response ===');
+                console.log(text);
+                
                 const svgContent = extractSvgContent(text);
                 
                 // Validate SVG completeness
@@ -386,14 +274,13 @@
                 }
                 
                 return svgContent;
+
             } catch (error) {
-                console.error(`Generation error (attempt ${retryCount + 1}/${maxRetries + 1}):`, error);
-                
+                console.error('Error:', error);
                 if (retryCount < maxRetries) {
-                    console.log('Retrying with a different seed...');
+                    console.log(`Retry ${retryCount + 1}/${maxRetries}: ${error.message}`);
                     return generateText(prompt, currentState, retryCount + 1);
                 }
-                
                 return null;
             }
         }
@@ -419,23 +306,36 @@
                     const historyItem = document.createElement('div');
                     historyItem.className = 'history-item';
                     historyItem.innerHTML = `
-                        <div style="width: 200px; height: 150px;">
+                        <div style="width: 160px; height: 120px;">
                             ${svgContent}
                         </div>
                     `;
-                    elements.history.insertBefore(historyItem, elements.history.firstChild);
+                    elements.history.appendChild(historyItem);
+
+                    // If this is the first frame, start the animation
+                    if (frames.length === 1) {
+                        startPreviewAnimation();
+                    }
                     
                     // Keep evolving
                     if (isRunning) {
-                        setTimeout(evolve, 100);
+                        setTimeout(evolve, 1500);
                     }
                 } else {
                     console.error('Failed to generate SVG content');
-                    stopEvolution();
+                    if (isRunning) {
+                        currentSeed++;
+                        elements.seed.value = currentSeed;
+                        setTimeout(evolve, 1500);
+                    }
                 }
             } catch (error) {
                 console.error('Evolution error:', error);
-                stopEvolution();
+                if (isRunning) {
+                    currentSeed++;
+                    elements.seed.value = currentSeed;
+                    setTimeout(evolve, 1500);
+                }
             }
         }
 
@@ -445,17 +345,18 @@
             elements.stop.disabled = false;
             frames = [];
             frameIndex = 0;
+            currentSeed = parseInt(elements.seed.value);
+            elements.frameCounter.textContent = 'Frame 0/0';
             evolve();
-            startPreviewAnimation();
         }
 
         function stopEvolution() {
             isRunning = false;
             elements.start.disabled = false;
             elements.stop.disabled = true;
-            if (animationTimer) {
-                clearInterval(animationTimer);
-                animationTimer = null;
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
             }
         }
 
