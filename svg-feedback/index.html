@@ -233,7 +233,7 @@ with occasional golden sparks where the lightning meets the tree branches.`,
                 const frameDelay = parseInt(elements.speedSlider.value);
                 const elapsed = currentTime - lastFrameTime;
                 
-                if (elapsed >= frameDelay && frames.length > 0) {
+                if (elapsed >= frameDelay && frames.length > 1) {
                     frameIndex = (frameIndex + 1) % frames.length;
                     updateFrame(frameIndex);
                     lastFrameTime = currentTime;
@@ -343,15 +343,14 @@ with occasional golden sparks where the lightning meets the tree branches.`,
                     currentState = svgContent;
                     frames.push(svgContent);
                     
-                    // Add to history
-                    const historyItem = document.createElement('div');
-                    historyItem.className = 'history-item';
-                    historyItem.innerHTML = `
-                        <div style="width: 160px; height: 120px;">
-                            ${svgContent}
+                    // Update history with all frames
+                    elements.history.innerHTML = frames.map(frame => `
+                        <div class="history-item">
+                            <div style="width: 160px; height: 120px;">
+                                ${frame}
+                            </div>
                         </div>
-                    `;
-                    elements.history.appendChild(historyItem);
+                    `).join('');
 
                     // Update frame index to show the latest frame
                     frameIndex = frames.length - 1;
@@ -393,13 +392,14 @@ with occasional golden sparks where the lightning meets the tree branches.`,
             
             if (elements.initialSvg.value?.trim?.()) {
                 const prompt = elements.basePrompt.value;
-                const initialSvg = elements.initialSvg.value.trim() + `\n\nPrompt: ${prompt}`;
+                const initialSvg = elements.initialSvg.value.trim();
                 try {
                     const svgContent = extractSvgContent(initialSvg);
                     if (svgContent) {
-                        currentState = svgContent;
+                        currentState = svgContent + `\n\nPrompt: ${prompt}`;
                         frames.push(svgContent);
                         updateFrame(frameIndex);
+                        startPreviewAnimation();
                     }
                 } catch (error) {
                     console.error('Invalid initial SVG:', error);
