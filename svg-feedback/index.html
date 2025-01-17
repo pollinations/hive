@@ -83,7 +83,7 @@
         };
 
         // Load saved presets from localStorage
-        const savedPresets = JSON.parse(localStorage.getItem('savedPresets') || '{}');
+        const savedPresets = JSON.parse(localStorage.getItem('savedPresets2') || '{}');
         
         // Base presets combined with saved presets
         const presets = {
@@ -423,28 +423,30 @@ with occasional golden sparks where the lightning meets the tree branches.`,
         }
 
         function saveCurrentPreset() {
-            const prompt = elements.basePrompt.value;
-            const temperature = parseFloat(elements.temperature.value);
-            const key = getFirstFourWords(prompt);
+            const name = prompt('Enter a name for this preset:');
+            if (!name) return;
             
-            const savedPresets = JSON.parse(localStorage.getItem('savedPresets') || '{}');
-            savedPresets[key] = {
-                prompt,
-                temperature,
-                name: key
+            const preset = {
+                name,
+                prompt: elements.basePrompt.value,
+                temperature: elements.temperature.value,
+                initialSvg: elements.initialSvg.value
             };
             
-            localStorage.setItem('savedPresets', JSON.stringify(savedPresets));
+            const savedPresets = JSON.parse(localStorage.getItem('savedPresets2') || '{}');
+            savedPresets[name] = preset;
+            
+            localStorage.setItem('savedPresets2', JSON.stringify(savedPresets));
             
             // Add to select if not exists
-            if (!elements.presetSelect.querySelector(`option[value="${key}"]`)) {
+            if (!elements.presetSelect.querySelector(`option[value="${name}"]`)) {
                 const option = document.createElement('option');
-                option.value = key;
-                option.textContent = key;
+                option.value = name;
+                option.textContent = name;
                 elements.presetSelect.appendChild(option);
             }
             
-            elements.presetSelect.value = key;
+            elements.presetSelect.value = name;
         }
 
         // Event Listeners
@@ -458,6 +460,9 @@ with occasional golden sparks where the lightning meets the tree branches.`,
             elements.basePrompt.value = preset.prompt;
             elements.temperature.value = preset.temperature;
             elements.temperatureValue.textContent = preset.temperature;
+            if (preset.initialSvg) {
+                elements.initialSvg.value = preset.initialSvg;
+            }
         });
 
         // Initialize
@@ -472,6 +477,9 @@ with occasional golden sparks where the lightning meets the tree branches.`,
             createEmptyCanvas();
             elements.presetSelect.value = 'digital-nature';
             elements.basePrompt.value = presets['digital-nature'].prompt;
+            if (presets['digital-nature'].initialSvg) {
+                elements.initialSvg.value = presets['digital-nature'].initialSvg;
+            }
         });
     </script>
 </body>
