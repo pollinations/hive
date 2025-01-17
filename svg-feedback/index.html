@@ -251,9 +251,7 @@ with occasional golden sparks where the lightning meets the tree branches.`,
             const maxRetries = 3;
             const model = getSelectedModel();
             const temperature = parseFloat(elements.temperature.value);
-            const seed = parseInt(elements.seed.value) >= 0 ? 
-                parseInt(elements.seed.value) : 
-                currentSeed++; // Use and increment the current seed
+            const seed = currentSeed; // Use and increment the current seed
 
             const systemPrompt = `You are an animated SVG art generator. Create SVG code that fits within a 800x600 viewBox.
             Follow these rules:
@@ -382,6 +380,10 @@ with occasional golden sparks where the lightning meets the tree branches.`,
             isRunning = true;
             elements.start.disabled = true;
             elements.stop.disabled = false;
+
+            if (parseInt(elements.seed.value) >= 0) {
+                initialSeed = parseInt(elements.seed.value);    
+            }
             
             frames = [];
             frameIndex = 0;
@@ -435,7 +437,7 @@ with occasional golden sparks where the lightning meets the tree branches.`,
                 temperature: elements.temperature.value,
                 initialSvg: elements.initialSvg.value,
                 model: elements.modelSelect.value,
-                seed: currentSeed
+                seed: initialSeed
             };
             
             const savedPresets = JSON.parse(localStorage.getItem('savedPresets2') || '{}');
