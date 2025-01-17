@@ -51,6 +51,7 @@ Every pull request in this repository gets an automatic preview deployment. Here
 
 | PR | Title | Preview |
 |-----|--------|---------|
+| [#151](https://github.com/pollinations/hive/pull/151) | svg feedback fix seed increment behavior | [Preview](https://pollinations.github.io/hive/pr-151/) |
 | [#149](https://github.com/pollinations/hive/pull/149) | Fix svg-feedback CSS path and test server path handling | [Preview](https://pollinations.github.io/hive/pr-149/) |
 | [#127](https://github.com/pollinations/hive/pull/127) | Add canvas dimensions to text AI prompt | [Preview](https://pollinations.github.io/hive/pr-127/) |
 
