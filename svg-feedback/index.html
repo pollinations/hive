@@ -168,8 +168,8 @@ with occasional golden sparks where the lightning meets the tree branches.`,
         let isRunning = false;
         let frames = [];
         let frameIndex = 0;
-        let currentSeed;
-        let initialSeed;
+        let currentSeed = 42;
+        let initialSeed = 42;
         let lastFrameTime = 0;
         let animationFrame = null;
         let currentState = null;
@@ -364,6 +364,7 @@ with occasional golden sparks where the lightning meets the tree branches.`,
                     
                     // Keep evolving
                     if (isRunning) {
+                        currentSeed++;
                         setTimeout(evolve, 1500);
                     }
                 }
@@ -371,7 +372,6 @@ with occasional golden sparks where the lightning meets the tree branches.`,
                 console.error('Evolution error:', error);
                 if (isRunning) {
                     currentSeed++;
-                    elements.seed.value = currentSeed;
                     setTimeout(evolve, 1500);
                 }
             }
@@ -387,6 +387,9 @@ with occasional golden sparks where the lightning meets the tree branches.`,
             frames = [];
             frameIndex = 0;
             currentState = null;
+            
+            // Reset seed to initial value
+            currentSeed = initialSeed;
             
             if (elements.initialSvg.value?.trim?.()) {
                 const prompt = elements.basePrompt.value;
@@ -410,12 +413,11 @@ with occasional golden sparks where the lightning meets the tree branches.`,
             isRunning = false;
             elements.start.disabled = false;
             elements.stop.disabled = true;
-            currentSeed = initialSeed;
-            elements.seed.value = initialSeed;
             if (animationFrame) {
                 cancelAnimationFrame(animationFrame);
-                animationFrame = null;
             }
+            // Reset seed to initial value
+            currentSeed = initialSeed;
         }
 
         function getFirstFourWords(str) {
@@ -430,7 +432,9 @@ with occasional golden sparks where the lightning meets the tree branches.`,
                 name,
                 prompt: elements.basePrompt.value,
                 temperature: elements.temperature.value,
-                initialSvg: elements.initialSvg.value
+                initialSvg: elements.initialSvg.value,
+                model: elements.modelSelect.value,
+                seed: currentSeed
             };
             
             const savedPresets = JSON.parse(localStorage.getItem('savedPresets2') || '{}');
@@ -449,20 +453,32 @@ with occasional golden sparks where the lightning meets the tree branches.`,
             elements.presetSelect.value = name;
         }
 
-        // Event Listeners
-        elements.start.addEventListener('click', startEvolution);
-        elements.stop.addEventListener('click', stopEvolution);
-        elements.temperature.addEventListener('input', (e) => {
-            elements.temperatureValue.textContent = e.target.value;
-        });
-        elements.presetSelect.addEventListener('change', (e) => {
-            const preset = presets[e.target.value];
+        elements.presetSelect.addEventListener('change', () => {
+            const preset = { ...presets[elements.presetSelect.value] };
+            console.log('Loading preset:', preset);
             elements.basePrompt.value = preset.prompt;
             elements.temperature.value = preset.temperature;
             elements.temperatureValue.textContent = preset.temperature;
             if (preset.initialSvg) {
                 elements.initialSvg.value = preset.initialSvg;
             }
+            if (preset.model) {
+                elements.modelSelect.value = preset.model;
+            }
+            if (preset.seed) {
+                currentSeed = preset.seed;
+                initialSeed = preset.seed;
+            } else {
+                currentSeed = 42;
+                initialSeed = 42;
+            }
+        });
+
+        // Event Listeners
+        elements.start.addEventListener('click', startEvolution);
+        elements.stop.addEventListener('click', stopEvolution);
+        elements.temperature.addEventListener('input', (e) => {
+            elements.temperatureValue.textContent = e.target.value;
         });
 
         // Initialize
