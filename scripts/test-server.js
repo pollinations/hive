@@ -11,12 +11,13 @@ function createServer(rootDir) {
     }
     
     let filePath;
-    if (req.url.startsWith('/../') || req.url === '/styles.css') {
-      // Remove leading /.. or / for root directory access
-      const urlPath = req.url.startsWith('/../') ? req.url.substring(3) : req.url.substring(1);
-      filePath = path.join(projectRoot, urlPath);
+    if (req.url === '/index.html' || req.url === '/') {
+      // Serve index.html from rootDir
+      filePath = path.join(rootDir, 'index.html');
     } else {
-      filePath = path.join(rootDir, req.url);
+      // Serve other assets from project root
+      const urlPath = req.url.replace(/^\/+/, '');
+      filePath = path.join(projectRoot, urlPath);
     }
     
     const ext = path.extname(filePath);
