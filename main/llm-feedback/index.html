@@ -351,7 +351,16 @@ ${prompt}`;
                         continue;
                     }
 
-                    frames.push(text);
+                    // Extract the state from between backticks if present
+                    const stateMatch = text.match(/```([\s\S]*?)```/);
+                    const state = stateMatch ? stateMatch[1] : text;
+                    
+                    // Split into lines and ensure correct dimensions (35x20)
+                    const lines = state.split('\n').map(line => line.padEnd(35, ' ').slice(0, 35));
+                    const paddedState = lines.slice(0, 20).join('\n');
+                    const finalState = paddedState.padEnd(35 * 20 + 19, '\n' + ' '.repeat(35)).slice(0, 35 * 20 + 19);
+
+                    frames.push(finalState);
                     currentState = text; // Keep full text for LLM context
                     console.log('State updated, frame count:', frames.length);
                     
@@ -364,7 +373,7 @@ ${prompt}`;
                     
                     // Wait 3 seconds before next iteration
                     console.log('Waiting 3 seconds...');
-                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    await new Promise(resolve => setTimeout(resolve, 200));
                     console.log('Wait complete');
                 } catch (error) {
                     console.error('Evolution error:', error);
