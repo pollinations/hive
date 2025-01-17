@@ -303,6 +303,7 @@
         let frames = [];
         let frameIndex = 0;
         let animationTimer = null;
+        let currentSeed = 42;
 
         function createEmptyCanvas() {
             elements.preview.innerHTML = `
@@ -337,7 +338,7 @@
             const temperature = parseFloat(elements.temperature.value);
             const seed = parseInt(elements.seed.value) >= 0 ? 
                 parseInt(elements.seed.value) : 
-                Math.floor(Math.random() * 1000000) + retryCount; // Add retryCount to ensure different seeds
+                currentSeed++; // Use and increment the deterministic seed
 
             const systemPrompt = `You are an animated SVG art generator. Create SVG code that fits within a 800x600 viewBox.
             Follow these rules:
