@@ -244,7 +244,7 @@
         // Presets for SVG generation
         const presets = {
             solarpunk: {
-                prompt: "Create an evolving solarpunk cityscape where nature and technology harmoniously intertwine. Use flowing organic curves for plant life mixed with clean geometric shapes for sustainable architecture. Include animated elements like swaying trees, floating gardens, and shimmering solar panels. Use vibrant greens and warm sunlit colors.",
+                prompt: "Isometric minimalism. Game engine. Create an evolving solarpunk cityscape where nature and technology harmoniously intertwine. Use flowing organic curves for plant life mixed with clean geometric shapes for sustainable architecture. Include animated elements like swaying trees, floating gardens, and shimmering solar panels. Use vibrant greens and warm sunlit colors.",
                 temperature: 0.9
             },
             isometric: {
@@ -342,15 +342,19 @@
             const systemPrompt = `You are an animated SVG art generator. Create SVG code that fits within a 800x600 viewBox.
             Follow these rules:
             1. Always start with <?xml version="1.0" encoding="UTF-8"?> and proper SVG tags
-            2. Use simple shapes, paths, and basic SVG elements
+            2. Dont modify too many things at once if receiving a previous state
             3. Include style definitions in a <defs> section
             4. Always ensure the SVG is complete and properly closed
             5. If evolving from a previous state, introduce only gradual changes!
             6. Return ONLY the SVG code wrapped in \`\`\`svg code blocks
             7. use animations abundantly
-            
+            8. please add directions for the next evolution as explanation underneath the svg
 
-            Current state: ${currentState ? 'Building upon previous SVG. Change gradually.' : 'Creating initial SVG'}`;
+            Creative Direction: ${prompt}`;
+
+            const userMessage = currentState ? 
+                `Here is the previous SVG state. Evolve it gradually while maintaining its essence:\n\n${currentState}` :
+                "Generate the initial SVG state following the creative direction.";
 
             try {
                 const response = await fetch('https://text.pollinations.ai/', {
@@ -360,7 +364,7 @@
                         model,
                         messages: [
                             { role: "system", content: systemPrompt },
-                            { role: "user", content: prompt }
+                            { role: "user", content: userMessage }
                         ],
                         temperature,
                         seed
