@@ -5,74 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LLM SVG Art Evolution</title>
     <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent: #4f9eff;
+            --border: #404040;
+            --input-bg: #333333;
+        }
+        
         body {
             font-family: system-ui, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background: #f5f5f5;
+            background: var(--bg-primary);
             line-height: 1.5;
+            color: var(--text-primary);
         }
+        
+        h1, h2 {
+            color: var(--text-primary);
+            margin-bottom: 1em;
+        }
+        
         .container {
-            background: white;
+            background: var(--bg-secondary);
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
         }
-        select {
+        
+        select, textarea {
             width: 100%;
             padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
+            margin: 8px 0;
+            border: 1px solid var(--border);
             border-radius: 4px;
-            font-size: 16px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-family: inherit;
         }
+        
+        select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
         .svg-container {
             display: block;
             width: 720px;
             height: 600px;
             overflow: auto;
-            background: #f8f8f8;
+            background: var(--bg-primary);
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border);
             border-radius: 4px;
         }
-        textarea, select {
-            width: 100%;
-            padding: 8px;
-            margin: 8px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-family: inherit;
-        }
+        
         button {
             padding: 8px 16px;
-            background: #2196f3;
-            color: white;
+            background: var(--accent);
+            color: var(--text-primary);
             border: none;
             border-radius: 4px;
             cursor: pointer;
             margin-right: 8px;
+            transition: background-color 0.2s;
         }
+        
+        button:hover {
+            background: #3d8be6;
+        }
+        
         button:disabled {
-            background: #ccc;
+            background: var(--border);
+            cursor: not-allowed;
         }
+        
         #history {
             max-height: 400px;
             overflow-y: auto;
         }
+        
         .history-item {
             padding: 10px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--border);
         }
+        
         label {
             display: block;
             margin: 8px 0;
+            color: var(--text-secondary);
         }
+        
         #speed-slider {
             -webkit-appearance: none;
-            background: #ddd;
+            background: var(--border);
             height: 2px;
             direction: rtl;
         }
@@ -82,21 +114,61 @@
             width: 15px;
             height: 15px;
             border-radius: 50%;
-            background: #666;
+            background: var(--accent);
             cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        #speed-slider::-webkit-slider-thumb:hover {
+            background: #3d8be6;
         }
 
         #speed-slider::-moz-range-thumb {
             width: 15px;
             height: 15px;
             border-radius: 50%;
-            background: #666;
+            background: var(--accent);
             cursor: pointer;
             border: none;
+            transition: background-color 0.2s;
+        }
+        
+        #speed-slider::-moz-range-thumb:hover {
+            background: #3d8be6;
         }
 
         #speed-slider::-moz-range-progress {
             background-color: transparent;
+        }
+        
+        input[type="number"] {
+            background: var(--input-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 4px 8px;
+        }
+        
+        input[type="range"] {
+            accent-color: var(--accent);
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
         }
     </style>
 </head>
@@ -106,16 +178,16 @@
     <div class="container">
         <label for="preset-select">Select Preset:</label>
         <select id="preset-select">
-            <option value="geometric">Geometric Patterns</option>
-            <option value="organic">Organic Shapes</option>
-            <option value="abstract">Abstract Art</option>
-            <option value="landscape">Digital Landscape</option>
-            <option value="portrait">Portrait Elements</option>
-            <option value="circuit">Circuit Board Design</option>
-            <option value="mandala">Mandala Patterns</option>
-            <option value="waves">Wave Interference</option>
-            <option value="grid">Grid Compositions</option>
-            <option value="flow">Flow Fields</option>
+            <option value="solarpunk">Solarpunk Utopia</option>
+            <option value="isometric">Isometric Cityscape</option>
+            <option value="cellular">Cellular Patterns</option>
+            <option value="bauhaus">Bauhaus Dreams</option>
+            <option value="quantum">Quantum Realms</option>
+            <option value="biomorphic">Biomorphic Systems</option>
+            <option value="cosmology">Cosmic Architecture</option>
+            <option value="neural">Neural Gardens</option>
+            <option value="meditation">Inner Landscapes</option>
+            <option value="emergence">Emergent Behaviors</option>
         </select>
         
         <label for="base-prompt">Animation Prompt:</label>
@@ -171,45 +243,45 @@
 
         // Presets for SVG generation
         const presets = {
-            geometric: {
-                prompt: "Create an SVG with basic geometric shapes (circles, rectangles, polygons) arranged in a balanced composition. Use clean lines and primary colors. The shapes should form an abstract pattern that suggests movement and harmony.",
-                temperature: 0.8
-            },
-            organic: {
-                prompt: "Generate an SVG with flowing, organic curves using path elements. Create natural, biomorphic shapes that suggest growth and movement. Include gentle gradients and earth tones.",
+            solarpunk: {
+                prompt: "Create an evolving solarpunk cityscape where nature and technology harmoniously intertwine. Use flowing organic curves for plant life mixed with clean geometric shapes for sustainable architecture. Include animated elements like swaying trees, floating gardens, and shimmering solar panels. Use vibrant greens and warm sunlit colors.",
                 temperature: 0.9
             },
-            abstract: {
-                prompt: "Design an abstract SVG composition using a mix of geometric and organic shapes. Layer transparent elements, use bold colors, and create dynamic intersections between shapes. Think Kandinsky-style modernist artwork.",
-                temperature: 0.9
-            },
-            landscape: {
-                prompt: "Create a minimalist landscape SVG using simple shapes and lines. Represent hills, trees, or buildings using geometric abstractions. Use a limited color palette with subtle gradients for depth.",
-                temperature: 0.7
-            },
-            portrait: {
-                prompt: "Generate an abstract face or portrait using SVG shapes. Use simple geometric forms to suggest facial features. Create an expressive composition that balances representation and abstraction.",
+            isometric: {
+                prompt: "Generate an isometric architectural composition inspired by M.C. Escher and impossible geometry. Create intricate 3D structures with precise angles, interconnected pathways, and recursive patterns. Use animated perspective shifts and transformations. Employ a sophisticated color palette with subtle gradients.",
                 temperature: 0.8
             },
-            circuit: {
-                prompt: "Design an SVG that resembles a circuit board pattern. Use straight lines, right angles, and circular connection points. Create a complex network of paths that suggests technological connectivity.",
-                temperature: 0.7
-            },
-            mandala: {
-                prompt: "Generate a symmetrical mandala pattern using SVG. Create intricate geometric patterns that radiate from the center. Use repetition and mathematical precision in the arrangement of shapes.",
-                temperature: 0.8
-            },
-            waves: {
-                prompt: "Create an SVG pattern of intersecting waves and ripples. Use curved paths and varying stroke widths to suggest interference patterns. Layer semi-transparent shapes to create depth and complexity.",
+            cellular: {
+                prompt: "Visualize a cellular automaton system inspired by Conway's Game of Life but with artistic flair. Create evolving patterns of geometric cells that pulse, grow, and transform. Use animated transitions between states. Incorporate mathematical beauty with organic unpredictability.",
                 temperature: 0.85
             },
-            grid: {
-                prompt: "Generate a grid-based SVG composition. Create variations in the grid using different sizes and colors of shapes. Include occasional disruptions to the pattern for visual interest.",
+            bauhaus: {
+                prompt: "Design an animated Bauhaus-inspired composition that celebrates geometric abstraction and modernist principles. Use primary colors, bold shapes, and clean lines in dynamic arrangements. Include subtle rotations and translations that reflect industrial rhythm and mechanical precision.",
                 temperature: 0.7
             },
-            flow: {
-                prompt: "Design an SVG flow field visualization. Create patterns of curved lines that suggest fluid dynamics or magnetic fields. Use varying line weights and colors to indicate field strength.",
+            quantum: {
+                prompt: "Visualize quantum phenomena through abstract art - wave-particle duality, superposition, and entanglement. Create animated probability clouds, interference patterns, and quantum tunneling effects. Use ethereal colors and translucent layers to suggest the mysterious nature of quantum reality.",
+                temperature: 0.95
+            },
+            biomorphic: {
+                prompt: "Create a living system of biomorphic forms inspired by Ernst Haeckel's scientific illustrations. Design intricate organic shapes that grow, divide, and evolve. Use animated transformations to suggest cellular processes and biological rhythms. Include delicate details and symmetrical patterns.",
                 temperature: 0.9
+            },
+            cosmology: {
+                prompt: "Design an abstract representation of cosmic architecture - galaxy formations, gravitational lensing, and spacetime fabric. Create animated elements suggesting orbital motion and celestial mechanics. Use deep space colors and geometric patterns inspired by astronomical phenomena.",
+                temperature: 0.85
+            },
+            neural: {
+                prompt: "Visualize a garden of artificial neural networks as living, breathing entities. Create organic-mechanical hybrid forms with animated synaptic connections and information flows. Show learning and adaptation through evolving patterns and emergent behaviors.",
+                temperature: 0.9
+            },
+            meditation: {
+                prompt: "Generate abstract visualizations of inner mental states and consciousness. Create flowing mandalas and organic patterns that pulse with meditative rhythms. Use subtle animations and transitions to induce contemplative states. Incorporate sacred geometry and archetypal forms.",
+                temperature: 0.8
+            },
+            emergence: {
+                prompt: "Design a complex system showing emergent behavior from simple rules. Create animated patterns that suggest flocking birds, forming crystals, or growing cities. Use mathematical principles to generate organic complexity. Show how individual elements combine to create larger organized structures.",
+                temperature: 0.85
             }
         };
 
@@ -235,8 +307,8 @@
         function createEmptyCanvas() {
             elements.preview.innerHTML = `
                 <svg width="100%" height="100%" viewBox="0 0 800 600">
-                    <rect width="100%" height="100%" fill="#f8f8f8"/>
-                    <text x="50%" y="50%" text-anchor="middle" fill="#666">
+                    <rect width="100%" height="100%" fill="var(--bg-primary)"/>
+                    <text x="50%" y="50%" text-anchor="middle" fill="var(--text-secondary)" font-family="system-ui, sans-serif">
                         Start evolution to generate SVG art
                     </text>
                 </svg>
