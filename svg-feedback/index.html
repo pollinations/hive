@@ -420,12 +420,13 @@ with occasional golden sparks where the lightning meets the tree branches.`,
             currentSeed = initialSeed;
         }
 
-        function getFirstFourWords(str) {
-            return str.split(/\s+/).slice(0, 4).join(' ').toLowerCase().replace(/[^\w\s-]/g, '');
+        function getFirstThreeWords(str) {
+            return str.trim().split(/\s+/).slice(0, 3).join(' ');
         }
 
         function saveCurrentPreset() {
-            const name = prompt('Enter a name for this preset:');
+            const defaultName = getFirstThreeWords(elements.basePrompt.value);
+            const name = prompt('Enter a name for this preset:', defaultName);
             if (!name) return;
             
             const preset = {
