@@ -215,3 +215,19 @@ input[type="range"] {
     font-family: monospace;
     margin-left: 10px;
 }
+
+textarea {
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+#initial-svg {
+    font-size: 0.9em;
+    background-color: #1a1a1a;
+    border-color: #333;
+    color: #aaa;
+}
