@@ -218,7 +218,7 @@
             .then(r => r.json())
             .then(models => {
                 elements.modelSelect.innerHTML = models
-                    .map(m => `<option value="${m.name}" ${m.name === 'openai' ? 'selected' : ''}>${m.name} - ${m.description}</option>`)
+                    .map(m => `<option value="${m.name}" ${m.name === 'openai-large' ? 'selected' : ''}>${m.name} - ${m.description}</option>`)
                     .join('');
             });
 
