@@ -4,7 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LLM SVG Art Evolution</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Include styles directly in HTML for testing */
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --accent: #4f9eff;
+            --border: #404040;
+            --input-bg: #333333;
+            --button-bg: #4f9eff;
+            --button-text: #ffffff;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto 20px auto;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+        }
+
+        h1, h2 {
+            margin: 0 0 15px 0;
+        }
+
+        select, textarea, input {
+            width: 100%;
+            padding: 5px;
+            margin: 5px 0;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        .svg-container {
+            display: block;
+            width: 480px;
+            height: 360px;
+            overflow: hidden;
+            background: var(--bg-primary);
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin: 0 auto;
+        }
+
+        button {
+            padding: 5px 10px;
+            margin: 5px;
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #history {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .history-item {
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg-secondary);
+            transition: border-color 0.2s;
+            padding: 5px;
+        }
+
+        .history-item.active {
+            border-color: var(--accent);
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .frame-counter {
+            margin-left: auto;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            color: #ff4444;
+            padding: 20px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <h1>LLM SVG Art Evolution</h1>
@@ -64,7 +174,7 @@
         <h2>History</h2>
         <div id="history"></div>
     </div>
-    <script src="script.js"></script>
+    <!-- Note: All JavaScript is now inline in this file. Previous script.js has been integrated here for better maintainability -->
 
     <script>
         const elements = {
@@ -186,6 +296,82 @@ with occasional golden sparks where the lightning meets the tree branches.`,
             `;
         }
 
+        /**
+         * Sanitizes an SVG element by removing potentially dangerous elements and attributes
+         * @param {SVGElement} svgElement - The SVG element to sanitize
+         * @returns {SVGElement} The sanitized SVG element
+         */
+        function sanitizeSvgElement(svgElement) {
+            const dangerousElements = ['script', 'foreignObject', 'use'];
+            const dangerousAttrs = ['onload', 'onerror', 'onclick', 'onmouseover', 'onmouseout', 'onmousemove', 
+                                  'onmousedown', 'onmouseup', 'onkeydown', 'onkeyup', 'onkeypress'];
+            
+            // Remove dangerous elements
+            dangerousElements.forEach(tag => {
+                const elements = svgElement.getElementsByTagName(tag);
+                while (elements.length > 0) {
+                    elements[0].parentNode.removeChild(elements[0]);
+                }
+            });
+            
+            // Remove dangerous attributes from all elements
+            const allElements = svgElement.getElementsByTagName('*');
+            for (const element of allElements) {
+                dangerousAttrs.forEach(attr => {
+                    element.removeAttribute(attr);
+                });
+                // Remove javascript: and data: from href/xlink:href
+                if (element.hasAttribute('href')) {
+                    const href = element.getAttribute('href');
+                    if (href.toLowerCase().startsWith('javascript:') || href.toLowerCase().startsWith('data:')) {
+                        element.removeAttribute('href');
+                    }
+                }
+                if (element.hasAttribute('xlink:href')) {
+                    const href = element.getAttribute('xlink:href');
+                    if (href.toLowerCase().startsWith('javascript:') || href.toLowerCase().startsWith('data:')) {
+                        element.removeAttribute('xlink:href');
+                    }
+                }
+            }
+            
+            return svgElement;
+        }
+
+        /**
+         * Safely parses and sanitizes SVG content before inserting into the DOM
+         * @param {string} svgString - The SVG content string
+         * @param {HTMLElement} container - The container element to insert the SVG into
+         * @returns {boolean} True if successful, false if parsing failed
+         */
+        function sanitizeAndInsertSvg(svgString, container) {
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(svgString, 'image/svg+xml');
+                
+                // Check for parsing errors
+                const parserError = doc.querySelector('parsererror');
+                if (parserError) {
+                    console.error('SVG parsing error:', parserError);
+                    return false;
+                }
+                
+                // Sanitize and insert
+                const sanitized = sanitizeSvgElement(doc.documentElement);
+                const clone = sanitized.cloneNode(true);
+                container.replaceChildren(clone);
+                return true;
+            } catch (error) {
+                console.error('Error sanitizing SVG:', error);
+                return false;
+            }
+        }
+
+        /**
+         * Extracts SVG content from LLM response text
+         * @param {string} text - The text to extract SVG from
+         * @returns {string|null} The extracted SVG content or null if not found
+         */
         function extractSvgContent(text) {
             // Try to match SVG with language specifier
             let svgMatch = text.match(/```(?:svg|xml)\n([\s\S]*?)\n```/);
@@ -205,9 +391,17 @@ with occasional golden sparks where the lightning meets the tree branches.`,
             return null;
         }
 
+        /**
+         * Updates the current frame display with sanitized SVG content
+         * @param {number} currentFrame - The index of the current frame to display
+         */
         function updateFrame(currentFrame) {
-            // Update preview
-            elements.preview.innerHTML = frames[currentFrame];
+            // Update preview with sanitized SVG
+            const svgContent = frames[currentFrame];
+            if (!sanitizeAndInsertSvg(svgContent, elements.preview)) {
+                console.error('Failed to update frame with SVG content');
+                elements.preview.innerHTML = '<div class="error">Error: Invalid SVG content</div>';
+            }
             
             // Update frame counter
             elements.frameCounter.textContent = `Frame ${currentFrame + 1}/${frames.length}`;
@@ -248,11 +442,19 @@ with occasional golden sparks where the lightning meets the tree branches.`,
             animationFrame = requestAnimationFrame(animate);
         }
 
+        /**
+         * Generates SVG content using the LLM API
+         * @param {string} prompt - The creative prompt for generation
+         * @param {string|null} currentState - The current SVG state to evolve from
+         * @param {number} retryCount - The current retry attempt number
+         * @returns {Promise<string|null>} The generated SVG content or null if generation failed
+         */
         async function generateText(prompt, currentState, retryCount = 0) {
             const maxRetries = 3;
             const model = getSelectedModel();
             const temperature = parseFloat(elements.temperature.value);
-            const seed = currentSeed;// + retryCount; // Increment seed based on retry count
+            // Increment seed based on retry count to ensure different results on retries
+            const seed = currentSeed + retryCount;
 
             const systemPrompt = `You are an animated SVG art generator. Create SVG code with 100% width and height.
             Follow these rules:
@@ -303,10 +505,20 @@ with occasional golden sparks where the lightning meets the tree branches.`,
                 
                 const svgContent = extractSvgContent(text);
                 
-                // Validate SVG completeness
+                // Validate SVG content with specific error messages
+                if (!svgContent) {
+                    throw new Error('No valid SVG content found in response');
+                }
                 
-                if (!svgContent || !svgContent.includes('</svg>')) {
-                    throw new Error('Incomplete SVG content');
+                if (!svgContent.includes('</svg>')) {
+                    throw new Error('SVG content is incomplete - missing closing tag');
+                }
+                
+                // Validate SVG can be parsed
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(svgContent, 'image/svg+xml');
+                if (doc.querySelector('parsererror')) {
+                    throw new Error('SVG content is malformed - parsing failed');
                 }
                 
                 console.log(`Response character count: ${text.length}`);
@@ -342,13 +554,17 @@ with occasional golden sparks where the lightning meets the tree branches.`,
                     frames.push(svgContent);
                     
                     // Update history with all frames
-                    elements.history.innerHTML = frames.map(frame => `
-                        <div class="history-item">
-                            <div style="width: 160px; height: 120px;">
-                                ${frame}
-                            </div>
-                        </div>
-                    `).join('');
+                    // Update history with sanitized SVG frames
+                    elements.history.innerHTML = frames.map(frame => {
+                        const container = document.createElement('div');
+                        container.className = 'history-item';
+                        const innerContainer = document.createElement('div');
+                        innerContainer.style.width = '160px';
+                        innerContainer.style.height = '120px';
+                        container.appendChild(innerContainer);
+                        sanitizeAndInsertSvg(frame, innerContainer);
+                        return container.outerHTML;
+                    }).join('');
 
                     // Update frame index to show the latest frame
                     frameIndex = frames.length - 1;
