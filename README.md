@@ -8,6 +8,7 @@ Welcome to Pollinations Hive - a revolutionary repository where AI meets collabo
 | App | Source | Last Updated |
 |-----|--------|--------------|
 | [llm-feedback](https://pollinations.github.io/hive/main/llm-feedback/) | [./llm-feedback](./llm-feedback) | 2025-01-14 |
+| [prompt-guessing-game](https://pollinations.github.io/hive/main/prompt-guessing-game/) | [./prompt-guessing-game](./prompt-guessing-game) | 2025-01-17 |
 | [tarot-reader](https://pollinations.github.io/hive/main/tarot-reader/) | [./tarot-reader](./tarot-reader) | 2025-01-14 |
 | [pollinations-image-show](https://pollinations.github.io/hive/main/pollinations-image-show/) | [./pollinations-image-show](./pollinations-image-show) | 2025-01-14 |
 | [graphics-editor](https://pollinations.github.io/hive/main/graphics-editor/) | [./graphics-editor](./graphics-editor) | 2025-01-15 |
@@ -49,6 +50,7 @@ Every pull request in this repository gets an automatic preview deployment. Here
 
 | PR | Title | Preview |
 |-----|--------|---------|
+| [#141](https://github.com/pollinations/hive/pull/141) | Add prompt guessing game initial structure | [Preview](https://pollinations.github.io/hive/pr-141/) |
 | [#127](https://github.com/pollinations/hive/pull/127) | Add canvas dimensions to text AI prompt | [Preview](https://pollinations.github.io/hive/pr-127/) |
 
 _This list is automatically updated when PRs are opened or closed._
