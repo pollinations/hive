@@ -23,6 +23,7 @@
             <option value="neural">Neural Gardens</option>
             <option value="meditation">Inner Landscapes</option>
             <option value="emergence">Emergent Behaviors</option>
+            <option value="digital-nature">Digital Nature</option>
         </select>
         
         <label for="base-prompt">Animation Prompt:</label>
@@ -49,8 +50,9 @@
         </div>
         
         <div class="controls">
-            <button id="startBtn">Start Evolution</button>
-            <button id="stopBtn" disabled>Stop Evolution</button>
+            <button id="start" onclick="startEvolution()">Start Evolution</button>
+            <button id="stop" onclick="stopEvolution()" disabled>Stop</button>
+            <button id="save-preset" onclick="saveCurrentPreset()">Save Preset</button>
             <span id="frame-counter" class="frame-counter">Frame 0/0</span>
         </div>
     </div>
@@ -69,15 +71,23 @@
             temperatureValue: document.getElementById('temperature-value'),
             seed: document.getElementById('seed'),
             preview: document.getElementById('preview-window'),
-            start: document.getElementById('startBtn'),
-            stop: document.getElementById('stopBtn'),
+            start: document.getElementById('start'),
+            stop: document.getElementById('stop'),
             speedSlider: document.getElementById('speed-slider'),
             frameCounter: document.getElementById('frame-counter'),
             history: document.getElementById('history')
         };
 
-        // Presets for SVG generation
+        // Load saved presets from localStorage
+        const savedPresets = JSON.parse(localStorage.getItem('savedPresets') || '{}');
+        
+        // Base presets combined with saved presets
         const presets = {
+            'neural': {
+                name: 'Neural Gardens',
+                prompt: "Create an abstract garden of neural networks. Use flowing lines and organic shapes to represent neurons, synapses, and the flow of information. Incorporate subtle color transitions and pulsing animations to suggest the dynamic nature of neural processing.",
+                temperature: 0.8
+            },
             biomorphic: {
                 prompt: "Create a living system of biomorphic forms inspired by Ernst Haeckel's scientific illustrations. Design intricate organic shapes that grow, divide, and evolve. Use animated transformations to suggest cellular processes and biological rhythms. Include delicate details and symmetrical patterns.",
                 temperature: 0.9
@@ -114,10 +124,6 @@
                 prompt: "Design an abstract representation of cosmic architecture - galaxy formations, gravitational lensing, and spacetime fabric. Create animated elements suggesting orbital motion and celestial mechanics. Use deep space colors and geometric patterns inspired by astronomical phenomena.",
                 temperature: 0.85
             },
-            neural: {
-                prompt: "Visualize a garden of artificial neural networks as living, breathing entities. Create organic-mechanical hybrid forms with animated synaptic connections and information flows. Show learning and adaptation through evolving patterns and emergent behaviors.",
-                temperature: 0.9
-            },
             meditation: {
                 prompt: "Generate abstract visualizations of inner mental states and consciousness. Create flowing mandalas and organic patterns that pulse with meditative rhythms. Use subtle animations and transitions to induce contemplative states. Incorporate sacred geometry and archetypal forms.",
                 temperature: 0.8
@@ -125,8 +131,21 @@
             emergence: {
                 prompt: "Design a complex system showing emergent behavior from simple rules. Create animated patterns that suggest flocking birds, forming crystals, or growing cities. Use mathematical principles to generate organic complexity. Show how individual elements combine to create larger organized structures.",
                 temperature: 0.85
+            },
+            'digital-nature': {
+                prompt: `Create a mesmerizing fusion of nature and technology: a fractal tree growing from a digital seedling, 
+with branches that transform into circuitboard pathways lit by electric blue lightning. 
+Matrix-style digital rain falls in the background, but using varying shades of green and cyan.
+The tree should grow slowly and majestically,
+while the lightning pulses should be subtle and ethereal. The digital rain should fall at different speeds,
+creating layers of depth. Color palette should focus on deep greens, electric blues, and cyan accents,
+with occasional golden sparks where the lightning meets the tree branches.`,
+                temperature: 0.9
             }
         };
+
+        // Add saved presets to base presets
+        Object.assign(presets, savedPresets);
 
         // Fetch available models
         fetch('https://text.pollinations.ai/models')
@@ -365,6 +384,35 @@
             }
         }
 
+        function getFirstFourWords(str) {
+            return str.split(/\s+/).slice(0, 4).join(' ').toLowerCase().replace(/[^\w\s-]/g, '');
+        }
+
+        function saveCurrentPreset() {
+            const prompt = elements.basePrompt.value;
+            const temperature = parseFloat(elements.temperature.value);
+            const key = getFirstFourWords(prompt);
+            
+            const savedPresets = JSON.parse(localStorage.getItem('savedPresets') || '{}');
+            savedPresets[key] = {
+                prompt,
+                temperature,
+                name: key
+            };
+            
+            localStorage.setItem('savedPresets', JSON.stringify(savedPresets));
+            
+            // Add to select if not exists
+            if (!elements.presetSelect.querySelector(`option[value="${key}"]`)) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = key;
+                elements.presetSelect.appendChild(option);
+            }
+            
+            elements.presetSelect.value = key;
+        }
+
         // Event Listeners
         elements.start.addEventListener('click', startEvolution);
         elements.stop.addEventListener('click', stopEvolution);
@@ -379,8 +427,18 @@
         });
 
         // Initialize
-        createEmptyCanvas();
-        elements.basePrompt.value = presets[elements.presetSelect.value].prompt;
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add saved presets to select
+            Object.entries(savedPresets).forEach(([key, preset]) => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = preset.name;
+                elements.presetSelect.appendChild(option);
+            });
+            createEmptyCanvas();
+            elements.presetSelect.value = 'digital-nature';
+            elements.basePrompt.value = presets['digital-nature'].prompt;
+        });
     </script>
 </body>
 </html>
