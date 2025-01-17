@@ -146,6 +146,7 @@
         let frames = [];
         let frameIndex = 0;
         let currentSeed;
+        let initialSeed;
         let lastFrameTime = 0;
         let animationFrame = null;
 
@@ -219,13 +220,14 @@
 
             const systemPrompt = `You are an animated SVG art generator. Create SVG code that fits within a 800x600 viewBox.
             Follow these rules:
+            0. Your code should be inspired by the demoscene. Self-containted. Small. Re-using elements and groups creatively.
             1. Always start with <?xml version="1.0" encoding="UTF-8"?> and proper SVG tags
             2. Dont modify too many things at once if receiving a previous state
             3. Include style definitions in a <defs> section
             4. Always ensure the SVG is complete and properly closed
             5. If evolving from a previous state, introduce only gradual changes!
             6. Return ONLY the SVG code wrapped in \`\`\`svg code blocks
-            7. use animations abundantly
+            7. animations should be slow and fluid
             8. please add directions for the next evolution as explanation underneath the svg
 
             Creative Direction: ${prompt}`;
@@ -345,7 +347,8 @@
             elements.stop.disabled = false;
             frames = [];
             frameIndex = 0;
-            currentSeed = parseInt(elements.seed.value);
+            initialSeed = parseInt(elements.seed.value);
+            currentSeed = initialSeed;
             elements.frameCounter.textContent = 'Frame 0/0';
             evolve();
         }
@@ -354,6 +357,8 @@
             isRunning = false;
             elements.start.disabled = false;
             elements.stop.disabled = true;
+            currentSeed = initialSeed;
+            elements.seed.value = initialSeed;
             if (animationFrame) {
                 cancelAnimationFrame(animationFrame);
                 animationFrame = null;
