@@ -251,3 +251,10 @@ textarea {
     border-color: #333;
     color: #aaa;
 }
+
+#history svg {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin: 5px;
+}
