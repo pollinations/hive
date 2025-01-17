@@ -50,7 +50,6 @@ Every pull request in this repository gets an automatic preview deployment. Here
 
 | PR | Title | Preview |
 |-----|--------|---------|
-| [#141](https://github.com/pollinations/hive/pull/141) | Add prompt guessing game initial structure | [Preview](https://pollinations.github.io/hive/pr-141/) |
 | [#127](https://github.com/pollinations/hive/pull/127) | Add canvas dimensions to text AI prompt | [Preview](https://pollinations.github.io/hive/pr-127/) |
 
 _This list is automatically updated when PRs are opened or closed._
