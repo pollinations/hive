@@ -1,0 +1,115 @@
+.app {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.instructions {
+  margin: 1rem 0 2rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  color: #666;
+}
+
+.instructions p {
+  margin: 0.5rem 0;
+}
+
+.game-container {
+  margin-top: 2rem;
+}
+
+.image-container {
+  margin: 2rem 0;
+}
+
+.image-container img {
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+form {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+input {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 300px;
+}
+
+input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.game-info {
+  margin-top: 2rem;
+}
+
+.feedback {
+  margin-top: 1rem;
+  font-weight: bold;
+}
+
+.hint {
+  margin-top: 1rem;
+  color: #856404;
+  background-color: #fff3cd;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-style: italic;
+}
+
+.error {
+  color: #dc3545;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  border-radius: 4px;
+  background-color: #f8d7da;
+}
+
+.loading {
+  margin: 2rem 0;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.loading {
+  animation: pulse 1.5s infinite;
+}
