@@ -4,7 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LLM SVG Art Evolution</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Include styles directly in HTML for testing */
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --accent: #4f9eff;
+            --border: #404040;
+            --input-bg: #333333;
+            --button-bg: #4f9eff;
+            --button-text: #ffffff;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto 20px auto;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+        }
+
+        h1, h2 {
+            margin: 0 0 15px 0;
+        }
+
+        select, textarea, input {
+            width: 100%;
+            padding: 5px;
+            margin: 5px 0;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        .svg-container {
+            display: block;
+            width: 480px;
+            height: 360px;
+            overflow: hidden;
+            background: var(--bg-primary);
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin: 0 auto;
+        }
+
+        button {
+            padding: 5px 10px;
+            margin: 5px;
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #history {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .history-item {
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg-secondary);
+            transition: border-color 0.2s;
+            padding: 5px;
+        }
+
+        .history-item.active {
+            border-color: var(--accent);
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .frame-counter {
+            margin-left: auto;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            color: #ff4444;
+            padding: 20px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <h1>LLM SVG Art Evolution</h1>
@@ -64,7 +174,7 @@
         <h2>History</h2>
         <div id="history"></div>
     </div>
-    <script src="script.js"></script>
+    <!-- Note: All JavaScript is now inline in this file. Previous script.js has been integrated here for better maintainability -->
 
     <script>
         const elements = {
