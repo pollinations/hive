@@ -1,4 +1,3 @@
-
 const elements = {
     presetSelect: document.getElementById('preset-select'),
     basePrompt: document.getElementById('base-prompt'),
@@ -6,7 +5,7 @@ const elements = {
     temperature: document.getElementById('temperature'),
     temperatureValue: document.getElementById('temperature-value'),
     seed: document.getElementById('seed'),
-    preview: document.getElementById('preview-window'),
+    preview: document.getElementById('mermaid-container'),
     start: document.getElementById('start'),
     stop: document.getElementById('stop'),
     speedSlider: document.getElementById('speed-slider'),
@@ -108,29 +107,35 @@ let animationFrame = null;
 let currentState = null;
 
 function createEmptyCanvas() {
-    elements.preview.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 800 600" style="max-width: 100%; height: auto;">
-            <rect width="100%" height="100%" fill="var(--bg-primary)"/>
-            <text x="50%" y="50%" text-anchor="middle" fill="var(--text-secondary)" font-family="system-ui, sans-serif">
-                Start evolution to generate SVG art
-            </text>
-        </svg>
-    `;
+    const initialDiagram = `graph TD
+        A[Start Evolution] --> B[Generate Diagram]`;
+    
+    elements.preview.innerHTML = `<div class="mermaid">
+        ${initialDiagram}
+    </div>`;
+    
+    if (window.mermaid) {
+        try {
+            mermaid.contentLoaded();
+        } catch (error) {
+            console.error('Mermaid rendering error:', error);
+        }
+    }
 }
 
-function extractSvgContent(text) {
-    // Try to match SVG with language specifier
-    let svgMatch = text.match(/```(?:svg|xml)\n([\s\S]*?)\n```/);
-    if (svgMatch) return svgMatch[1].trim();
+function extractMermaidContent(text) {
+    // Try to match Mermaid with language specifier
+    let mermaidMatch = text.match(/```(?:mermaid|md)\n([\s\S]*?)\n```/);
+    if (mermaidMatch) return mermaidMatch[1].trim();
     
-    // Try to match SVG without language specifier
-    svgMatch = text.match(/```([\s\S]*?)```/);
-    if (svgMatch && svgMatch[1].trim().startsWith('<svg')) {
-        return svgMatch[1].trim();
+    // Try to match Mermaid without language specifier
+    mermaidMatch = text.match(/```([\s\S]*?)```/);
+    if (mermaidMatch && mermaidMatch[1].trim().startsWith('graph')) {
+        return mermaidMatch[1].trim();
     }
     
-    // If the text itself starts with <svg, return it directly
-    if (text.trim().startsWith('<svg')) {
+    // If the text itself starts with graph, return it directly
+    if (text.trim().startsWith('graph')) {
         return text.trim();
     }
     
@@ -140,6 +145,36 @@ function extractSvgContent(text) {
 function updateFrame(currentFrame) {
     // Update preview
     elements.preview.innerHTML = frames[currentFrame];
+    console.log("set innerHTML", frames[currentFrame]);
+    elements.preview.removeAttribute('data-processed');
+
+    try {
+        mermaid.contentLoaded();
+    } catch (error) {
+        console.error("Mermaid error:", error);
+        // Remove the problematic frame
+        frames.splice(currentFrame, 1);
+        
+        // If we have no frames left, create empty canvas
+        if (frames.length === 0) {
+            createEmptyCanvas();
+            return;
+        }
+        
+        // Increment seed and try to regenerate
+        currentSeed = Math.floor(Math.random() * 1000000);
+        console.log("Regenerating with new seed:", currentSeed);
+        
+        // If we're evolving, trigger a new evolution
+        if (isRunning) {
+            evolve();
+        }
+        
+        // Show previous valid frame
+        const newFrameIndex = Math.max(0, frames.length - 1);
+        updateFrame(newFrameIndex);
+        return;
+    }
     
     // Update frame counter
     elements.frameCounter.textContent = `Frame ${currentFrame + 1}/${frames.length}`;
@@ -155,55 +190,28 @@ function updateFrame(currentFrame) {
     });
 }
 
-function startPreviewAnimation() {
-    if (animationFrame) {
-        cancelAnimationFrame(animationFrame);
-    }
-    
-    lastFrameTime = performance.now();
-    
-    function animate(currentTime) {
-        const frameDelay = parseInt(elements.speedSlider.value);
-        const elapsed = currentTime - lastFrameTime;
-        
-        if (elapsed >= frameDelay && frames.length > 1) {
-            frameIndex = (frameIndex + 1) % frames.length;
-            updateFrame(frameIndex);
-            lastFrameTime = currentTime;
-        }
-        
-        if (isRunning) {
-            animationFrame = requestAnimationFrame(animate);
-        }
-    }
-    
-    animationFrame = requestAnimationFrame(animate);
-}
-
 async function generateText(prompt, currentState, retryCount = 0) {
     const maxRetries = 8;
     const model = getSelectedModel();
     const temperature = parseFloat(elements.temperature.value);
     const seed = currentSeed;// + retryCount; // Increment seed based on retry count
 
-    const systemPrompt = `You are an animated SVG art generator. Create SVG code with 100% width and height.
+    const systemPrompt = `You are a Mermaid diagram generator. Create Mermaid code.
     Follow these rules:
     0. Your code should be inspired by the demoscene. Self-containted. Small. Re-using elements and groups creatively.
-    1. Always start with <?xml version="1.0" encoding="UTF-8"?> and proper SVG tags
     2. Dont modify too many things at once if receiving a previous state
-    3. Include style definitions in a <defs> section
-    4. Always ensure the SVG is complete and properly closed
+    4. Always ensure the Mermaid is complete and properly closed
     5. If evolving from a previous state, introduce only gradual changes!
-    6. Return ONLY the SVG code wrapped in \`\`\`svg code blocks
+    6. Return ONLY the Mermaid code wrapped in \`\`\`mermaid code blocks
     7. animations should be slow and fluid
-    8. please add directions for the next evolution as explanation underneath the svg
-    9. The svg should have width and height 100%
+    8. please add directions for the next evolution as explanation underneath the mermaid
+    9. The mermaid should have a clear and concise layout
     10. The background is dark
     Creative Direction: ${prompt}`;
 
     const userMessage = currentState ? 
-        `Here is the previous SVG state. Evolve it gradually while maintaining its essence:\n\n${currentState}` :
-        "Generate the initial SVG state following the creative direction.";
+        `Here is the previous Mermaid state. Evolve it gradually while maintaining its essence:\n\n${currentState}` :
+        "Generate the initial Mermaid state following the creative direction.";
 
     console.log('=== LLM Request ===');
     console.log('System:', systemPrompt);
@@ -233,17 +241,17 @@ async function generateText(prompt, currentState, retryCount = 0) {
         console.log('=== LLM Response ===');
         console.log(text);
         
-        const svgContent = extractSvgContent(text);
+        const mermaidContent = extractMermaidContent(text);
         
-        // Validate SVG completeness
+        // Validate Mermaid completeness
         
-        if (!svgContent || !svgContent.includes('</svg>')) {
-            throw new Error('Incomplete SVG content');
+        if (!mermaidContent) {
+            throw new Error('Incomplete Mermaid content');
         }
         
         console.log(`Response character count: ${text.length}`);
         
-        return svgContent;
+        return mermaidContent;
 
     } catch (error) {
         console.error('Error:', error);
@@ -264,14 +272,14 @@ async function evolve() {
     
     try {
         const evolutionPrompt = currentState 
-            ? `Evolve this SVG art while maintaining some consistency with the previous state. ${basePrompt}`
+            ? `Evolve this Mermaid diagram while maintaining some consistency with the previous state. ${basePrompt}`
             : basePrompt;
 
-        const svgContent = await generateText(evolutionPrompt, currentState);
+        const mermaidContent = await generateText(evolutionPrompt, currentState);
         
-        if (svgContent) {
-            currentState = svgContent;
-            frames.push(svgContent);
+        if (mermaidContent) {
+            currentState = mermaidContent;
+            frames.push(mermaidContent);
             
             // Update history with all frames
             elements.history.innerHTML = frames.map(frame => `
@@ -328,15 +336,15 @@ async function startEvolution() {
         const prompt = elements.basePrompt.value;
         const initialSvg = elements.initialSvg.value.trim();
         try {
-            const svgContent = extractSvgContent(initialSvg);
-            if (svgContent) {
-                currentState = svgContent + `\n\nPrompt: ${prompt}`;
-                frames.push(svgContent);
+            const mermaidContent = extractMermaidContent(initialSvg);
+            if (mermaidContent) {
+                currentState = mermaidContent + `\n\nPrompt: ${prompt}`;
+                frames.push(mermaidContent);
                 updateFrame(frameIndex);
                 startPreviewAnimation();
             }
         } catch (error) {
-            console.error('Invalid initial SVG:', error);
+            console.error('Invalid initial Mermaid:', error);
         }
     }
 
@@ -416,19 +424,68 @@ elements.temperature.addEventListener('input', (e) => {
     elements.temperatureValue.textContent = e.target.value;
 });
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    // Add saved presets to select
-    Object.entries(savedPresets).forEach(([key, preset]) => {
-        const option = document.createElement('option');
-        option.value = key;
-        option.textContent = preset.name;
-        elements.presetSelect.appendChild(option);
+// Wait for mermaid to be available
+function waitForMermaid(callback) {
+    if (window.mermaid) {
+        callback();
+    } else {
+        setTimeout(() => waitForMermaid(callback), 100);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    waitForMermaid(() => {
+        // Add saved presets to select
+        Object.entries(savedPresets).forEach(([key, preset]) => {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = preset.name;
+            elements.presetSelect.appendChild(option);
+        });
+        createEmptyCanvas();
+        elements.presetSelect.value = 'digital-nature';
+        elements.basePrompt.value = presets['digital-nature'].prompt;
+        if (presets['digital-nature'].initialSvg) {
+            elements.initialSvg.value = presets['digital-nature'].initialSvg;
+        }
     });
-    createEmptyCanvas();
-    elements.presetSelect.value = 'digital-nature';
-    elements.basePrompt.value = presets['digital-nature'].prompt;
-    if (presets['digital-nature'].initialSvg) {
-        elements.initialSvg.value = presets['digital-nature'].initialSvg;
+});
+
+// Initialize when mermaid is ready
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.mermaid) {
+        createEmptyCanvas();
+    } else {
+        const checkMermaid = setInterval(() => {
+            if (window.mermaid) {
+                clearInterval(checkMermaid);
+                createEmptyCanvas();
+            }
+        }, 100);
     }
 });
+
+function startPreviewAnimation() {
+    if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+    }
+    
+    lastFrameTime = performance.now();
+    
+    function animate(currentTime) {
+        const frameDelay = parseInt(elements.speedSlider.value);
+        const elapsed = currentTime - lastFrameTime;
+        
+        if (elapsed >= frameDelay && frames.length > 1) {
+            frameIndex = (frameIndex + 1) % frames.length;
+            updateFrame(frameIndex);
+            lastFrameTime = currentTime;
+        }
+        
+        if (isRunning) {
+            animationFrame = requestAnimationFrame(animate);
+        }
+    }
+    
+    animationFrame = requestAnimationFrame(animate);
+}

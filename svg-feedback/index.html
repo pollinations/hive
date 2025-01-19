@@ -45,7 +45,8 @@
             <input type="number" id="seed" value="42">
         </div>
 
-        <div id="preview-window" class="svg-container"></div>
+        <div id="mermaid-container" class="mermaid">
+        </div>
         
         <div class="speed-slider-container">
             <label for="speed-slider">Frame Delay (ms):</label>
@@ -65,6 +66,17 @@
         <div id="history"></div>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/+esm'
+        window.mermaid = mermaid;  // Make mermaid globally available
+        
+        // Initialize mermaid with specific configuration
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+    </script>
+    <script src="script.js" defer></script>
 </body>
 </html>
