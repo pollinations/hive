@@ -44,6 +44,15 @@
             line-height: 1.1;
             letter-spacing: 0.02em;
         }
+        .state-block {
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 20px 0;
+            background: white;
+            display: inline-block;
+            min-width: min-content;
+        }
         textarea, select {
             width: 100%;
             padding: 8px;
@@ -71,6 +80,8 @@
         .history-item {
             padding: 10px;
             border-bottom: 1px solid #eee;
+            width: auto;
+            height: auto;
         }
         label {
             display: block;
@@ -168,12 +179,16 @@
                 prompt: `Simulate one generation of Conway's Game of Life on a 5x5 grid.
 Initial state (O = alive, . = dead):
 
+\`\`\`
 Gen #001
 .....
 .....
 .OOO.
 .....
 .....
+\`\`\`
+
+
 
 Apply Conway's Game of Life rules:
 1. Any live cell with 2-3 live neighbors survives
@@ -184,6 +199,7 @@ Apply Conway's Game of Life rules:
 - If no state is provided below the prompt, simply return the initial state.
 - Display and increment the generation number on each response.
 - Your response should start with 'Gen #'
+- Each state should be wrapped in code blocks
 `,
                 temperature: 0.1
             },
@@ -405,10 +421,21 @@ ${prompt}`;
                     currentState = text; // Keep full text for LLM context
                     console.log('State updated, frame count:', frames.length);
                     
+                    const container = document.createElement('div');
+                    container.style.marginBottom = '30px';
+                    
+                    const iterationLabel = document.createElement('div');
+                    iterationLabel.style.marginBottom = '5px';
+                    iterationLabel.style.color = '#666';
+                    iterationLabel.textContent = `Iteration ${frames.length}`;
+                    
                     const historyItem = document.createElement('div');
-                    historyItem.className = 'history-item mono';
+                    historyItem.className = 'history-item state-block mono';
                     historyItem.textContent = text;
-                    elements.history.insertBefore(historyItem, elements.history.firstChild);
+                    
+                    container.appendChild(iterationLabel);
+                    container.appendChild(historyItem);
+                    elements.history.insertBefore(container, elements.history.firstChild);
                     
                     console.log('UI updated');
                     
