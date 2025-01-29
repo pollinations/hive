@@ -139,7 +139,7 @@
             </div>
             <div style="display: flex; align-items: center; gap: 10px;">
                 <label for="seed">Seed:</label>
-                <input type="number" id="seed" value="-1">
+                <input type="number" id="seed" value="42">
             </div>
         </div>
 
@@ -168,6 +168,7 @@
                 prompt: `Simulate one generation of Conway's Game of Life on a 5x5 grid.
 Initial state (O = alive, . = dead):
 
+Gen #001
 .....
 .....
 .OOO.
@@ -179,7 +180,11 @@ Apply Conway's Game of Life rules:
 2. Any dead cell with exactly 3 live neighbors becomes alive
 3. All other cells die or stay dead
 
-Format the output as a left-aligned grid.`,
+- Simulate a 5x5 grid
+- If no state is provided below the prompt, simply return the initial state.
+- Display and increment the generation number on each response.
+- Your response should start with 'Gen #'
+`,
                 temperature: 0.1
             },
             calligram: {
@@ -268,13 +273,18 @@ Format the output as a left-aligned grid.`,
         }
 
         function extractDisplayContent(text) {
-            // First try to extract content from code blocks
-            const codeMatch = text.match(/```([\s\S]*?)```/);
-            if (codeMatch) return codeMatch[1];
-            
+
             // Then check for content before </think>
             const thinkMatch = text.split('</think>');
-            if (thinkMatch.length > 1) return thinkMatch[1].trim();
+            if (thinkMatch.length > 1) 
+                text = thinkMatch[1].trim();
+
+
+            // First try to extract content from code blocks
+            const codeMatch = text.match(/```([\s\S]*?)```/);
+            if (codeMatch) 
+                return codeMatch[1];
+            
             
             // If neither pattern matches, return the original text
             return text;
@@ -311,7 +321,7 @@ ${prompt}`;
                 
                 let seed = elements.seed.value && elements.seed.value !== '-1' ? 
                     parseInt(elements.seed.value) : 
-                    Math.floor(Math.random() * 1000000);
+                    42;
 
                 const model = getSelectedModel();
                 const messages = model === 'deepseek-r1' ? 
