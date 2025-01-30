@@ -51,7 +51,6 @@ Every pull request in this repository gets an automatic preview deployment. Here
 
 | PR | Title | Preview |
 |-----|--------|---------|
-| [#159](https://github.com/pollinations/hive/pull/159) | 155 game of life llm feedback | [Preview](https://pollinations.github.io/hive/pr-159/) |
 | [#158](https://github.com/pollinations/hive/pull/158) | Fix Game of Life implementation issues | [Preview](https://pollinations.github.io/hive/pr-158/) |
 | [#153](https://github.com/pollinations/hive/pull/153) | SVG Feedback Security and Quality Improvements | [Preview](https://pollinations.github.io/hive/pr-153/) |
 | [#149](https://github.com/pollinations/hive/pull/149) | Fix svg-feedback CSS path and test server path handling | [Preview](https://pollinations.github.io/hive/pr-149/) |
