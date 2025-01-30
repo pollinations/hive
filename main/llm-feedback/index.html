@@ -288,21 +288,23 @@ Apply Conway's Game of Life rules:
             //      '.'.repeat(40);
         }
 
-        function extractDisplayContent(text) {
-
-            // Then check for content before </think>
+        function removeThink(text) {
+            // Check for content before </think>
             const thinkMatch = text.split('</think>');
             if (thinkMatch.length > 1) 
-                text = thinkMatch[1].trim();
+                return thinkMatch[1].trim();
+            return text;
+        }
 
+        function extractDisplayContent(text) {
+            text = removeThink(text);
 
-            // First try to extract content from code blocks
+            // Extract content from code blocks
             const codeMatch = text.match(/```([\s\S]*?)```/);
             if (codeMatch) 
                 return codeMatch[1];
             
-            
-            // If neither pattern matches, return the original text
+            // If no code blocks, return the cleaned text
             return text;
         }
 
@@ -320,18 +322,18 @@ Apply Conway's Game of Life rules:
 
         async function generateText(prompt, currentState) {
             const formatInstructions = `- You create an output state from an input state according to the prompt. It will be visualized in a 30x15 grid.
-- Output exactly 15 lines, each exactly 30 characters wide
 - You may output explanations but wrap the next state in triple backticks \`\`\` so we can parse it for display
 - If there is an input state, transform it gradually according to the prompt.
 - If there is no input state, use the prompt to come up with a starting state. Be creative
 - Maintain consistent style and theme
+- Before outputting anything spend some time thinking between <think> </think> tags. Please think step by step maybe decomposing the job.
 
 Prompt:
 ${prompt}`;
 
             try {
-                console.log('Prompt:', prompt);
-                console.log('System instructions:', formatInstructions);
+                // console.log('Prompt:', prompt);
+                // console.log('System instructions:', formatInstructions);
                 
                 elements.start.textContent = 'Generating...';
                 
@@ -343,7 +345,7 @@ ${prompt}`;
                 const messages = model === 'deepseek-r1' ? 
                     [{
                         role: "user",
-                        content: formatInstructions + "\n\n# Current State\n\n" + currentState
+                        content: formatInstructions + "\n\n# Current State\n\n" + removeThink(currentState)
                     }] : 
                     [{
                         role: "system",
@@ -354,7 +356,8 @@ ${prompt}`;
                         content: currentState
                     }];
 
-                    
+
+                console.log('Generating text... for message:', JSON.stringify(messages, null, 2));
                 const response = await fetch('https://text.pollinations.ai/', {
                     method: 'POST',
                     headers: {
