@@ -51,6 +51,7 @@ Every pull request in this repository gets an automatic preview deployment. Here
 
 | PR | Title | Preview |
 |-----|--------|---------|
+| [#161](https://github.com/pollinations/hive/pull/161) | Live Wallpaper Creator | [Preview](https://pollinations.github.io/hive/pr-161/) |
 | [#158](https://github.com/pollinations/hive/pull/158) | Fix Game of Life implementation issues | [Preview](https://pollinations.github.io/hive/pr-158/) |
 | [#153](https://github.com/pollinations/hive/pull/153) | SVG Feedback Security and Quality Improvements | [Preview](https://pollinations.github.io/hive/pr-153/) |
 | [#149](https://github.com/pollinations/hive/pull/149) | Fix svg-feedback CSS path and test server path handling | [Preview](https://pollinations.github.io/hive/pr-149/) |
