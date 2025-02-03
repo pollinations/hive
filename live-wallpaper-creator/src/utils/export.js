@@ -1,6 +1,19 @@
-import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { toBlobURL } from '@ffmpeg/util';
 
-const ffmpeg = createFFmpeg({ log: true });
+let ffmpeg = null;
+
+const initFFmpeg = async () => {
+  if (!ffmpeg) {
+    ffmpeg = new FFmpeg();
+    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+    await ffmpeg.load({
+      coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+      wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+    });
+  }
+  return ffmpeg;
+};
 
 export const exportAsGif = async (canvas, fps = 30) => {
   const frames = [];
@@ -15,43 +28,36 @@ export const exportAsGif = async (canvas, fps = 30) => {
     await new Promise(resolve => setTimeout(resolve, 1000 / fps));
   }
 
-  // Load FFmpeg if not loaded
-  if (!ffmpeg.isLoaded()) {
-    await ffmpeg.load();
-  }
+  const ffmpeg = await initFFmpeg();
 
   // Convert frames to GIF
   for (let i = 0; i < frames.length; i++) {
     const base64Data = frames[i].replace(/^data:image\/\w+;base64,/, '');
-    const buffer = Buffer.from(base64Data, 'base64');
-    ffmpeg.FS('writeFile', `frame_${i}.png`, buffer);
+    const buffer = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+    await ffmpeg.writeFile(`frame_${i}.png`, buffer);
   }
 
-  await ffmpeg.run(
+  await ffmpeg.exec([
     '-framerate', `${fps}`,
     '-pattern_type', 'glob',
     '-i', 'frame_*.png',
     '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
     'output.gif'
-  );
+  ]);
 
   // Read the output file
-  const data = ffmpeg.FS('readFile', 'output.gif');
+  const data = await ffmpeg.readFile('output.gif');
   
   // Clean up files
-  frames.forEach((_, i) => {
-    ffmpeg.FS('unlink', `frame_${i}.png`);
-  });
-  ffmpeg.FS('unlink', 'output.gif');
+  for (let i = 0; i < frames.length; i++) {
+    await ffmpeg.deleteFile(`frame_${i}.png`);
+  }
+  await ffmpeg.deleteFile('output.gif');
 
   return new Blob([data.buffer], { type: 'image/gif' });
 };
 
 export const exportAsMP4 = async (canvas, fps = 30) => {
-  if (!ffmpeg.isLoaded()) {
-    await ffmpeg.load();
-  }
-
   const frames = [];
   const context = canvas.getContext('2d');
   const duration = 3000; // 3 seconds
@@ -64,30 +70,32 @@ export const exportAsMP4 = async (canvas, fps = 30) => {
     await new Promise(resolve => setTimeout(resolve, 1000 / fps));
   }
 
+  const ffmpeg = await initFFmpeg();
+
   // Convert frames to video
   for (let i = 0; i < frames.length; i++) {
     const base64Data = frames[i].replace(/^data:image\/\w+;base64,/, '');
-    const buffer = Buffer.from(base64Data, 'base64');
-    ffmpeg.FS('writeFile', `frame_${i}.png`, buffer);
+    const buffer = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+    await ffmpeg.writeFile(`frame_${i}.png`, buffer);
   }
 
-  await ffmpeg.run(
+  await ffmpeg.exec([
     '-framerate', `${fps}`,
     '-pattern_type', 'glob',
     '-i', 'frame_*.png',
     '-c:v', 'libx264',
     '-pix_fmt', 'yuv420p',
     'output.mp4'
-  );
+  ]);
 
   // Read the output file
-  const data = ffmpeg.FS('readFile', 'output.mp4');
+  const data = await ffmpeg.readFile('output.mp4');
   
   // Clean up files
-  frames.forEach((_, i) => {
-    ffmpeg.FS('unlink', `frame_${i}.png`);
-  });
-  ffmpeg.FS('unlink', 'output.mp4');
+  for (let i = 0; i < frames.length; i++) {
+    await ffmpeg.deleteFile(`frame_${i}.png`);
+  }
+  await ffmpeg.deleteFile('output.mp4');
 
   return new Blob([data.buffer], { type: 'video/mp4' });
 };
