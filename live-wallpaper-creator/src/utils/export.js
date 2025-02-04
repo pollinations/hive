@@ -1,15 +1,43 @@
-import { initFFmpeg } from './ffmpeg-init';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { toBlobURL } from '@ffmpeg/util';
 
-export const exportAsGif = async (canvas, fps = 30) => {
+let ffmpeg = null;
+
+const initFFmpeg = async () => {
+  if (!ffmpeg) {
+    ffmpeg = new FFmpeg();
+    try {
+      const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+      const coreURL = await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript');
+      const wasmURL = await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm');
+      const workerURL = await toBlobURL(`${baseURL}/ffmpeg-core.worker.js`, 'text/javascript');
+
+      console.log('Loading FFmpeg with URLs:', { coreURL, wasmURL, workerURL });
+      
+      await ffmpeg.load({
+        coreURL,
+        wasmURL,
+        workerURL,
+        logger: ({ message }) => console.log('FFmpeg:', message)
+      });
+      
+      console.log('FFmpeg initialized successfully');
+    } catch (error) {
+      console.error('FFmpeg initialization failed:', error);
+      throw new Error(`Failed to initialize FFmpeg: ${error.message}`);
+    }
+  }
+  return ffmpeg;
+};
+
+export const exportAsGif = async (canvas, fps = 30, onProgress = () => {}) => {
   const frames = [];
-  const context = canvas.getContext('2d');
-  const duration = 3000; // 3 seconds
-  const frameCount = (fps * duration) / 1000;
-
+  const frameCount = (fps * 3); // 3 seconds
+  
   // Capture frames
   for (let i = 0; i < frameCount; i++) {
     frames.push(canvas.toDataURL('image/png'));
-    // Here you would update animations if any
+    onProgress(i / (frameCount * 2)); // First half of progress for frame capture
     await new Promise(resolve => setTimeout(resolve, 1000 / fps));
   }
 
@@ -21,6 +49,7 @@ export const exportAsGif = async (canvas, fps = 30) => {
       const base64Data = frames[i].replace(/^data:image\/\w+;base64,/, '');
       const buffer = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
       await ffmpeg.writeFile(`frame_${i}.png`, buffer);
+      onProgress(0.5 + (i / (frames.length * 2))); // Second half of progress for conversion
     }
 
     await ffmpeg.exec([
@@ -40,23 +69,22 @@ export const exportAsGif = async (canvas, fps = 30) => {
     }
     await ffmpeg.deleteFile('output.gif');
 
+    onProgress(1); // Complete
     return new Blob([data.buffer], { type: 'image/gif' });
   } catch (error) {
     console.error('GIF export failed:', error);
-    throw new Error('Failed to export GIF');
+    throw error;
   }
 };
 
-export const exportAsMP4 = async (canvas, fps = 30) => {
+export const exportAsMP4 = async (canvas, fps = 30, onProgress = () => {}) => {
   const frames = [];
-  const context = canvas.getContext('2d');
-  const duration = 3000; // 3 seconds
-  const frameCount = (fps * duration) / 1000;
-
+  const frameCount = (fps * 3); // 3 seconds
+  
   // Capture frames
   for (let i = 0; i < frameCount; i++) {
     frames.push(canvas.toDataURL('image/png'));
-    // Here you would update animations if any
+    onProgress(i / (frameCount * 2)); // First half of progress for frame capture
     await new Promise(resolve => setTimeout(resolve, 1000 / fps));
   }
 
@@ -68,6 +96,7 @@ export const exportAsMP4 = async (canvas, fps = 30) => {
       const base64Data = frames[i].replace(/^data:image\/\w+;base64,/, '');
       const buffer = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
       await ffmpeg.writeFile(`frame_${i}.png`, buffer);
+      onProgress(0.5 + (i / (frames.length * 2))); // Second half of progress for conversion
     }
 
     await ffmpeg.exec([
@@ -88,9 +117,10 @@ export const exportAsMP4 = async (canvas, fps = 30) => {
     }
     await ffmpeg.deleteFile('output.mp4');
 
+    onProgress(1); // Complete
     return new Blob([data.buffer], { type: 'video/mp4' });
   } catch (error) {
     console.error('MP4 export failed:', error);
-    throw new Error('Failed to export MP4');
+    throw error;
   }
 };

@@ -1,16 +1,23 @@
 import { useRef, useEffect, useState } from 'react';
-import { Box, Button, ButtonGroup, Tooltip, CircularProgress, Alert, Snackbar } from '@mui/material';
+import { Box, Button, ButtonGroup, Tooltip, CircularProgress, Alert, Snackbar, IconButton } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import Draggable from 'react-draggable';
 import { exportAsGif, exportAsMP4 } from '../utils/export';
 import SaveIcon from '@mui/icons-material/Save';
 import MovieIcon from '@mui/icons-material/Movie';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import LinearProgress from '@mui/material/LinearProgress';
+
+const Input = styled('input')({
+  display: 'none',
+});
 
 const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOverlaysChange }) => {
   const canvasRef = useRef(null);
   const [scale, setScale] = useState(1);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState(null);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -18,28 +25,23 @@ const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOver
     const containerWidth = canvas.parentElement.clientWidth;
     const containerHeight = canvas.parentElement.clientHeight;
     
-    // Calculate scale to fit canvas in container while maintaining aspect ratio
     const scaleX = containerWidth / resolution.width;
     const scaleY = containerHeight / resolution.height;
-    const newScale = Math.min(scaleX, scaleY) * 0.9; // 90% of container size
+    const newScale = Math.min(scaleX, scaleY) * 0.9;
     setScale(newScale);
     
     canvas.style.width = `${resolution.width * newScale}px`;
     canvas.style.height = `${resolution.height * newScale}px`;
     
-    // Set actual canvas resolution
     canvas.width = resolution.width;
     canvas.height = resolution.height;
     
-    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw background if exists
     if (backgroundImage) {
       ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
     }
     
-    // Draw overlays
     overlays.forEach(overlay => {
       if (overlay.image) {
         ctx.drawImage(
@@ -52,6 +54,19 @@ const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOver
       }
     });
   }, [resolution, backgroundImage, overlays]);
+
+  const handleFileInput = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => onBackgroundSet(img);
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -71,13 +86,23 @@ const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOver
     try {
       setExporting(true);
       setError(null);
+      setProgress(0);
       const canvas = canvasRef.current;
       let blob;
 
+      const updateProgress = (p) => {
+        setProgress(Math.round(p * 100));
+      };
+
       if (type === 'gif') {
-        blob = await exportAsGif(canvas);
+        blob = await exportAsGif(canvas, 30, updateProgress);
       } else {
-        blob = await exportAsMP4(canvas);
+        blob = await exportAsMP4(canvas, 30, updateProgress);
+      }
+
+      // Check file size
+      if (blob.size > 100 * 1024 * 1024) { // 100MB
+        setError('Warning: The exported file is quite large. You might want to reduce the resolution or duration.');
       }
 
       // Create download link
@@ -94,6 +119,7 @@ const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOver
       setError(`Failed to export ${type.toUpperCase()}: ${error.message}`);
     } finally {
       setExporting(false);
+      setProgress(0);
     }
   };
 
@@ -129,6 +155,11 @@ const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOver
           </Button>
         </Tooltip>
       </ButtonGroup>
+      {exporting && (
+        <Box sx={{ width: '100%', mt: 1 }}>
+          <LinearProgress variant="determinate" value={progress} />
+        </Box>
+      )}
       <Box
         sx={{
           flexGrow: 1,
@@ -151,7 +182,22 @@ const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOver
               color: 'text.secondary',
             }}
           >
-            <CloudUploadIcon sx={{ fontSize: 48 }} />
+            <label htmlFor="upload-image">
+              <Input
+                accept="image/*"
+                id="upload-image"
+                type="file"
+                onChange={handleFileInput}
+              />
+              <IconButton
+                color="primary"
+                aria-label="upload picture"
+                component="span"
+                sx={{ mb: 1 }}
+              >
+                <CloudUploadIcon sx={{ fontSize: 48 }} />
+              </IconButton>
+            </label>
             <span>Drag and drop an image or click to upload</span>
           </Box>
         )}
