@@ -1,0 +1,30 @@
+{
+  "sparkles": [
+    {
+      "name": "Sparkle Effect",
+      "file": "sparkle.gif",
+      "description": "Add sparkle effects to your wallpaper"
+    }
+  ],
+  "effects": [
+    {
+      "name": "Glow Effect",
+      "file": "glow.gif",
+      "description": "Add a glowing effect"
+    }
+  ],
+  "nature": [
+    {
+      "name": "Falling Leaves",
+      "file": "leaves.gif",
+      "description": "Animated falling leaves effect"
+    }
+  ],
+  "animals": [
+    {
+      "name": "Butterfly",
+      "file": "butterfly.gif",
+      "description": "Animated butterfly overlay"
+    }
+  ]
+}
