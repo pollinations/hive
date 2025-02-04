@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { Box, Button, ButtonGroup, Tooltip, CircularProgress, Alert, Snackbar, IconButton } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Draggable from 'react-draggable';
@@ -14,6 +14,7 @@ const Input = styled('input')({
 
 const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOverlaysChange }) => {
   const canvasRef = useRef(null);
+  const fileInputRef = useRef(null);
   const [scale, setScale] = useState(1);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState(null);
@@ -54,6 +55,23 @@ const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOver
       }
     });
   }, [resolution, backgroundImage, overlays]);
+
+  const handleKeyPress = useCallback((e) => {
+    if (e.key === 'o' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      fileInputRef.current?.click();
+    } else if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      if (!exporting && backgroundImage) {
+        handleExport(e.shiftKey ? 'mp4' : 'gif');
+      }
+    }
+  }, [exporting, backgroundImage]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [handleKeyPress]);
 
   const handleFileInput = (e) => {
     const file = e.target.files[0];
@@ -136,20 +154,22 @@ const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOver
       }}
     >
       <ButtonGroup variant="contained" sx={{ alignSelf: 'center' }}>
-        <Tooltip title="Save as GIF">
+        <Tooltip title="Save as GIF (Ctrl/⌘ + S)">
           <Button
             onClick={() => handleExport('gif')}
             disabled={exporting || !backgroundImage}
             startIcon={exporting ? <CircularProgress size={20} /> : <SaveIcon />}
+            aria-label="Save as GIF"
           >
             Save GIF
           </Button>
         </Tooltip>
-        <Tooltip title="Save as MP4">
+        <Tooltip title="Save as MP4 (Ctrl/⌘ + Shift + S)">
           <Button
             onClick={() => handleExport('mp4')}
             disabled={exporting || !backgroundImage}
             startIcon={exporting ? <CircularProgress size={20} /> : <MovieIcon />}
+            aria-label="Save as MP4"
           >
             Save MP4
           </Button>
@@ -157,7 +177,11 @@ const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOver
       </ButtonGroup>
       {exporting && (
         <Box sx={{ width: '100%', mt: 1 }}>
-          <LinearProgress variant="determinate" value={progress} />
+          <LinearProgress 
+            variant="determinate" 
+            value={progress} 
+            aria-label="Export progress"
+          />
         </Box>
       )}
       <Box
@@ -170,6 +194,8 @@ const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOver
         }}
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
+        role="region"
+        aria-label="Canvas area"
       >
         {!backgroundImage && (
           <Box
@@ -188,17 +214,19 @@ const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOver
                 id="upload-image"
                 type="file"
                 onChange={handleFileInput}
+                ref={fileInputRef}
+                aria-label="Upload image"
               />
               <IconButton
                 color="primary"
-                aria-label="upload picture"
+                aria-label="Upload picture"
                 component="span"
                 sx={{ mb: 1 }}
               >
                 <CloudUploadIcon sx={{ fontSize: 48 }} />
               </IconButton>
             </label>
-            <span>Drag and drop an image or click to upload</span>
+            <span>Drag and drop an image or click to upload (Ctrl/⌘ + O)</span>
           </Box>
         )}
         <canvas
@@ -207,6 +235,7 @@ const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOver
             border: '2px dashed rgba(255,255,255,0.1)',
             borderRadius: '4px',
           }}
+          aria-label="Wallpaper canvas"
         />
       </Box>
       <Snackbar
@@ -215,7 +244,12 @@ const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOver
         onClose={() => setError(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
+        <Alert 
+          onClose={() => setError(null)} 
+          severity="error" 
+          sx={{ width: '100%' }}
+          role="alert"
+        >
           {error}
         </Alert>
       </Snackbar>
