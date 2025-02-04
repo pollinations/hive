@@ -8,10 +8,26 @@ export const initFFmpeg = async () => {
     ffmpeg = new FFmpeg();
     try {
       const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+      const coreURL = await toBlobURL(
+        `${baseURL}/ffmpeg-core.js`,
+        'text/javascript'
+      );
+      const wasmURL = await toBlobURL(
+        `${baseURL}/ffmpeg-core.wasm`,
+        'application/wasm'
+      );
+      const workerURL = await toBlobURL(
+        `${baseURL}/ffmpeg-core.worker.js`,
+        'text/javascript'
+      );
+
+      console.log('Loading FFmpeg with URLs:', { coreURL, wasmURL, workerURL });
+      
       await ffmpeg.load({
-        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-        workerURL: await toBlobURL(`${baseURL}/ffmpeg-core.worker.js`, 'text/javascript'),
+        coreURL,
+        wasmURL,
+        workerURL,
+        logger: ({ message }) => console.log('FFmpeg:', message)
       });
       
       // Test FFmpeg initialization

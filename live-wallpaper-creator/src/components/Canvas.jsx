@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { Box, Button, ButtonGroup, Tooltip, CircularProgress } from '@mui/material';
+import { Box, Button, ButtonGroup, Tooltip, CircularProgress, Alert, Snackbar } from '@mui/material';
 import Draggable from 'react-draggable';
 import { exportAsGif, exportAsMP4 } from '../utils/export';
 import SaveIcon from '@mui/icons-material/Save';
@@ -10,6 +10,7 @@ const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOver
   const canvasRef = useRef(null);
   const [scale, setScale] = useState(1);
   const [exporting, setExporting] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -69,6 +70,7 @@ const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOver
   const handleExport = async (type) => {
     try {
       setExporting(true);
+      setError(null);
       const canvas = canvasRef.current;
       let blob;
 
@@ -88,7 +90,8 @@ const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOver
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Export failed:', error);
+      console.error(`${type.toUpperCase()} export failed:`, error);
+      setError(`Failed to export ${type.toUpperCase()}: ${error.message}`);
     } finally {
       setExporting(false);
     }
@@ -160,6 +163,16 @@ const Canvas = ({ resolution, backgroundImage, overlays, onBackgroundSet, onOver
           }}
         />
       </Box>
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
+          {error}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
