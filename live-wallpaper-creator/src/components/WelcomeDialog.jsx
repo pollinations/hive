@@ -16,7 +16,12 @@ const WelcomeDialog = ({ open, onClose }) => {
       maxWidth="md"
       fullWidth
     >
-      <DialogTitle id="welcome-dialog-title">Welcome to Live Wallpaper Creator</DialogTitle>
+      <DialogTitle id="welcome-dialog-title" sx={{ pb: 0 }}>
+        Welcome to Live Wallpaper Creator
+        <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>
+          Create stunning animated wallpapers with an accessible and easy-to-use interface
+        </Typography>
+      </DialogTitle>
       <DialogContent>
         <Typography variant="body1" paragraph>
           Create animated wallpapers in just a few steps:
@@ -173,57 +178,169 @@ const WelcomeDialog = ({ open, onClose }) => {
           <ListItem>
             <ListItemText 
               primary={
-                <Box component="span" sx={{ fontFamily: 'monospace', bgcolor: 'action.hover', px: 1, borderRadius: 1 }}>
+                <Box
+                  component="kbd"
+                  sx={{
+                    fontFamily: 'monospace',
+                    bgcolor: 'action.hover',
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: 1,
+                    border: '1px solid',
+                    borderColor: 'divider'
+                  }}
+                >
                   ?
                 </Box>
               }
               secondary="Show/hide help dialog"
+              secondaryTypographyProps={{
+                'aria-label': 'Press question mark key to show or hide help dialog'
+              }}
             />
           </ListItem>
           <ListItem>
             <ListItemText 
               primary={
-                <Box component="span" sx={{ fontFamily: 'monospace', bgcolor: 'action.hover', px: 1, borderRadius: 1 }}>
+                <Box
+                  component="kbd"
+                  sx={{
+                    fontFamily: 'monospace',
+                    bgcolor: 'action.hover',
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: 1,
+                    border: '1px solid',
+                    borderColor: 'divider'
+                  }}
+                >
                   Delete
                 </Box>
               }
               secondary="Remove selected overlay"
+              secondaryTypographyProps={{
+                'aria-label': 'Press delete key to remove the selected overlay'
+              }}
             />
           </ListItem>
           <ListItem>
             <ListItemText 
               primary={
-                <Box component="span" sx={{ fontFamily: 'monospace', bgcolor: 'action.hover', px: 1, borderRadius: 1 }}>
+                <Box
+                  component="kbd"
+                  sx={{
+                    fontFamily: 'monospace',
+                    bgcolor: 'action.hover',
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: 1,
+                    border: '1px solid',
+                    borderColor: 'divider'
+                  }}
+                >
                   Space
                 </Box>
               }
               secondary="Play/pause preview"
+              secondaryTypographyProps={{
+                'aria-label': 'Press space bar to play or pause the preview'
+              }}
             />
           </ListItem>
           <ListItem>
             <ListItemText 
               primary={
-                <Box component="span" sx={{ fontFamily: 'monospace', bgcolor: 'action.hover', px: 1, borderRadius: 1 }}>
+                <Box
+                  component="kbd"
+                  sx={{
+                    fontFamily: 'monospace',
+                    bgcolor: 'action.hover',
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: 1,
+                    border: '1px solid',
+                    borderColor: 'divider'
+                  }}
+                >
                   Ctrl + Z
                 </Box>
               }
               secondary="Undo last change"
+              secondaryTypographyProps={{
+                'aria-label': 'Press Control plus Z to undo the last change'
+              }}
             />
           </ListItem>
           <ListItem>
             <ListItemText 
               primary={
-                <Box component="span" sx={{ fontFamily: 'monospace', bgcolor: 'action.hover', px: 1, borderRadius: 1 }}>
+                <Box
+                  component="kbd"
+                  sx={{
+                    fontFamily: 'monospace',
+                    bgcolor: 'action.hover',
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: 1,
+                    border: '1px solid',
+                    borderColor: 'divider'
+                  }}
+                >
                   Ctrl + Y
                 </Box>
               }
               secondary="Redo last change"
+              secondaryTypographyProps={{
+                'aria-label': 'Press Control plus Y to redo the last change'
+              }}
+            />
+          </ListItem>
+        </List>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <CheckCircleIcon color="success" fontSize="small" />
+          Accessibility Features
+        </Typography>
+
+        <List dense>
+          <ListItem>
+            <ListItemIcon>
+              <CheckCircleIcon color="success" fontSize="small" />
+            </ListItemIcon>
+            <ListItemText 
+              primary="Keyboard Navigation"
+              secondary="Full keyboard support for all features"
+            />
+          </ListItem>
+          <ListItem>
+            <ListItemIcon>
+              <CheckCircleIcon color="success" fontSize="small" />
+            </ListItemIcon>
+            <ListItemText 
+              primary="Screen Reader Support"
+              secondary="ARIA labels and descriptions for all controls"
+            />
+          </ListItem>
+          <ListItem>
+            <ListItemIcon>
+              <CheckCircleIcon color="success" fontSize="small" />
+            </ListItemIcon>
+            <ListItemText 
+              primary="High Contrast"
+              secondary="Clear visual indicators and focus states"
             />
           </ListItem>
         </List>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="primary" variant="contained">
+        <Button 
+          onClick={onClose} 
+          color="primary" 
+          variant="contained"
+          aria-label="Close welcome dialog and start using the app"
+        >
           Get Started
         </Button>
       </DialogActions>
