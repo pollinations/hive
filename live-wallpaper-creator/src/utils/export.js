@@ -21,6 +21,9 @@ const initFFmpeg = async () => {
         logger: ({ message }) => console.log('FFmpeg:', message)
       });
       
+      // Test FFmpeg initialization
+      await ffmpeg.writeFile('test.txt', new Uint8Array([1]));
+      await ffmpeg.deleteFile('test.txt');
       console.log('FFmpeg initialized successfully');
     } catch (error) {
       console.error('FFmpeg initialization failed:', error);
