@@ -532,9 +532,24 @@ const WelcomeDialog = ({ open, onClose }) => {
                     color="error" 
                     size="small" 
                     onClick={handleRetry}
-                    sx={{ minWidth: 'auto', p: 0.5 }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleRetry();
+                      }
+                    }}
+                    sx={{ 
+                      minWidth: 'auto', 
+                      p: 0.5,
+                      '&:focus-visible': {
+                        outline: '2px solid',
+                        outlineColor: 'error.main',
+                        outlineOffset: 2,
+                      }
+                    }}
+                    aria-label={`Retry browser compatibility check (${maxRetries - retryCount} attempts remaining)`}
                   >
-                    Retry
+                    Retry ({maxRetries - retryCount})
                   </Button>
                 ) : null
               }
