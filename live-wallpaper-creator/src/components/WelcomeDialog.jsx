@@ -1,4 +1,19 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, List, ListItem, ListItemIcon, ListItemText, Divider, Box, Link } from '@mui/material';
+import { 
+  Dialog, 
+  DialogTitle, 
+  DialogContent, 
+  DialogActions, 
+  Button, 
+  Typography, 
+  List, 
+  ListItem, 
+  ListItemIcon, 
+  ListItemText, 
+  Divider, 
+  Box, 
+  Link,
+  CircularProgress 
+} from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AddIcon from '@mui/icons-material/Add';
 import SaveIcon from '@mui/icons-material/Save';
@@ -9,6 +24,7 @@ import LaptopIcon from '@mui/icons-material/Laptop';
 
 const WelcomeDialog = ({ open, onClose }) => {
   const getStartedRef = React.useRef(null);
+  const [loading, setLoading] = React.useState(true);
 
   // Focus the "Get Started" button when dialog opens
   React.useEffect(() => {
@@ -19,9 +35,26 @@ const WelcomeDialog = ({ open, onClose }) => {
     }
   }, [open]);
 
+  // Simulate checking browser compatibility
+  React.useEffect(() => {
+    if (open) {
+      setLoading(true);
+      // Simulate checking browser features
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+    }
+  }, [open]);
+
   const handleKeyDown = (event) => {
     // Close dialog on Escape
     if (event.key === 'Escape') {
+      onClose();
+    }
+  };
+
+  const handleGetStarted = () => {
+    if (!loading) {
       onClose();
     }
   };
@@ -359,23 +392,43 @@ const WelcomeDialog = ({ open, onClose }) => {
         </List>
       </DialogContent>
       <DialogActions>
-        <Button 
-          ref={getStartedRef}
-          onClick={onClose} 
-          color="primary" 
-          variant="contained"
-          aria-label="Close welcome dialog and start using the app"
-          tabIndex={0}
-          sx={{
-            '&:focus-visible': {
-              outline: '2px solid',
-              outlineColor: 'primary.main',
-              outlineOffset: 2,
-            }
-          }}
-        >
-          Get Started
-        </Button>
+        <Box sx={{ position: 'relative' }}>
+          <Button 
+            ref={getStartedRef}
+            onClick={handleGetStarted} 
+            color="primary" 
+            variant="contained"
+            disabled={loading}
+            aria-label={loading ? "Checking browser compatibility" : "Close welcome dialog and start using the app"}
+            tabIndex={0}
+            sx={{
+              minWidth: 120,
+              '&:focus-visible': {
+                outline: '2px solid',
+                outlineColor: 'primary.main',
+                outlineOffset: 2,
+              }
+            }}
+            endIcon={loading ? <CircularProgress size={16} color="inherit" /> : null}
+          >
+            {loading ? 'Checking...' : 'Get Started'}
+          </Button>
+          {loading && (
+            <Typography 
+              variant="caption" 
+              color="text.secondary"
+              sx={{ 
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: -20,
+                textAlign: 'center'
+              }}
+            >
+              Checking browser compatibility...
+            </Typography>
+          )}
+        </Box>
       </DialogActions>
     </Dialog>
   );
