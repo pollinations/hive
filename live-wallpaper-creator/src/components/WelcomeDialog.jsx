@@ -117,7 +117,29 @@ const WelcomeDialog = ({ open, onClose }) => {
     <Dialog
       open={open}
       onClose={onClose}
-      onKeyDown={handleKeyDown}
+      onKeyDown={(e) => {
+        handleKeyDown(e);
+        // Handle tab key to keep focus within dialog
+        if (e.key === 'Tab') {
+          const focusableElements = e.currentTarget.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+          const firstFocusable = focusableElements[0];
+          const lastFocusable = focusableElements[focusableElements.length - 1];
+
+          if (e.shiftKey) {
+            if (document.activeElement === firstFocusable) {
+              e.preventDefault();
+              lastFocusable.focus();
+            }
+          } else {
+            if (document.activeElement === lastFocusable) {
+              e.preventDefault();
+              firstFocusable.focus();
+            }
+          }
+        }
+      }}
       aria-labelledby="welcome-dialog-title"
       aria-describedby="welcome-dialog-description"
       maxWidth="md"
@@ -141,6 +163,9 @@ const WelcomeDialog = ({ open, onClose }) => {
           }
         }
       }}
+      // Ensure dialog is modal for proper focus management
+      disableEnforceFocus={false}
+      disableAutoFocus={false}
     >
       <DialogTitle id="welcome-dialog-title" sx={{ pb: 0 }}>
         Welcome to Live Wallpaper Creator
