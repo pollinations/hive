@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ThemeProvider, CssBaseline, Box, AppBar, Toolbar, Typography, Container, IconButton, Tooltip } from '@mui/material';
+import { ThemeProvider, CssBaseline, Box, AppBar, Toolbar, Typography, Container, IconButton, Tooltip, LinearProgress } from '@mui/material';
 import { createTheme } from '@mui/material/styles';
 import HelpIcon from '@mui/icons-material/Help';
 import Canvas from './components/Canvas';
@@ -7,6 +7,7 @@ import Sidebar from './components/Sidebar';
 import Controls from './components/Controls';
 import BrowserWarning from './components/BrowserWarning';
 import HelpDialog from './components/HelpDialog';
+import WelcomeDialog from './components/WelcomeDialog';
 import { checkBrowserCompatibility } from './utils/browser-check';
 
 const theme = createTheme({
@@ -31,6 +32,8 @@ function App() {
   const [overlays, setOverlays] = useState([]);
   const [browserIssues, setBrowserIssues] = useState([]);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [welcomeOpen, setWelcomeOpen] = useState(true);
+  const [ffmpegLoading, setFfmpegLoading] = useState(false);
 
   useEffect(() => {
     const { isCompatible, issues } = checkBrowserCompatibility();
@@ -54,7 +57,10 @@ function App() {
       {browserIssues.length > 0 ? (
         <BrowserWarning issues={browserIssues} />
       ) : !resolution ? (
-        <Controls onResolutionSet={setResolution} />
+        <>
+          <Controls onResolutionSet={setResolution} />
+          <WelcomeDialog open={welcomeOpen} onClose={() => setWelcomeOpen(false)} />
+        </>
       ) : (
         <Box sx={{ flexGrow: 1 }}>
           <AppBar position="static" elevation={0}>
@@ -72,6 +78,12 @@ function App() {
                 </IconButton>
               </Tooltip>
             </Toolbar>
+            {ffmpegLoading && (
+              <LinearProgress 
+                sx={{ height: 2 }}
+                aria-label="Loading FFmpeg"
+              />
+            )}
           </AppBar>
           <Container maxWidth="xl" sx={{ mt: 2, height: 'calc(100vh - 80px)' }}>
             <Box sx={{ display: 'flex', gap: 2, height: '100%' }}>
@@ -84,6 +96,7 @@ function App() {
                 overlays={overlays}
                 onBackgroundSet={setBackgroundImage}
                 onOverlaysChange={setOverlays}
+                onFfmpegLoadingChange={setFfmpegLoading}
               />
             </Box>
           </Container>
