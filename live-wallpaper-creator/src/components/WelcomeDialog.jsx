@@ -8,13 +8,34 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LaptopIcon from '@mui/icons-material/Laptop';
 
 const WelcomeDialog = ({ open, onClose }) => {
+  const getStartedRef = React.useRef(null);
+
+  // Focus the "Get Started" button when dialog opens
+  React.useEffect(() => {
+    if (open && getStartedRef.current) {
+      setTimeout(() => {
+        getStartedRef.current.focus();
+      }, 100);
+    }
+  }, [open]);
+
+  const handleKeyDown = (event) => {
+    // Close dialog on Escape
+    if (event.key === 'Escape') {
+      onClose();
+    }
+  };
   return (
     <Dialog
       open={open}
       onClose={onClose}
+      onKeyDown={handleKeyDown}
       aria-labelledby="welcome-dialog-title"
+      aria-describedby="welcome-dialog-description"
       maxWidth="md"
       fullWidth
+      disableEscapeKeyDown={false}
+      keepMounted={false}
     >
       <DialogTitle id="welcome-dialog-title" sx={{ pb: 0 }}>
         Welcome to Live Wallpaper Creator
@@ -23,6 +44,9 @@ const WelcomeDialog = ({ open, onClose }) => {
         </Typography>
       </DialogTitle>
       <DialogContent>
+        <Typography id="welcome-dialog-description" sx={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>
+          This dialog provides information about the Live Wallpaper Creator app, including steps to create wallpapers, system requirements, keyboard shortcuts, and accessibility features.
+        </Typography>
         <Typography variant="body1" paragraph>
           Create animated wallpapers in just a few steps:
         </Typography>
@@ -336,10 +360,19 @@ const WelcomeDialog = ({ open, onClose }) => {
       </DialogContent>
       <DialogActions>
         <Button 
+          ref={getStartedRef}
           onClick={onClose} 
           color="primary" 
           variant="contained"
           aria-label="Close welcome dialog and start using the app"
+          tabIndex={0}
+          sx={{
+            '&:focus-visible': {
+              outline: '2px solid',
+              outlineColor: 'primary.main',
+              outlineOffset: 2,
+            }
+          }}
         >
           Get Started
         </Button>
