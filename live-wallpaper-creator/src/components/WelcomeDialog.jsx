@@ -35,14 +35,41 @@ const WelcomeDialog = ({ open, onClose }) => {
     }
   }, [open]);
 
-  // Simulate checking browser compatibility
+  const [error, setError] = React.useState(null);
+
+  // Check browser compatibility
   React.useEffect(() => {
     if (open) {
       setLoading(true);
-      // Simulate checking browser features
-      setTimeout(() => {
+      setError(null);
+      try {
+        // Check for required features
+        const features = [
+          { name: 'SharedArrayBuffer', check: () => typeof SharedArrayBuffer !== 'undefined' },
+          { name: 'WebAssembly', check: () => typeof WebAssembly !== 'undefined' },
+          { name: 'Canvas', check: () => typeof HTMLCanvasElement !== 'undefined' },
+          { name: 'Blob', check: () => typeof Blob !== 'undefined' },
+          { name: 'File API', check: () => typeof File !== 'undefined' && typeof FileReader !== 'undefined' }
+        ];
+
+        const missingFeatures = features.filter(feature => !feature.check());
+        
+        if (missingFeatures.length > 0) {
+          throw new Error(`Missing required features: ${missingFeatures.map(f => f.name).join(', ')}`);
+        }
+
+        // Check for secure context
+        if (!window.isSecureContext) {
+          throw new Error('This app requires a secure context (HTTPS) to function properly.');
+        }
+
+        setTimeout(() => {
+          setLoading(false);
+        }, 500);
+      } catch (err) {
+        setError(err.message);
         setLoading(false);
-      }, 500);
+      }
     }
   }, [open]);
 
@@ -413,7 +440,7 @@ const WelcomeDialog = ({ open, onClose }) => {
           >
             {loading ? 'Checking...' : 'Get Started'}
           </Button>
-          {loading && (
+          {loading ? (
             <Typography 
               variant="caption" 
               color="text.secondary"
@@ -427,7 +454,26 @@ const WelcomeDialog = ({ open, onClose }) => {
             >
               Checking browser compatibility...
             </Typography>
-          )}
+          ) : error ? (
+            <Alert 
+              severity="error" 
+              sx={{ 
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: -60,
+                textAlign: 'left',
+                fontSize: '0.75rem'
+              }}
+            >
+              <Typography variant="caption" component="div">
+                {error}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" component="div">
+                Please try using a modern browser with HTTPS enabled.
+              </Typography>
+            </Alert>
+          ) : null}
         </Box>
       </DialogActions>
     </Dialog>
