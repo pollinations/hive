@@ -161,6 +161,66 @@ const WelcomeDialog = ({ open, onClose }) => {
             />
           </ListItem>
         </List>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <HelpIcon color="info" fontSize="small" />
+          Keyboard Shortcuts
+        </Typography>
+
+        <List dense>
+          <ListItem>
+            <ListItemText 
+              primary={
+                <Box component="span" sx={{ fontFamily: 'monospace', bgcolor: 'action.hover', px: 1, borderRadius: 1 }}>
+                  ?
+                </Box>
+              }
+              secondary="Show/hide help dialog"
+            />
+          </ListItem>
+          <ListItem>
+            <ListItemText 
+              primary={
+                <Box component="span" sx={{ fontFamily: 'monospace', bgcolor: 'action.hover', px: 1, borderRadius: 1 }}>
+                  Delete
+                </Box>
+              }
+              secondary="Remove selected overlay"
+            />
+          </ListItem>
+          <ListItem>
+            <ListItemText 
+              primary={
+                <Box component="span" sx={{ fontFamily: 'monospace', bgcolor: 'action.hover', px: 1, borderRadius: 1 }}>
+                  Space
+                </Box>
+              }
+              secondary="Play/pause preview"
+            />
+          </ListItem>
+          <ListItem>
+            <ListItemText 
+              primary={
+                <Box component="span" sx={{ fontFamily: 'monospace', bgcolor: 'action.hover', px: 1, borderRadius: 1 }}>
+                  Ctrl + Z
+                </Box>
+              }
+              secondary="Undo last change"
+            />
+          </ListItem>
+          <ListItem>
+            <ListItemText 
+              primary={
+                <Box component="span" sx={{ fontFamily: 'monospace', bgcolor: 'action.hover', px: 1, borderRadius: 1 }}>
+                  Ctrl + Y
+                </Box>
+              }
+              secondary="Redo last change"
+            />
+          </ListItem>
+        </List>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary" variant="contained">
