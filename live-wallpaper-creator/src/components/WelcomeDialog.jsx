@@ -39,28 +39,42 @@ const WelcomeDialog = ({ open, onClose }) => {
   const [retryCount, setRetryCount] = React.useState(0);
   const maxRetries = 3;
 
+  const [checkProgress, setCheckProgress] = React.useState(0);
+  const [currentCheck, setCurrentCheck] = React.useState('');
+
   const checkFeatures = async () => {
     const features = [
-      { name: 'SharedArrayBuffer', check: () => typeof SharedArrayBuffer !== 'undefined' },
-      { name: 'WebAssembly', check: () => typeof WebAssembly !== 'undefined' },
-      { name: 'Canvas', check: () => typeof HTMLCanvasElement !== 'undefined' },
-      { name: 'Blob', check: () => typeof Blob !== 'undefined' },
-      { name: 'File API', check: () => typeof File !== 'undefined' && typeof FileReader !== 'undefined' }
+      { name: 'SharedArrayBuffer', check: () => typeof SharedArrayBuffer !== 'undefined', label: 'Checking memory support...' },
+      { name: 'WebAssembly', check: () => typeof WebAssembly !== 'undefined', label: 'Checking WebAssembly support...' },
+      { name: 'Canvas', check: () => typeof HTMLCanvasElement !== 'undefined', label: 'Checking canvas support...' },
+      { name: 'Blob', check: () => typeof Blob !== 'undefined', label: 'Checking file support...' },
+      { name: 'File API', check: () => typeof File !== 'undefined' && typeof FileReader !== 'undefined', label: 'Checking file API support...' }
     ];
 
-    const missingFeatures = features.filter(feature => !feature.check());
+    const missingFeatures = [];
+    for (let i = 0; i < features.length; i++) {
+      const feature = features[i];
+      setCurrentCheck(feature.label);
+      setCheckProgress((i + 1) / (features.length + 1));
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      if (!feature.check()) {
+        missingFeatures.push(feature.name);
+      }
+    }
     
     if (missingFeatures.length > 0) {
-      throw new Error(`Missing required features: ${missingFeatures.map(f => f.name).join(', ')}`);
+      throw new Error(`Missing required features: ${missingFeatures.join(', ')}`);
     }
 
     // Check for secure context
+    setCurrentCheck('Checking security context...');
+    setCheckProgress(1);
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
     if (!window.isSecureContext) {
       throw new Error('This app requires a secure context (HTTPS) to function properly.');
     }
-
-    // Simulate delay for UX
-    await new Promise(resolve => setTimeout(resolve, 500));
   };
 
   const handleRetry = () => {
@@ -455,19 +469,31 @@ const WelcomeDialog = ({ open, onClose }) => {
             {loading ? 'Checking...' : 'Get Started'}
           </Button>
           {loading ? (
-            <Typography 
-              variant="caption" 
-              color="text.secondary"
-              sx={{ 
+            <Box
+              sx={{
                 position: 'absolute',
                 left: 0,
                 right: 0,
-                bottom: -20,
-                textAlign: 'center'
+                bottom: -40,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 1
               }}
             >
-              Checking browser compatibility...
-            </Typography>
+              <Typography 
+                variant="caption" 
+                color="text.secondary"
+                sx={{ textAlign: 'center' }}
+              >
+                {currentCheck || 'Checking browser compatibility...'}
+              </Typography>
+              <LinearProgress 
+                variant="determinate" 
+                value={checkProgress * 100}
+                sx={{ width: '100%', height: 2 }}
+              />
+            </Box>
           ) : error ? (
             <Alert 
               severity="error" 
