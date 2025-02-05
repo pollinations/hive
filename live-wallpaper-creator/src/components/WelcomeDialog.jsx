@@ -485,14 +485,35 @@ const WelcomeDialog = ({ open, onClose }) => {
                 variant="caption" 
                 color="text.secondary"
                 sx={{ textAlign: 'center' }}
+                role="status"
+                aria-live="polite"
               >
                 {currentCheck || 'Checking browser compatibility...'}
               </Typography>
-              <LinearProgress 
-                variant="determinate" 
-                value={checkProgress * 100}
-                sx={{ width: '100%', height: 2 }}
-              />
+              <Box sx={{ width: '100%', position: 'relative' }}>
+                <LinearProgress 
+                  variant="determinate" 
+                  value={checkProgress * 100}
+                  sx={{ height: 2 }}
+                  aria-label="Browser compatibility check progress"
+                />
+                <Typography
+                  variant="caption"
+                  component="div"
+                  color="text.secondary"
+                  sx={{ 
+                    position: 'absolute',
+                    right: -25,
+                    top: -2,
+                    minWidth: 20,
+                    textAlign: 'right'
+                  }}
+                  role="status"
+                  aria-live="polite"
+                >
+                  {Math.round(checkProgress * 100)}%
+                </Typography>
+              </Box>
             </Box>
           ) : error ? (
             <Alert 
