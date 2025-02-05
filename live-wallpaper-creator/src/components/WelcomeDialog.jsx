@@ -124,6 +124,23 @@ const WelcomeDialog = ({ open, onClose }) => {
       fullWidth
       disableEscapeKeyDown={false}
       keepMounted={false}
+      TransitionProps={{
+        onEntered: () => {
+          if (!loading && !error && getStartedRef.current) {
+            getStartedRef.current.focus();
+          }
+        }
+      }}
+      PaperProps={{
+        sx: {
+          outline: 'none',
+          '& *:focus-visible': {
+            outline: '2px solid',
+            outlineColor: 'primary.main',
+            outlineOffset: 2,
+          }
+        }
+      }}
     >
       <DialogTitle id="welcome-dialog-title" sx={{ pb: 0 }}>
         Welcome to Live Wallpaper Creator
