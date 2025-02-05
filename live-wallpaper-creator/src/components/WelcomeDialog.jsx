@@ -110,7 +110,7 @@ const WelcomeDialog = ({ open, onClose }) => {
           </List>
         </Box>
 
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="text.secondary" paragraph>
           Learn more about{' '}
           <Link
             href="https://github.com/pollinations/hive/wiki/Browser-Compatibility"
@@ -120,6 +120,47 @@ const WelcomeDialog = ({ open, onClose }) => {
             browser compatibility
           </Link>
         </Typography>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <CheckCircleIcon color="success" fontSize="small" />
+          Performance Tips
+        </Typography>
+
+        <Typography variant="body2" color="text.secondary" paragraph>
+          For the best experience:
+        </Typography>
+
+        <List dense>
+          <ListItem>
+            <ListItemIcon>
+              <CheckCircleIcon color="success" fontSize="small" />
+            </ListItemIcon>
+            <ListItemText 
+              primary="Close other resource-intensive tabs"
+              secondary="Video processing requires significant memory"
+            />
+          </ListItem>
+          <ListItem>
+            <ListItemIcon>
+              <CheckCircleIcon color="success" fontSize="small" />
+            </ListItemIcon>
+            <ListItemText 
+              primary="Use recommended resolutions"
+              secondary="Higher resolutions require more processing power"
+            />
+          </ListItem>
+          <ListItem>
+            <ListItemIcon>
+              <CheckCircleIcon color="success" fontSize="small" />
+            </ListItemIcon>
+            <ListItemText 
+              primary="Keep animations simple"
+              secondary="Complex animations take longer to process"
+            />
+          </ListItem>
+        </List>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary" variant="contained">
