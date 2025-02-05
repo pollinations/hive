@@ -6,6 +6,7 @@ import {
   List,
   ListItem,
   ListItemText,
+  ListItemIcon,
   Collapse,
   IconButton,
   CircularProgress,
@@ -128,6 +129,20 @@ const Sidebar = ({ onOverlaySelect }) => {
                     sx={{ pl: 4 }}
                     onClick={() => handleOverlayClick(key, overlay)}
                   >
+                    {overlay.preview && (
+                      <ListItemIcon>
+                        <Box
+                          component="img"
+                          src={`./overlays/${overlay.preview}`}
+                          alt={overlay.name}
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            objectFit: 'contain',
+                          }}
+                        />
+                      </ListItemIcon>
+                    )}
                     <ListItemText
                       primary={overlay.name}
                       secondary={overlay.description}

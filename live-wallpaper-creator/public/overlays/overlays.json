@@ -3,6 +3,7 @@
     {
       "name": "Sparkle Effect",
       "file": "sparkle.gif",
+      "preview": "previews/sparkle.svg",
       "description": "Add sparkle effects to your wallpaper"
     }
   ],
@@ -10,6 +11,7 @@
     {
       "name": "Glow Effect",
       "file": "glow.gif",
+      "preview": "previews/glow.svg",
       "description": "Add a glowing effect"
     }
   ],
@@ -17,6 +19,7 @@
     {
       "name": "Falling Leaves",
       "file": "leaves.gif",
+      "preview": "previews/leaf.svg",
       "description": "Animated falling leaves effect"
     }
   ],
@@ -24,6 +27,7 @@
     {
       "name": "Butterfly",
       "file": "butterfly.gif",
+      "preview": "previews/butterfly.svg",
       "description": "Animated butterfly overlay"
     }
   ]
