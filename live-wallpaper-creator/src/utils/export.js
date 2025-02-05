@@ -1,5 +1,6 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { toBlobURL } from '@ffmpeg/util';
+import { FFmpegError, ExportError, createFFmpegError } from './errors';
 
 let ffmpeg = null;
 
@@ -27,7 +28,7 @@ const initFFmpeg = async () => {
       console.log('FFmpeg initialized successfully');
     } catch (error) {
       console.error('FFmpeg initialization failed:', error);
-      throw new Error(`Failed to initialize FFmpeg: ${error.message}`);
+      throw createFFmpegError(error);
     }
   }
   return ffmpeg;
@@ -37,16 +38,16 @@ export const exportAsGif = async (canvas, fps = 30, onProgress = () => {}) => {
   const frames = [];
   const frameCount = (fps * 3); // 3 seconds
   
-  // Capture frames
-  for (let i = 0; i < frameCount; i++) {
-    frames.push(canvas.toDataURL('image/png'));
-    onProgress(i / (frameCount * 2)); // First half of progress for frame capture
-    await new Promise(resolve => setTimeout(resolve, 1000 / fps));
-  }
-
-  const ffmpeg = await initFFmpeg();
-
   try {
+    // Capture frames
+    for (let i = 0; i < frameCount; i++) {
+      frames.push(canvas.toDataURL('image/png'));
+      onProgress(i / (frameCount * 2)); // First half of progress for frame capture
+      await new Promise(resolve => setTimeout(resolve, 1000 / fps));
+    }
+
+    const ffmpeg = await initFFmpeg();
+
     // Convert frames to GIF
     for (let i = 0; i < frames.length; i++) {
       const base64Data = frames[i].replace(/^data:image\/\w+;base64,/, '');
@@ -76,7 +77,16 @@ export const exportAsGif = async (canvas, fps = 30, onProgress = () => {}) => {
     return new Blob([data.buffer], { type: 'image/gif' });
   } catch (error) {
     console.error('GIF export failed:', error);
-    throw error;
+    throw new ExportError(
+      error.message,
+      'gif',
+      {
+        originalError: error,
+        frameCount,
+        fps,
+        timestamp: new Date().toISOString()
+      }
+    );
   }
 };
 
@@ -84,16 +94,16 @@ export const exportAsMP4 = async (canvas, fps = 30, onProgress = () => {}) => {
   const frames = [];
   const frameCount = (fps * 3); // 3 seconds
   
-  // Capture frames
-  for (let i = 0; i < frameCount; i++) {
-    frames.push(canvas.toDataURL('image/png'));
-    onProgress(i / (frameCount * 2)); // First half of progress for frame capture
-    await new Promise(resolve => setTimeout(resolve, 1000 / fps));
-  }
-
-  const ffmpeg = await initFFmpeg();
-
   try {
+    // Capture frames
+    for (let i = 0; i < frameCount; i++) {
+      frames.push(canvas.toDataURL('image/png'));
+      onProgress(i / (frameCount * 2)); // First half of progress for frame capture
+      await new Promise(resolve => setTimeout(resolve, 1000 / fps));
+    }
+
+    const ffmpeg = await initFFmpeg();
+
     // Convert frames to video
     for (let i = 0; i < frames.length; i++) {
       const base64Data = frames[i].replace(/^data:image\/\w+;base64,/, '');
@@ -124,6 +134,15 @@ export const exportAsMP4 = async (canvas, fps = 30, onProgress = () => {}) => {
     return new Blob([data.buffer], { type: 'video/mp4' });
   } catch (error) {
     console.error('MP4 export failed:', error);
-    throw error;
+    throw new ExportError(
+      error.message,
+      'mp4',
+      {
+        originalError: error,
+        frameCount,
+        fps,
+        timestamp: new Date().toISOString()
+      }
+    );
   }
 };
