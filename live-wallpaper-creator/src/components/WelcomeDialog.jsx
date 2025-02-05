@@ -36,42 +36,56 @@ const WelcomeDialog = ({ open, onClose }) => {
   }, [open]);
 
   const [error, setError] = React.useState(null);
+  const [retryCount, setRetryCount] = React.useState(0);
+  const maxRetries = 3;
+
+  const checkFeatures = async () => {
+    const features = [
+      { name: 'SharedArrayBuffer', check: () => typeof SharedArrayBuffer !== 'undefined' },
+      { name: 'WebAssembly', check: () => typeof WebAssembly !== 'undefined' },
+      { name: 'Canvas', check: () => typeof HTMLCanvasElement !== 'undefined' },
+      { name: 'Blob', check: () => typeof Blob !== 'undefined' },
+      { name: 'File API', check: () => typeof File !== 'undefined' && typeof FileReader !== 'undefined' }
+    ];
+
+    const missingFeatures = features.filter(feature => !feature.check());
+    
+    if (missingFeatures.length > 0) {
+      throw new Error(`Missing required features: ${missingFeatures.map(f => f.name).join(', ')}`);
+    }
+
+    // Check for secure context
+    if (!window.isSecureContext) {
+      throw new Error('This app requires a secure context (HTTPS) to function properly.');
+    }
+
+    // Simulate delay for UX
+    await new Promise(resolve => setTimeout(resolve, 500));
+  };
+
+  const handleRetry = () => {
+    if (retryCount < maxRetries) {
+      setRetryCount(prev => prev + 1);
+      setLoading(true);
+      setError(null);
+    }
+  };
 
   // Check browser compatibility
   React.useEffect(() => {
     if (open) {
-      setLoading(true);
-      setError(null);
-      try {
-        // Check for required features
-        const features = [
-          { name: 'SharedArrayBuffer', check: () => typeof SharedArrayBuffer !== 'undefined' },
-          { name: 'WebAssembly', check: () => typeof WebAssembly !== 'undefined' },
-          { name: 'Canvas', check: () => typeof HTMLCanvasElement !== 'undefined' },
-          { name: 'Blob', check: () => typeof Blob !== 'undefined' },
-          { name: 'File API', check: () => typeof File !== 'undefined' && typeof FileReader !== 'undefined' }
-        ];
-
-        const missingFeatures = features.filter(feature => !feature.check());
-        
-        if (missingFeatures.length > 0) {
-          throw new Error(`Missing required features: ${missingFeatures.map(f => f.name).join(', ')}`);
-        }
-
-        // Check for secure context
-        if (!window.isSecureContext) {
-          throw new Error('This app requires a secure context (HTTPS) to function properly.');
-        }
-
-        setTimeout(() => {
+      const runCheck = async () => {
+        try {
+          await checkFeatures();
           setLoading(false);
-        }, 500);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
+        } catch (err) {
+          setError(err.message);
+          setLoading(false);
+        }
+      };
+      runCheck();
     }
-  }, [open]);
+  }, [open, retryCount]);
 
   const handleKeyDown = (event) => {
     // Close dialog on Escape
@@ -461,16 +475,33 @@ const WelcomeDialog = ({ open, onClose }) => {
                 position: 'absolute',
                 left: 0,
                 right: 0,
-                bottom: -60,
+                bottom: -80,
                 textAlign: 'left',
                 fontSize: '0.75rem'
               }}
+              action={
+                retryCount < maxRetries ? (
+                  <Button 
+                    color="error" 
+                    size="small" 
+                    onClick={handleRetry}
+                    sx={{ minWidth: 'auto', p: 0.5 }}
+                  >
+                    Retry
+                  </Button>
+                ) : null
+              }
             >
               <Typography variant="caption" component="div">
                 {error}
               </Typography>
               <Typography variant="caption" color="text.secondary" component="div">
                 Please try using a modern browser with HTTPS enabled.
+                {retryCount >= maxRetries && (
+                  <Box component="span" sx={{ display: 'block', mt: 0.5 }}>
+                    Maximum retry attempts reached. Please try again later or use a different browser.
+                  </Box>
+                )}
               </Typography>
             </Alert>
           ) : null}
