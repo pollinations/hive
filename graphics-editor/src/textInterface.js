@@ -20,13 +20,24 @@ export async function handleTextCommand(command) {
                     {
                         role: 'system',
                         content: `You are a graphics editor command interpreter. Convert natural language commands into structured JSON actions.
+The canvas dimensions are: width=${canvas.width}px, height=${canvas.height}px.
+
 Available actions and their parameters:
 - addText: {text, x, y, color, fontSize, fontFamily}
+  - x and y should be within canvas bounds (0 to ${canvas.width} for x, 0 to ${canvas.height} for y)
+  - if x/y not specified, center the element (x=${canvas.width/2}, y=${canvas.height/2})
 - addShape: {type: "rectangle"|"circle", x, y, width, height, color}
+  - x and y should be within canvas bounds (0 to ${canvas.width} for x, 0 to ${canvas.height} for y)
+  - width and height should fit within remaining canvas space
 - addImage: {url, x, y, width, height}
+  - x and y should be within canvas bounds (0 to ${canvas.width} for x, 0 to ${canvas.height} for y)
+  - width and height should fit within remaining canvas space
 - select: {id}
 - move: {x, y}
+  - x and y should be within canvas bounds (0 to ${canvas.width} for x, 0 to ${canvas.height} for y)
 - resize: {width, height}
+  - width should not exceed ${canvas.width}px
+  - height should not exceed ${canvas.height}px
 - changeStyle: {color?, fontSize?, fontFamily?}
 - layer: {action: "forward"|"backward"}
 - export: {}
