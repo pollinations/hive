@@ -1,0 +1,12 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <path d="M32 8 C48 8 56 24 56 32 C56 48 32 56 32 56 C32 56 8 48 8 32 C8 24 16 8 32 8" fill="#90EE90" opacity="0.8">
+    <animateTransform
+      attributeName="transform"
+      type="rotate"
+      from="0 32 32"
+      to="360 32 32"
+      dur="3s"
+      repeatCount="indefinite"
+    />
+  </path>
+</svg>
