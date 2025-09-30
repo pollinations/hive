@@ -1,7 +1,13 @@
 # 🐝 Pollinations Hive
-<!-- Placeholder for deployment simplification changes -->
+
 
 Welcome to Pollinations Hive - a revolutionary repository where AI meets collaborative development! This project showcases a unique approach to software development where applications are created and modified entirely through AI assistance.
+
+## 📢 Hacktoberfest News
+
+- **Hacktoberfest 2025 is here!**  
+  If you're participating, please check out our [Code of Conduct](./CODE_OF_CONDUCT.md) and [Contributing Guidelines](./CONTRIBUTING.md) before submitting your PRs.
+- For event PRs, look for issues tagged with `hacktoberfest` in our [issue tracker](https://github.com/pollinations/hive/issues) and join the community effort!
 
 ## 📱 Available Apps
 
