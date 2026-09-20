@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MagicKit - Free AI Toolbox</title>
+<meta name="description" content="100% free AI toolbox: image generator, AI writer, and video maker. No sign-up, no API key.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+<style>
+  :root{
+    --bg:#0d0b1a; --bg2:#16122e; --card:#1d1838; --border:#2c2554;
+    --txt:#f1eeff; --mut:#9b93c2; --acc:#8b5cf6; --acc2:#22d3ee;
+    --ok:#34d399; --err:#f87171;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:radial-gradient(1200px 600px at 70% -10%,#2a1a5e 0%,var(--bg) 55%);
+    color:var(--txt);min-height:100vh}
+  header{padding:28px 20px 8px;text-align:center}
+  header img{width:min(720px,100%);border-radius:14px;margin-bottom:18px}
+  h1{font-size:clamp(28px,6vw,44px);letter-spacing:-.5px}
+  h1 span{background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--mut);margin-top:8px;font-size:15px}
+  .badges{margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .badge{font-size:12px;border:1px solid var(--border);padding:4px 10px;border-radius:99px;color:var(--mut);background:var(--card)}
+  nav{display:flex;gap:8px;justify-content:center;padding:22px 16px 6px;flex-wrap:wrap}
+  nav button{background:var(--card);border:1px solid var(--border);color:var(--mut);
+    padding:10px 18px;border-radius:10px;font-size:14px;cursor:pointer;font-weight:600;transition:.15s}
+  nav button.active{background:linear-gradient(90deg,var(--acc),#6d28d9);color:#fff;border-color:transparent}
+  main{max-width:760px;margin:0 auto;padding:16px 16px 60px}
+  .panel{display:none;animation:fade .25s}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-top:14px}
+  label{display:block;font-size:13px;color:var(--mut);margin:14px 0 6px;font-weight:600}
+  textarea,input,select{width:100%;background:var(--bg2);border:1px solid var(--border);
+    color:var(--txt);border-radius:10px;padding:12px;font-size:14px;font-family:inherit;resize:vertical}
+  textarea:focus,input:focus,select:focus{outline:none;border-color:var(--acc)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .row>div{flex:1;min-width:130px}
+  .go{margin-top:18px;width:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));
+    border:none;color:#fff;padding:14px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer}
+  .go:disabled{opacity:.5;cursor:not-allowed}
+  .hint{font-size:12px;color:var(--mut);margin-top:8px}
+  .out{margin-top:18px;text-align:center}
+  .out img{max-width:100%;border-radius:12px;border:1px solid var(--border)}
+  .out textarea{text-align:left;min-height:220px}
+  .spin{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);
+    border-top-color:#fff;border-radius:50%;animation:rot .8s linear infinite;vertical-align:-3px;margin-right:8px}
+  @keyframes rot{to{transform:rotate(360deg)}}
+  .err{color:var(--err);font-size:14px}
+  .dl{display:inline-block;margin-top:12px;color:var(--acc2);text-decoration:none;font-weight:600;font-size:14px;
+    border:1px solid var(--border);padding:8px 16px;border-radius:8px}
+  .scenes{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:14px}
+  .scenes img{width:100%;border-radius:10px;border:1px solid var(--border)}
+  video{width:100%;border-radius:12px;margin-top:12px}
+  footer{text-align:center;color:var(--mut);font-size:13px;padding:30px 20px 50px;border-top:1px solid var(--border)}
+  footer a{color:var(--acc2)}
+</style>
+</head>
+<body>
+<header>
+  <img src="./cover.jpg" alt="MagicKit cover">
+  <h1><span>MagicKit</span> 🎨</h1>
+  <p class="sub">A 100% free AI toolbox — no sign-up, no API key, no paywall.</p>
+  <div class="badges">
+    <span class="badge">🖼️ Image</span>
+    <span class="badge">✍️ Writer</span>
+    <span class="badge">🎬 Video</span>
+    <span class="badge">🔒 Private</span>
+  </div>
+</header>
+
+<nav>
+  <button data-t="image" class="active">🖼️ Image</button>
+  <button data-t="text">✍️ Writer</button>
+  <button data-t="video">🎬 Video</button>
+</nav>
+
+<main>
+  <section class="panel active" id="p-image">
+    <div class="card">
+      <label>Describe your image</label>
+      <textarea id="img-prompt" rows="3" placeholder="A neon city street at night, rainy, cinematic"></textarea>
+      <div class="row">
+        <div><label>Ratio</label>
+          <select id="img-ratio">
+            <option value="1080x1920">Portrait 9:16</option>
+            <option value="1024x1024">Square 1:1</option>
+            <option value="1920x1080">Landscape 16:9</option>
+          </select>
+        </div>
+        <div><label>Seed (optional)</label><input id="img-seed" type="number" placeholder="random"></div>
+      </div>
+      <button class="go" id="img-go">Generate Image ✨</button>
+      <p class="hint">Free tier can be busy — the tool retries automatically up to 5 times.</p>
+      <div class="out" id="img-out"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-text">
+    <div class="card">
+      <label>What should I write?</label>
+      <textarea id="txt-prompt" rows="4" placeholder="Write a 30-word ad for a cozy coffee shop"></textarea>
+      <label>Style / system prompt (optional)</label>
+      <input id="txt-system" placeholder="You are a senior copywriter">
+      <button class="go" id="txt-go">Generate Text ✍️</button>
+      <div class="out" id="txt-out"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-video">
+    <div class="card">
+      <label>Story idea</label>
+      <textarea id="vid-story" rows="3" placeholder="A cat discovers a glowing portal in the forest"></textarea>
+      <div class="row">
+        <div><label>Scenes</label><input id="vid-count" type="number" value="4" min="3" max="6"></div>
+      </div>
+      <button class="go" id="vid-go">Plan &amp; Generate Scenes 🎬</button>
+      <p class="hint">Scenes use AI storyboard planning. For the final rendered MP4, use the <a href="http://47.80.8.174" style="color:var(--acc2)">full server version</a>.</p>
+      <div class="out" id="vid-out"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Built with the free <a href="https://pollinations.ai" target="_blank">Pollinations</a> API ·
+  <a href="https://github.com/kaketiti/magickit" target="_blank">Source code</a> ·
+  <a href="http://47.80.8.174">Full version</a>
+</footer>
+
+<script>
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById('p-'+b.dataset.t).classList.add('active');
+});
+
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+async function fetchImage(url){
+  const r=await fetch(url);
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  const blob=await r.blob();
+  if(!blob.type.startsWith('image/')) throw new Error('not image');
+  return URL.createObjectURL(blob);
+}
+
+document.getElementById('img-go').onclick=async function(){
+  const prompt=document.getElementById('img-prompt').value.trim();
+  const out=document.getElementById('img-out');
+  if(!prompt){out.innerHTML='<p class="err">Please enter a prompt.</p>';return;}
+  const [w,h]=document.getElementById('img-ratio').value.split('x');
+  const seed=document.getElementById('img-seed').value;
+  this.disabled=true;
+  let lastErr='';
+  for(let i=0;i<5;i++){
+    out.innerHTML=`<p><span class="spin"></span>Generating... attempt ${i+1}/5</p>`;
+    let url=`https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${w}&height=${h}&model=flux&nologo=true`;
+    if(seed) url+=`&seed=${seed}`;
+    try{
+      const obj=await fetchImage(url);
+      out.innerHTML=`<img src="${obj}" alt="result"><br><a class="dl" href="${obj}" download="magickit.jpg">⬇ Download</a>`;
+      this.disabled=false;return;
+    }catch(e){lastErr=e.message;await sleep(3000*(i+1));}
+  }
+  out.innerHTML=`<p class="err">Service busy after 5 tries (${lastErr}). Please wait a minute and retry.</p>`;
+  this.disabled=false;
+};
+
+document.getElementById('txt-go').onclick=async function(){
+  const prompt=document.getElementById('txt-prompt').value.trim();
+  const system=document.getElementById('txt-system').value.trim();
+  const out=document.getElementById('txt-out');
+  if(!prompt){out.innerHTML='<p class="err">Please enter a prompt.</p>';return;}
+  this.disabled=true;
+  out.innerHTML=`<p><span class="spin"></span>Writing...</p>`;
+  try{
+    const messages=[];
+    if(system)messages.push({role:'system',content:system});
+    messages.push({role:'user',content:prompt});
+    const r=await fetch('https://text.pollinations.ai/',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({messages,model:'openai'})
+    });
+    const t=await r.text();
+    if(!r.ok) throw new Error(t.slice(0,120));
+    out.innerHTML=`<textarea readonly>${t.replace(/[<>]/g,c=>({'<':'&lt;','>':'&gt;'}[c]))}</textarea>`;
+  }catch(e){
+    out.innerHTML=`<p class="err">Failed: ${e.message}<br>Free daily limit may be reached — try again later.</p>`;
+  }
+  this.disabled=false;
+};
+
+const SPLIT_SYS=`You are a short-video storyboard director. Split the user's story into visual scenes.
+Output ONLY a JSON array, no markdown. Each element: {"prompt":"...","subtitle":"..."}
+prompt: self-contained English visual description, 25-50 words. subtitle: short, max 20 chars. 3 to 6 scenes.`;
+
+document.getElementById('vid-go').onclick=async function(){
+  const story=document.getElementById('vid-story').value.trim();
+  const count=Math.min(6,Math.max(3,+document.getElementById('vid-count').value||4));
+  const out=document.getElementById('vid-out');
+  if(!story){out.innerHTML='<p class="err">Please enter a story.</p>';return;}
+  this.disabled=true;
+  out.innerHTML=`<p><span class="spin"></span>Planning scenes with AI...</p>`;
+  let scenes;
+  try{
+    const r=await fetch('https://text.pollinations.ai/',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({messages:[
+        {role:'system',content:SPLIT_SYS},
+        {role:'user',content:`${story}\n\nUse exactly ${count} scenes.`}
+      ],model:'openai'})
+    });
+    const raw=await r.text();
+    const m=raw.match(/\[[\s\S]*\]/);
+    if(!m) throw new Error('bad storyboard');
+    scenes=JSON.parse(m[0]);
+  }catch(e){
+    out.innerHTML=`<p class="err">Storyboard failed: ${e.message}</p>`;
+    this.disabled=false;return;
+  }
+  out.innerHTML='<p style="font-weight:600;margin-bottom:4px">Scenes ready — generating images:</p><div class="scenes" id="scene-grid"></div>';
+  const grid=document.getElementById('scene-grid');
+  for(let i=0;i<scenes.length;i++){
+    const s=scenes[i];
+    let done=false;
+    for(let attempt=0;attempt<5&&!done;attempt++){
+      const cell=document.createElement('div');
+      cell.innerHTML=`<div style="height:100px;display:flex;align-items:center;justify-content:center;color:var(--mut);font-size:12px"><span class="spin"></span></div><p style="font-size:11px;color:var(--mut);margin-top:4px">${i+1}. ${(s.subtitle||'').replace(/[<>]/g,'')}</p>`;
+      if(!grid.children[i]) grid.appendChild(cell); else grid.replaceChild(cell,grid.children[i]);
+      try{
+        const url=`https://image.pollinations.ai/prompt/${encodeURIComponent(s.prompt)}?width=1080&height=1920&model=flux&nologo=true`;
+        const obj=await fetchImage(url);
+        const ok=document.createElement('div');
+        ok.innerHTML=`<img src="${obj}"><p style="font-size:11px;color:var(--mut);margin-top:4px">${i+1}. ${(s.subtitle||'').replace(/[<>]/g,'')}</p>`;
+        grid.replaceChild(ok,cell);
+        done=true;
+      }catch(e){await sleep(3000*(attempt+1));}
+    }
+    await sleep(3000);
+  }
+  this.disabled=false;
+};
+</script>
+</body>
+</html>

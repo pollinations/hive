@@ -22,6 +22,7 @@ Welcome to Pollinations Hive - a revolutionary repository where AI meets collabo
 | [graphics-editor](https://pollinations.github.io/hive/main/graphics-editor/) | [./graphics-editor](./graphics-editor) | 2025-01-15 |
 | [ai-chat](https://pollinations.github.io/hive/main/ai-chat/) | [./ai-chat](./ai-chat) | 2025-01-15 |
 | [tarot-reader](https://pollinations.github.io/hive/main/tarot-reader/) | [./tarot-reader](./tarot-reader) | 2025-01-14 |
+| [magickit](https://pollinations.github.io/hive/main/magickit/) | [./magickit](./magickit) | 2026-09-21 |
 ## 📚 Documentation
 
 ### 🔍 Pull Request Previews
